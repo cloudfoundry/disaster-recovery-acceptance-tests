@@ -35,6 +35,19 @@ func Get(url string) *http.Response {
 	return response
 }
 
+func StatusCode(url string) func() (int, error) {
+	return func() (int, error) {
+		client := &http.Client{Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}}
+		resp, err := client.Get(url)
+		if err != nil {
+			return 0, err
+		}
+		return resp.StatusCode, err
+	}
+}
+
 func GetCurrentApplicationStateFor(guid string) (string, error) {
 	statusJson := RunCommandSuccessfully(fmt.Sprintf("cf curl /v2/apps/%s/stats", string(guid)))
 	response := AppStatusResponse{}

@@ -7,8 +7,6 @@ import (
 
 	"fmt"
 
-	"crypto/tls"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"
@@ -25,7 +23,8 @@ var _ = Describe("backing up Cloud Foundry", func() {
 		RunCommandSuccessfully("cf create-org acceptance-test-org-" + uniqueTestID)
 		RunCommandSuccessfully("cf create-space acceptance-test-space-" + uniqueTestID + " -o acceptance-test-org-" + uniqueTestID)
 		RunCommandSuccessfully("cf target -o acceptance-test-org-" + uniqueTestID + " -s acceptance-test-space-" + uniqueTestID)
-		RunCommandSuccessfully("cf push test_app_" + uniqueTestID + " -p " + testAppPath)
+		var testAppFixturePath = "../fixtures/test_app/"
+		RunCommandSuccessfully("cf push test_app_" + uniqueTestID + " -p " + testAppFixturePath)
 
 		By("checking the app stays up")
 		appUrl := GetAppUrl("test_app_" + uniqueTestID)
@@ -44,7 +43,7 @@ var _ = Describe("backing up Cloud Foundry", func() {
 			MustHaveEnv("DEPLOYMENT_TO_BACKUP"),
 		))).Should(gexec.Exit(0))
 
-		Eventually(statusCode(urlForDeploymentToBackup)).Should(Equal(200))
+		Eventually(StatusCode(urlForDeploymentToBackup)).Should(Equal(200))
 
 		By("stopping checking the app")
 		stopCheckingAppAlive <- true
@@ -68,19 +67,6 @@ var _ = Describe("backing up Cloud Foundry", func() {
 		RunCommandSuccessfully("cf delete-org -f acceptance-test-org-" + uniqueTestID)
 	})
 })
-
-func statusCode(url string) func() (int, error) {
-	return func() (int, error) {
-		client := &http.Client{Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}}
-		resp, err := client.Get(url)
-		if err != nil {
-			return 0, err
-		}
-		return resp.StatusCode, err
-	}
-}
 
 func CheckApiGoesDown() (chan<- bool, <-chan bool) {
 	doneChannel := make(chan bool)

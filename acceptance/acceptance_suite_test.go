@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/pivotal-cf-experimental/disaster-recovery-acceptance-tests/acceptance/testcases"
 	. "github.com/pivotal-cf-experimental/disaster-recovery-acceptance-tests/common"
 )
 
@@ -16,7 +17,10 @@ func TestPcfBackupAndRestoreAcceptanceTests(t *testing.T) {
 	RunSpecs(t, "PcfBackupAndRestoreAcceptanceTests Suite")
 }
 
-var testAppPath = "../fixtures/test_app/"
+// ### test cases to be run
+var testCases = []acceptance.TestCase{
+	acceptance.NewCfAppTestCase(uniqueTestID),
+}
 
 var uniqueTestID string
 var jumpBoxSession *JumpBoxSession

@@ -3,8 +3,6 @@ package acceptance
 import (
 	"fmt"
 
-	"time"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"
@@ -14,14 +12,12 @@ import (
 var _ = Describe("backing up Cloud Foundry", func() {
 	It("backups and restores a cf", func() {
 		By("finding credentials for the deployment to backup")
-		urlForDeploymentToBackup, usernameForDeploymentToBackup, passwordForDeploymentToBackup := FindCredentialsFor(DeploymentToBackup())
+		urlForDeploymentToBackup, _, _ := FindCredentialsFor(DeploymentToBackup())
 
-		By("creating new orgs and spaces")
-		RunCommandSuccessfully("cf login --skip-ssl-validation -a", urlForDeploymentToBackup, "-u", usernameForDeploymentToBackup, "-p", passwordForDeploymentToBackup)
-		RunCommandSuccessfully("cf create-org acceptance-test-org-" + uniqueTestID)
-		RunCommandSuccessfully("cf create-space acceptance-test-space-" + uniqueTestID + " -o acceptance-test-org-" + uniqueTestID)
-		RunCommandSuccessfully("cf target -s acceptance-test-space-" + uniqueTestID + " -o acceptance-test-org-" + uniqueTestID)
-		RunCommandSuccessfully("cf push test_app_" + uniqueTestID + " -p " + testAppPath)
+		// ### populate state in environment to be backed up
+		for _, testCase := range testCases {
+			testCase.PopulateState()
+		}
 
 		By("backing up " + MustHaveEnv("DEPLOYMENT_TO_BACKUP"))
 		Eventually(RunOnJumpboxAsVcap(fmt.Sprintf(
@@ -35,12 +31,7 @@ var _ = Describe("backing up Cloud Foundry", func() {
 			MustHaveEnv("DEPLOYMENT_TO_BACKUP"),
 		))).Should(gexec.Exit(0))
 
-		Eventually(statusCode(urlForDeploymentToBackup)).Should(Equal(200))
-
-		By("changing " + MustHaveEnv("DEPLOYMENT_TO_BACKUP"))
-		RunCommandSuccessfully("cf delete -f test_app_" + uniqueTestID)
-		RunCommandSuccessfully("cf delete-space -f acceptance-test-space-" + uniqueTestID)
-		RunCommandSuccessfully("cf delete-org -f acceptance-test-org-" + uniqueTestID)
+		Eventually(StatusCode(urlForDeploymentToBackup)).Should(Equal(200))
 
 		By("restoring to " + MustHaveEnv("DEPLOYMENT_TO_RESTORE"))
 		Eventually(RunOnJumpboxAsVcap(fmt.Sprintf(
@@ -56,20 +47,10 @@ var _ = Describe("backing up Cloud Foundry", func() {
 			MustHaveEnv("DEPLOYMENT_TO_BACKUP"),
 		))).Should(gexec.Exit(0))
 
-		By("finding credentials for the deployment to restore")
-		urlForDeploymentToRestore, usernameForDeploymentToRestore, passwordForDeploymentToRestore := FindCredentialsFor(DeploymentToBackup())
-		RunCommandSuccessfully("cf login --skip-ssl-validation -a", urlForDeploymentToRestore, "-u", usernameForDeploymentToRestore, "-p", passwordForDeploymentToRestore)
-
-		By("verifying apps are back")
-		RunCommandSuccessfully("cf target -s acceptance-test-space-" + uniqueTestID + " -o acceptance-test-org-" + uniqueTestID)
-		url := GetAppUrl("test_app_" + uniqueTestID)
-
-		Eventually(statusCode("https://"+url), 5*time.Minute, 5*time.Second).Should(Equal(200))
-
-		By("verify orgs and spaces have been re-created")
-		RunCommandSuccessfully("cf org acceptance-test-org-" + uniqueTestID)
-		RunCommandSuccessfully("cf target -o acceptance-test-org-" + uniqueTestID)
-		RunCommandSuccessfully("cf space acceptance-test-space-" + uniqueTestID)
+		// ### check state in restored environment
+		for _, testCase := range testCases {
+			testCase.CheckState()
+		}
 	})
 
 	AfterEach(func() {
@@ -79,12 +60,9 @@ var _ = Describe("backing up Cloud Foundry", func() {
 			MustHaveEnv("DEPLOYMENT_TO_RESTORE"),
 		))).Should(gexec.Exit(0))
 
-		By("cleaning up orgs and spaces")
-		urlForDeploymentToBackup, usernameForDeploymentToBackup, passwordForDeploymentToBackup := FindCredentialsFor(DeploymentToBackup())
-
-		RunCommandSuccessfully("cf login --skip-ssl-validation -a", urlForDeploymentToBackup, "-u", usernameForDeploymentToBackup, "-p", passwordForDeploymentToBackup)
-		RunCommandSuccessfully("cf target -o acceptance-test-org-" + uniqueTestID)
-		RunCommandSuccessfully("cf delete-space -f acceptance-test-space-" + uniqueTestID)
-		RunCommandSuccessfully("cf delete-org -f acceptance-test-org-" + uniqueTestID)
+		// ### clean up backup environment
+		for _, testCase := range testCases {
+			testCase.Cleanup()
+		}
 	})
 })
