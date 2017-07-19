@@ -17,11 +17,7 @@ func TestPcfBackupAndRestoreAcceptanceTests(t *testing.T) {
 	RunSpecs(t, "PcfBackupAndRestoreAcceptanceTests Suite")
 }
 
-// ### test cases to be run
-var testCases = []acceptance.TestCase{
-	acceptance.NewCfAppTestCase(uniqueTestID),
-}
-
+var testCases []acceptance.TestCase
 var uniqueTestID string
 var jumpBoxSession *JumpBoxSession
 
@@ -29,6 +25,11 @@ var _ = BeforeSuite(func() {
 	SetDefaultEventuallyTimeout(15 * time.Minute)
 	uniqueTestID = timestamp()
 	jumpBoxSession = NewJumpBoxSession(uniqueTestID)
+
+	// ### test cases to be run
+	testCases = []acceptance.TestCase{
+		acceptance.NewCfAppTestCase(uniqueTestID),
+	}
 })
 
 var _ = AfterSuite(func() {
