@@ -15,7 +15,8 @@ var _ = Describe("backing up Cloud Foundry", func() {
 	It("backups and restores a cf", func() {
 		if MustHaveEnv("DEPLOYMENT_TO_BACKUP") == MustHaveEnv("DEPLOYMENT_TO_RESTORE") {
 			envsAreSame = true
-			printEnvsAreSameWarning()
+		} else {
+			printEnvsAreDifferentWarning()
 		}
 
 		By("finding credentials for the deployment to backup")

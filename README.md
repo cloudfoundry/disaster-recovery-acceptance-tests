@@ -1,19 +1,21 @@
 # disaster-recovery-acceptance-tests (DRATS)
 
-## Set Up
+## Running DRATS
 
-1. Spin up two Cloud Foundry deployments, one to back up from and the other to restore to.
+1. Spin up a Cloud Foundry deployment.
 1. Deploy a jumpbox deployment called `integration-jump-box` containing a single VM, `jumpbox`.
-1. Run `ci/scripts/acceptance.sh` with the following environment variables:
-  * BOSH_CLIENT - BOSH Director username
-  * BOSH_CLIENT_SECRET - BOSH Director password
-  * BOSH_CERT_PATH - path to BOSH Director's CA cert
-  * BOSH_URL - BOSH Director URL
-  * BOSH_GATEWAY_USER - BOSH SSH client username
-  * BOSH_GATEWAY_HOST - BOSH SSH client hostname
-  * BOSH_GATEWAY_KEY - path to BOSH SSH client private key
-  * DEPLOYMENT_TO_BACKUP - name of the Cloud Foundry deployment to be backed up
-  * DEPLOYMENT_TO_RESTORE - name of the Cloud Foundry deployment to be restored
+1. Run `ci/scripts/acceptance.sh` with the following environment variables set:
+  * `DEPLOYMENT_TO_BACKUP` - name of the Cloud Foundry deployment
+  * `DEPLOYMENT_TO_RESTORE` - name of the Cloud Foundry deployment
+  * `BOSH_URL` - URL of BOSH Director which has deployed the above Cloud Foundries
+  * `BOSH_CLIENT` - BOSH Director username
+  * `BOSH_CLIENT_SECRET` - BOSH Director password
+  * `BOSH_CERT_PATH` - path to BOSH Director's CA cert
+  * `BOSH_GATEWAY_USER` - BOSH SSH client username
+  * `BOSH_GATEWAY_HOST` - BOSH SSH client hostname
+  * `BOSH_GATEWAY_KEY` - path to BOSH SSH client private key
+
+Currently, DRATS backs up from and restores to the same environment.
 
 ## Test Structure
 
@@ -34,8 +36,8 @@ To add extra test cases, create a new TestCase that follows the [TestCase interf
 
 The methods that need to be implemented are `PopulateState()`, `CheckState()` and `Cleanup()`.
 
-* `PopulateState()` should create some state in the Cloud Foundry deployment to be backed up.
-* `CheckState()` should assert that the state in the restored Cloud Foundry deployment matches that created by `PopulateState()`.
+* `PopulateState()` should create some state in the Cloud Foundry deployment to be backed up (whose name is set to environment variable `DEPLOYMENT_TO_BACKUP`).
+* `CheckState()` should assert that the state in the restored Cloud Foundry deployment (whose name is set to environment variable `DEPLOYMENT_TO_RESTORE`) matches that created by `PopulateState()`.
 * `Cleanup()` should clean up the state created in the Cloud Foundry deployment to be backed up.
 
 1. Create a new TestCase in acceptance/testcases
