@@ -11,8 +11,7 @@ export BOSH_GATEWAY_HOST
 export BBR_BUILD_PATH
 
 pushd src/github.com/pivotal-cf-experimental/disaster-recovery-acceptance-tests
-    go get github.com/onsi/ginkgo/ginkgo
-    glide install
-	ginkgo -v -r --trace acceptance
-  popd
+  go get github.com/onsi/ginkgo/ginkgo
+  glide install
+  ginkgo -v -r --trace acceptance
 popd
