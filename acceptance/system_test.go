@@ -10,7 +10,14 @@ import (
 )
 
 var _ = Describe("backing up Cloud Foundry", func() {
+	var envsAreSame bool
+
 	It("backups and restores a cf", func() {
+		if MustHaveEnv("DEPLOYMENT_TO_BACKUP") == MustHaveEnv("DEPLOYMENT_TO_RESTORE") {
+			envsAreSame = true
+			printEnvsAreSameWarning()
+		}
+
 		By("finding credentials for the deployment to backup")
 		urlForDeploymentToBackup, _, _ := FindCredentialsFor(DeploymentToBackup())
 
@@ -32,6 +39,13 @@ var _ = Describe("backing up Cloud Foundry", func() {
 		))).Should(gexec.Exit(0))
 
 		Eventually(StatusCode(urlForDeploymentToBackup)).Should(Equal(200))
+
+		if envsAreSame {
+			// ### clean up state in backed up environment
+			for _, testCase := range testCases {
+				testCase.Cleanup()
+			}
+		}
 
 		By("restoring to " + MustHaveEnv("DEPLOYMENT_TO_RESTORE"))
 		Eventually(RunOnJumpboxAsVcap(fmt.Sprintf(

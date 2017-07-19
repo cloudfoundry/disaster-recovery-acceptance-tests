@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"fmt"
+
 	"github.com/pivotal-cf-experimental/disaster-recovery-acceptance-tests/acceptance/testcases"
 	. "github.com/pivotal-cf-experimental/disaster-recovery-acceptance-tests/common"
 )
@@ -38,4 +40,12 @@ var _ = AfterSuite(func() {
 
 func timestamp() string {
 	return strconv.FormatInt(time.Now().UnixNano(), 16)
+}
+
+func printEnvsAreSameWarning() {
+	fmt.Println("     --------------------------------------------------------")
+	fmt.Println("     NOTE: this suite is currently configured to back up from")
+	fmt.Println("     and restore to the same environment. Make sure this is  ")
+	fmt.Println("     the intended configuration.                             ")
+	fmt.Println("     --------------------------------------------------------")
 }
