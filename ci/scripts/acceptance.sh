@@ -2,28 +2,17 @@
 
 set -eu
 
-eval "$(ssh-agent)"
-./bosh-backup-and-restore-meta/unlock-ci.sh
-chmod 400 bosh-backup-and-restore-meta/keys/github
-chmod 400 bosh-backup-and-restore-meta/genesis-bosh/bosh.pem
-ssh-add bosh-backup-and-restore-meta/keys/github
-
-export GOPATH=$PWD
-export PATH=$PATH:$GOPATH/bin
-export BOSH_CERT_PATH=`pwd`/bosh-backup-and-restore-meta/certs/genesis-bosh.backup-and-restore.cf-app.com.crt
-export BOSH_CLIENT=admin
-export BOSH_URL=https://genesis-bosh.backup-and-restore.cf-app.com
-export BOSH_GATEWAY_USER=vcap
-export BOSH_GATEWAY_HOST=genesis-bosh.backup-and-restore.cf-app.com
-export BOSH_GATEWAY_KEY=`pwd`/bosh-backup-and-restore-meta/genesis-bosh/bosh.pem
-
-
-export BBR_BUILD_PATH=$PWD/bbr-binary-release/
+export BOSH_CERT_PATH
+export BOSH_GATEWAY_KEY
+export BOSH_CLIENT
+export BOSH_URL
+export BOSH_GATEWAY_USER
+export BOSH_GATEWAY_HOST
+export BBR_BUILD_PATH
 
 pushd src/github.com/pivotal-cf-experimental/disaster-recovery-acceptance-tests
     go get github.com/onsi/ginkgo/ginkgo
-
     glide install
-
 	ginkgo -v -r --trace acceptance
+  popd
 popd
