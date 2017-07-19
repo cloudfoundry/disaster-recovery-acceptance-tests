@@ -14,6 +14,7 @@
   * `BOSH_GATEWAY_USER` - BOSH SSH client username
   * `BOSH_GATEWAY_HOST` - BOSH SSH client hostname
   * `BOSH_GATEWAY_KEY` - path to BOSH SSH client private key
+  * `BBR_BUILD_PATH` - path to BBR binary
 
 Currently, DRATS backs up from and restores to the same environment.
 

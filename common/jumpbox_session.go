@@ -25,10 +25,8 @@ func NewJumpBoxSession(uniqueTestID string) *JumpBoxSession {
 	Eventually(RunOnJumpboxAsVcap("sudo mkdir", session.WorkspaceDir, "&& sudo chown vcap:vcap", session.WorkspaceDir, "&& sudo chmod 0777", session.WorkspaceDir)).Should(gexec.Exit(0))
 
 	By("copying the BBR binary to the jumpbox")
-	bbrFilename := getTar(bbrBuildPath)
-	CopyOnJumpbox(filepath.Join(bbrBuildPath, bbrFilename), access_vm+session.WorkspaceDir)
-	Eventually(RunOnJumpboxAsVcap("tar -C", session.WorkspaceDir, "-xvf", filepath.Join(session.WorkspaceDir, bbrFilename))).Should(gexec.Exit(0))
-	session.BinaryPath = filepath.Join(session.WorkspaceDir, "releases", "bbr")
+	CopyOnJumpbox(bbrBuildPath, access_vm+session.WorkspaceDir)
+	session.BinaryPath = filepath.Join(session.WorkspaceDir, filepath.Base(bbrBuildPath))
 
 	By("copying the Director certificate to the jumpbox")
 	CopyOnJumpbox(MustHaveEnv("BOSH_CERT_PATH"), access_vm+session.WorkspaceDir+"/bosh.crt")
@@ -40,12 +38,4 @@ func NewJumpBoxSession(uniqueTestID string) *JumpBoxSession {
 func (jumpBoxSession *JumpBoxSession) Cleanup() {
 	By("remove workspace directory")
 	RunOnJumpbox("sudo rm -rf", jumpBoxSession.WorkspaceDir)
-}
-
-func getTar(path string) string {
-	glob := filepath.Join(path, "*.tar")
-	matches, err := filepath.Glob(glob)
-	Expect(err).NotTo(HaveOccurred())
-	Expect(len(matches)).To(Equal(1), "There should be only one tar file present in the BBR binary path")
-	return filepath.Base(matches[0])
 }
