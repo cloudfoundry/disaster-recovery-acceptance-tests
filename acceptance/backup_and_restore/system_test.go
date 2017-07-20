@@ -1,4 +1,4 @@
-package acceptance
+package backup_and_restore
 
 import (
 	"fmt"

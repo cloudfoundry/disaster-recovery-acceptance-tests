@@ -4,7 +4,7 @@
 
 1. Spin up a Cloud Foundry deployment.
 1. Deploy a jumpbox deployment called `integration-jump-box` containing a single VM, `jumpbox`.
-1. Run `ci/scripts/acceptance.sh` with the following environment variables set:
+1. Run `scripts/run_acceptance_tests.sh` with the following environment variables set:
   * `DEPLOYMENT_TO_BACKUP` - name of the Cloud Foundry deployment
   * `DEPLOYMENT_TO_RESTORE` - name of the Cloud Foundry deployment
   * `BOSH_URL` - URL of BOSH Director which has deployed the above Cloud Foundries
@@ -33,7 +33,7 @@ The system tests do the following:
 
 DRATS runs a collection of test cases against two Cloud Foundry deployments.
 
-To add extra test cases, create a new TestCase that follows the [TestCase interface](https://github.com/pivotal-cf-experimental/disaster-recovery-acceptance-tests/blob/master/acceptance/testcases/test_case.go).
+To add extra test cases, create a new TestCase that follows the [TestCase interface](https://github.com/pivotal-cf-experimental/disaster-recovery-acceptance-tests/blob/master/acceptance/backup_and_restore/test_cases/test_case.go).
 
 The methods that need to be implemented are `PopulateState()`, `CheckState()` and `Cleanup()`.
 
@@ -41,5 +41,5 @@ The methods that need to be implemented are `PopulateState()`, `CheckState()` an
 * `CheckState()` should assert that the state in the restored Cloud Foundry deployment (whose name is set to environment variable `DEPLOYMENT_TO_RESTORE`) matches that created by `PopulateState()`.
 * `Cleanup()` should clean up the state created in the Cloud Foundry deployment to be backed up.
 
-1. Create a new TestCase in acceptance/testcases
-1. In `acceptance/acceptance_suite_test.go`, initialise the TestCase and add it to the `testCases` slice
+1. Create a new TestCase in acceptance/backup_and_restore/test_cases
+1. In `acceptance/backup_and_restore/acceptance_suite_test.go`, initialise the TestCase and add it to the `testCases` slice

@@ -1,4 +1,4 @@
-package acceptance
+package uptime
 
 import (
 	"net/http"
@@ -23,7 +23,7 @@ var _ = Describe("backing up Cloud Foundry", func() {
 		RunCommandSuccessfully("cf create-org acceptance-test-org-" + uniqueTestID)
 		RunCommandSuccessfully("cf create-space acceptance-test-space-" + uniqueTestID + " -o acceptance-test-org-" + uniqueTestID)
 		RunCommandSuccessfully("cf target -o acceptance-test-org-" + uniqueTestID + " -s acceptance-test-space-" + uniqueTestID)
-		var testAppFixturePath = "../fixtures/test_app/"
+		var testAppFixturePath = "../../fixtures/test_app/"
 		RunCommandSuccessfully("cf push test_app_" + uniqueTestID + " -p " + testAppFixturePath)
 
 		By("checking the app stays up")

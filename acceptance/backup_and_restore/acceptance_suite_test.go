@@ -1,4 +1,4 @@
-package acceptance
+package backup_and_restore
 
 import (
 	. "github.com/onsi/ginkgo"
@@ -10,7 +10,8 @@ import (
 
 	"fmt"
 
-	"github.com/pivotal-cf-experimental/disaster-recovery-acceptance-tests/acceptance/testcases"
+	acceptance "github.com/pivotal-cf-experimental/disaster-recovery-acceptance-tests/acceptance/backup_and_restore/test_cases"
+
 	. "github.com/pivotal-cf-experimental/disaster-recovery-acceptance-tests/common"
 )
 
