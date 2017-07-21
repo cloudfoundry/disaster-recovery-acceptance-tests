@@ -24,7 +24,7 @@ var _ = Describe("backing up Cloud Foundry", func() {
 
 		// ### populate state in environment to be backed up
 		for _, testCase := range testCases {
-			testCase.PopulateState()
+			testCase.BeforeBackup()
 		}
 
 		By("backing up " + MustHaveEnv("DEPLOYMENT_TO_BACKUP"))
@@ -41,11 +41,8 @@ var _ = Describe("backing up Cloud Foundry", func() {
 
 		Eventually(StatusCode(urlForDeploymentToBackup)).Should(Equal(200))
 
-		if envsAreSame {
-			// ### clean up state in backed up environment
-			for _, testCase := range testCases {
-				testCase.Cleanup()
-			}
+		for _, testCase := range testCases {
+			testCase.AfterBackup()
 		}
 
 		By("restoring to " + MustHaveEnv("DEPLOYMENT_TO_RESTORE"))
@@ -64,7 +61,7 @@ var _ = Describe("backing up Cloud Foundry", func() {
 
 		// ### check state in restored environment
 		for _, testCase := range testCases {
-			testCase.CheckState()
+			testCase.AfterRestore()
 		}
 	})
 

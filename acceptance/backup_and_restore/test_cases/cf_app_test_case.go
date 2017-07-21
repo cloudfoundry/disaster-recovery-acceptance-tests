@@ -12,11 +12,12 @@ type CfAppTestCase struct {
 	uniqueTestID string
 }
 
-func NewCfAppTestCase(uniqueTestID string) CfAppTestCase {
-	return CfAppTestCase{uniqueTestID: uniqueTestID}
+func NewCfAppTestCase() *CfAppTestCase {
+	id := RandomStringNumber()
+	return &CfAppTestCase{uniqueTestID: id}
 }
 
-func (tc CfAppTestCase) PopulateState() {
+func (tc *CfAppTestCase) BeforeBackup() {
 	By("creating new orgs and spaces")
 	urlForDeploymentToBackup, usernameForDeploymentToBackup, passwordForDeploymentToBackup := FindCredentialsFor(DeploymentToBackup())
 
@@ -28,7 +29,11 @@ func (tc CfAppTestCase) PopulateState() {
 	RunCommandSuccessfully("cf push test_app_" + tc.uniqueTestID + " -p " + testAppFixturePath)
 }
 
-func (tc CfAppTestCase) CheckState() {
+func (tc *CfAppTestCase) AfterBackup() {
+	tc.deletePushedApps()
+}
+
+func (tc *CfAppTestCase) AfterRestore() {
 	By("finding credentials for the deployment to restore")
 	urlForDeploymentToRestore, usernameForDeploymentToRestore, passwordForDeploymentToRestore := FindCredentialsFor(DeploymentToRestore())
 	RunCommandSuccessfully("cf login --skip-ssl-validation -a", urlForDeploymentToRestore, "-u", usernameForDeploymentToRestore, "-p", passwordForDeploymentToRestore)
@@ -45,7 +50,11 @@ func (tc CfAppTestCase) CheckState() {
 	RunCommandSuccessfully("cf space acceptance-test-space-" + tc.uniqueTestID)
 }
 
-func (tc CfAppTestCase) Cleanup() {
+func (tc *CfAppTestCase) Cleanup() {
+	tc.deletePushedApps()
+}
+
+func (tc *CfAppTestCase) deletePushedApps() {
 	By("cleaning up orgs and spaces")
 	urlForDeploymentToBackup, usernameForDeploymentToBackup, passwordForDeploymentToBackup := FindCredentialsFor(DeploymentToBackup())
 

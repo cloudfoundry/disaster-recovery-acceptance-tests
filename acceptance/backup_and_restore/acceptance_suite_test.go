@@ -4,7 +4,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"strconv"
 	"testing"
 	"time"
 
@@ -26,22 +25,19 @@ var jumpBoxSession *JumpBoxSession
 
 var _ = BeforeSuite(func() {
 	SetDefaultEventuallyTimeout(15 * time.Minute)
-	uniqueTestID = timestamp()
+	uniqueTestID = RandomStringNumber()
 	jumpBoxSession = NewJumpBoxSession(uniqueTestID)
 
 	// ### test cases to be run
 	testCases = []acceptance.TestCase{
-		acceptance.NewCfAppTestCase(uniqueTestID),
+		acceptance.NewAppUptimeTestCase(),
+		acceptance.NewCfAppTestCase(),
 	}
 })
 
 var _ = AfterSuite(func() {
 	jumpBoxSession.Cleanup()
 })
-
-func timestamp() string {
-	return strconv.FormatInt(time.Now().UnixNano(), 16)
-}
 
 func printEnvsAreDifferentWarning() {
 	fmt.Println("     --------------------------------------------------------")

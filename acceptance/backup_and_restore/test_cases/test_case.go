@@ -1,7 +1,8 @@
 package backup_and_restore
 
 type TestCase interface {
-	PopulateState()
-	CheckState()
+	BeforeBackup()
+	AfterBackup()
+	AfterRestore()
 	Cleanup()
 }

@@ -7,6 +7,10 @@ import (
 	"net/http"
 	"strings"
 
+	"crypto/rand"
+
+	"encoding/base64"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -58,6 +62,13 @@ func GetCurrentApplicationStateFor(guid string) (string, error) {
 	}
 
 	return response["0"].State, nil
+}
+func RandomStringNumber() string {
+	b := make([]byte, 16)
+	_, err := rand.Read(b)
+	Expect(err).NotTo(HaveOccurred())
+
+	return base64.RawURLEncoding.EncodeToString(b)
 }
 
 type InstanceStatusResponse struct {
