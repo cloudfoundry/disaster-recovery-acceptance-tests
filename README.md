@@ -1,12 +1,14 @@
 # disaster-recovery-acceptance-tests (DRATS)
 
+Tests if Cloud Foundry can be backuped and restored. The tests will back up `DEPLOYMENT_TO_BACKUP` and restore to `DEPLOYMENT_TO_RESTORE`. The two environments fed in should be identical to each other, i.e. they should have the same set of credentials in their deployment manifests. You can also run the tests on a single environment, by setting `DEPLOYMENT_TO_BACKUP` and `DEPLOYMENT_TO_RESTORE` to the same environment.
+
 ## Running DRATS
 
 1. Spin up a Cloud Foundry deployment.
 1. Deploy a jumpbox deployment called `integration-jump-box` containing a single VM, `jumpbox`.
 1. Run `scripts/run_acceptance_tests.sh` with the following environment variables set:
-  * `DEPLOYMENT_TO_BACKUP` - name of the Cloud Foundry deployment
-  * `DEPLOYMENT_TO_RESTORE` - name of the Cloud Foundry deployment
+  * `DEPLOYMENT_TO_BACKUP` - name of the Cloud Foundry deployment to backup
+  * `DEPLOYMENT_TO_RESTORE` - name of the Cloud Foundry deployment to restore
   * `BOSH_URL` - URL of BOSH Director which has deployed the above Cloud Foundries
   * `BOSH_CLIENT` - BOSH Director username
   * `BOSH_CLIENT_SECRET` - BOSH Director password
