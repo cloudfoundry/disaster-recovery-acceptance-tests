@@ -2,6 +2,7 @@ package testcases
 
 import (
 	"net/http"
+	"path"
 	"time"
 
 	"log"
@@ -30,7 +31,7 @@ func (tc *AppUptimeTestCase) BeforeBackup() {
 	RunCommandSuccessfully("cf create-org acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf create-space acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf target -o acceptance-test-org-" + tc.uniqueTestID + " -s acceptance-test-space-" + tc.uniqueTestID)
-	var testAppFixturePath = "fixtures/test_app/"
+	var testAppFixturePath = path.Join(CurrentTestDir(), "/../fixtures/test_app/")
 	RunCommandSuccessfully("cf push test_app_" + tc.uniqueTestID + " -p " + testAppFixturePath)
 
 	By("checking the app stays up")
