@@ -2,16 +2,16 @@
 
 set -eu
 
-export DEPLOYMENT_TO_BACKUP=cf-integration-0
-export DEPLOYMENT_TO_RESTORE=cf-integration-0
-export BOSH_CERT_PATH=/Users/pivotal/workspace/bosh-backup-and-restore-meta/certs/genesis-bosh.backup-and-restore.cf-app.com.crt
-export BOSH_CLIENT=admin
-export BOSH_CLIENT_SECRET=DWTk6zUf6ogtPzl501e4Wi0eGNBQSS
-export BOSH_URL=https://genesis-bosh.backup-and-restore.cf-app.com
-export BOSH_GATEWAY_USER=vcap
-export BOSH_GATEWAY_HOST=genesis-bosh.backup-and-restore.cf-app.com
-export BOSH_GATEWAY_KEY=/Users/pivotal/workspace/bosh-backup-and-restore-meta/genesis-bosh/bosh.pem
-export BBR_BUILD_PATH=/Users/pivotal/workspace/go/src/github.com/pivotal-cf/bosh-backup-and-restore/bbr
+export DEPLOYMENT_TO_BACKUP
+export DEPLOYMENT_TO_RESTORE
+export BOSH_CERT_PATH
+export BOSH_CLIENT
+export BOSH_CLIENT_SECRET
+export BOSH_URL
+export BOSH_GATEWAY_USER
+export BOSH_GATEWAY_HOST
+export BOSH_GATEWAY_KEY
+export BBR_BUILD_PATH
 
 go get github.com/onsi/ginkgo/ginkgo
 glide install
