@@ -1,7 +1,9 @@
-package backup_and_restore
+package runner
 
 import (
 	"fmt"
+
+	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -9,8 +11,16 @@ import (
 	. "github.com/pivotal-cf-experimental/disaster-recovery-acceptance-tests/common"
 )
 
-var _ = Describe("backing up Cloud Foundry", func() {
+func RunDisasterRecoveryAcceptanceTests(testCases []TestCase) {
 	var envsAreSame bool
+	var uniqueTestID string
+	var jumpBoxSession *JumpBoxSession
+
+	BeforeEach(func() {
+		SetDefaultEventuallyTimeout(15 * time.Minute)
+		uniqueTestID = RandomStringNumber()
+		jumpBoxSession = NewJumpBoxSession(uniqueTestID)
+	})
 
 	It("backups and restores a cf", func() {
 		if MustHaveEnv("DEPLOYMENT_TO_BACKUP") == MustHaveEnv("DEPLOYMENT_TO_RESTORE") {
@@ -76,5 +86,15 @@ var _ = Describe("backing up Cloud Foundry", func() {
 		for _, testCase := range testCases {
 			testCase.Cleanup()
 		}
+
+		jumpBoxSession.Cleanup()
 	})
-})
+}
+
+func printEnvsAreDifferentWarning() {
+	fmt.Println("     --------------------------------------------------------")
+	fmt.Println("     NOTE: this suite is currently configured to back up from")
+	fmt.Println("     one environment and restore to a difference one. Make   ")
+	fmt.Println("     sure this is the intended configuration.                ")
+	fmt.Println("     --------------------------------------------------------")
+}

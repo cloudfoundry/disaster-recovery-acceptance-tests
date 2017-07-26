@@ -1,4 +1,4 @@
-package backup_and_restore
+package runner
 
 type TestCase interface {
 	BeforeBackup()

@@ -66,7 +66,9 @@ func GetCurrentApplicationStateFor(guid string) (string, error) {
 func RandomStringNumber() string {
 	b := make([]byte, 16)
 	_, err := rand.Read(b)
-	Expect(err).NotTo(HaveOccurred())
+	if err != nil {
+		panic("failed to generate random string number")
+	}
 
 	return base64.RawURLEncoding.EncodeToString(b)
 }

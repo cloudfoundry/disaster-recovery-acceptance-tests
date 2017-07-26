@@ -1,4 +1,4 @@
-package backup_and_restore
+package testcases
 
 import (
 	"time"
@@ -25,7 +25,7 @@ func (tc *CfAppTestCase) BeforeBackup() {
 	RunCommandSuccessfully("cf create-org acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf create-space acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf target -s acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
-	var testAppFixturePath = "../../fixtures/test_app/"
+	var testAppFixturePath = "fixtures/test_app/"
 	RunCommandSuccessfully("cf push test_app_" + tc.uniqueTestID + " -p " + testAppFixturePath)
 }
 
