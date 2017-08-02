@@ -10,6 +10,7 @@ import (
 	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/common"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/runner"
 )
 
 type AppUptimeTestCase struct {
@@ -24,10 +25,8 @@ func NewAppUptimeTestCase() *AppUptimeTestCase {
 	return &AppUptimeTestCase{uniqueTestID: id}
 }
 
-func (tc *AppUptimeTestCase) BeforeBackup() {
-	urlForDeploymentToBackup, usernameForDeploymentToBackup, passwordForDeploymentToBackup := FindCredentialsFor(DeploymentToBackup())
-
-	RunCommandSuccessfully("cf login --skip-ssl-validation -a", urlForDeploymentToBackup, "-u", usernameForDeploymentToBackup, "-p", passwordForDeploymentToBackup)
+func (tc *AppUptimeTestCase) BeforeBackup(config runner.Config) {
+	RunCommandSuccessfully("cf login --skip-ssl-validation -a", config.DeploymentToBackup.ApiUrl, "-u", config.DeploymentToBackup.AdminUsername, "-p", config.DeploymentToBackup.AdminPassword)
 	RunCommandSuccessfully("cf create-org acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf create-space acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf target -o acceptance-test-org-" + tc.uniqueTestID + " -s acceptance-test-space-" + tc.uniqueTestID)
@@ -40,7 +39,7 @@ func (tc *AppUptimeTestCase) BeforeBackup() {
 	tc.stopCheckingAPIGoesDown, tc.valueApiWasDown = checkApiGoesDown()
 }
 
-func (tc *AppUptimeTestCase) AfterBackup() {
+func (tc *AppUptimeTestCase) AfterBackup(config runner.Config) {
 	By("stopping checking the app")
 	log.Println("writing to stopCheckingAppAlive...")
 	tc.stopCheckingAppAlive <- true
@@ -50,15 +49,13 @@ func (tc *AppUptimeTestCase) AfterBackup() {
 	Expect(<-tc.valueApiWasDown).To(BeTrue())
 }
 
-func (tc *AppUptimeTestCase) AfterRestore() {
+func (tc *AppUptimeTestCase) AfterRestore(config runner.Config) {
 
 }
 
-func (tc *AppUptimeTestCase) Cleanup() {
+func (tc *AppUptimeTestCase) Cleanup(config runner.Config) {
 	By("cleaning up orgs, spaces and apps")
-	urlForDeploymentToBackup, usernameForDeploymentToBackup, passwordForDeploymentToBackup := FindCredentialsFor(DeploymentToBackup())
-
-	RunCommandSuccessfully("cf login --skip-ssl-validation -a", urlForDeploymentToBackup, "-u", usernameForDeploymentToBackup, "-p", passwordForDeploymentToBackup)
+	RunCommandSuccessfully("cf login --skip-ssl-validation -a", config.DeploymentToBackup.ApiUrl, "-u", config.DeploymentToBackup.AdminUsername, "-p", config.DeploymentToBackup.AdminPassword)
 	RunCommandSuccessfully("cf target -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf delete-space -f acceptance-test-space-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf delete-org -f acceptance-test-org-" + tc.uniqueTestID)

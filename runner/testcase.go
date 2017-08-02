@@ -1,8 +1,8 @@
 package runner
 
 type TestCase interface {
-	BeforeBackup()
-	AfterBackup()
-	AfterRestore()
-	Cleanup()
+	BeforeBackup(Config)
+	AfterBackup(Config)
+	AfterRestore(Config)
+	Cleanup(Config)
 }

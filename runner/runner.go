@@ -5,13 +5,13 @@ import (
 
 	"time"
 
+	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/common"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"
-	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/common"
 )
 
-func RunDisasterRecoveryAcceptanceTests(testCases []TestCase) {
+func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 	var envsAreSame bool
 	var uniqueTestID string
 	var jumpBoxSession *JumpBoxSession
@@ -34,7 +34,7 @@ func RunDisasterRecoveryAcceptanceTests(testCases []TestCase) {
 
 		// ### populate state in environment to be backed up
 		for _, testCase := range testCases {
-			testCase.BeforeBackup()
+			testCase.BeforeBackup(config)
 		}
 
 		By("backing up " + MustHaveEnv("DEPLOYMENT_TO_BACKUP"))
@@ -52,7 +52,7 @@ func RunDisasterRecoveryAcceptanceTests(testCases []TestCase) {
 		Eventually(StatusCode(urlForDeploymentToBackup)).Should(Equal(200))
 
 		for _, testCase := range testCases {
-			testCase.AfterBackup()
+			testCase.AfterBackup(config)
 		}
 
 		By("restoring to " + MustHaveEnv("DEPLOYMENT_TO_RESTORE"))
@@ -71,7 +71,7 @@ func RunDisasterRecoveryAcceptanceTests(testCases []TestCase) {
 
 		// ### check state in restored environment
 		for _, testCase := range testCases {
-			testCase.AfterRestore()
+			testCase.AfterRestore(config)
 		}
 	})
 
@@ -84,7 +84,7 @@ func RunDisasterRecoveryAcceptanceTests(testCases []TestCase) {
 
 		// ### clean up backup environment
 		for _, testCase := range testCases {
-			testCase.Cleanup()
+			testCase.Cleanup(config)
 		}
 
 		jumpBoxSession.Cleanup()
