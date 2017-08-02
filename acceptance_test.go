@@ -1,8 +1,8 @@
 package disaster_recovery_acceptance_tests
 
 import (
-	"github.com/pivotal-cf-experimental/disaster-recovery-acceptance-tests/runner"
-	"github.com/pivotal-cf-experimental/disaster-recovery-acceptance-tests/testcases"
+	"github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/runner"
+	"github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/testcases"
 
 	. "github.com/onsi/ginkgo"
 )

@@ -7,7 +7,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	. "github.com/pivotal-cf-experimental/disaster-recovery-acceptance-tests/common"
+	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/common"
 )
 
 type CfAppTestCase struct {

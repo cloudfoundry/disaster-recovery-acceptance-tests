@@ -1,4 +1,4 @@
-package: github.com/pivotal-cf-experimental/disaster-recovery-acceptance-tests
+package: github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests
 import:
 - package: github.com/onsi/ginkgo
 - package: github.com/onsi/gomega
