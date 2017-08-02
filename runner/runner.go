@@ -15,16 +15,17 @@ func RunDisasterRecoveryAcceptanceTests(configGetter func() Config, testCases []
 	var envsAreSame bool
 	var uniqueTestID string
 	var jumpBoxSession *JumpBoxSession
+	var config Config
 
 	BeforeEach(func() {
+		config = configGetter()
+
 		SetDefaultEventuallyTimeout(15 * time.Minute)
 		uniqueTestID = RandomStringNumber()
 		jumpBoxSession = NewJumpBoxSession(uniqueTestID)
 	})
 
 	It("backups and restores a cf", func() {
-		config := configGetter()
-
 		if MustHaveEnv("DEPLOYMENT_TO_BACKUP") == MustHaveEnv("DEPLOYMENT_TO_RESTORE") {
 			envsAreSame = true
 		} else {
