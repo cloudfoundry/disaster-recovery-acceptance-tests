@@ -8,8 +8,8 @@ import (
 )
 
 var _ = Describe("backing up Cloud Foundry", func() {
-	config := ReadConfigFromBOSHManifest()
-	runner.RunDisasterRecoveryAcceptanceTests(config, []runner.TestCase{
+	configGetter := ReadConfigFromBOSHManifest
+	runner.RunDisasterRecoveryAcceptanceTests(configGetter, []runner.TestCase{
 		testcases.NewAppUptimeTestCase(),
 		testcases.NewCfAppTestCase(),
 	})
@@ -31,5 +31,4 @@ func ReadConfigFromBOSHManifest() runner.Config {
 			AdminPassword: passwordForDeploymentToRestore,
 		},
 	}
-
 }

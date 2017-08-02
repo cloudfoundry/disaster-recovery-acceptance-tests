@@ -5,10 +5,10 @@ import (
 
 	"path"
 
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/common"
 	"github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/runner"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 type CfAppTestCase struct {

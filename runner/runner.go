@@ -11,7 +11,7 @@ import (
 	"github.com/onsi/gomega/gexec"
 )
 
-func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
+func RunDisasterRecoveryAcceptanceTests(configGetter func() Config, testCases []TestCase) {
 	var envsAreSame bool
 	var uniqueTestID string
 	var jumpBoxSession *JumpBoxSession
@@ -23,6 +23,8 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 	})
 
 	It("backups and restores a cf", func() {
+		config := configGetter()
+
 		if MustHaveEnv("DEPLOYMENT_TO_BACKUP") == MustHaveEnv("DEPLOYMENT_TO_RESTORE") {
 			envsAreSame = true
 		} else {
