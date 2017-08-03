@@ -9,5 +9,5 @@ import (
 
 func TestPcfBackupAndRestoreAcceptanceTests(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "CfBackupAndRestoreAcceptanceTests Suite")
+	RunSpecs(t, "DisasterRecoveryAcceptanceTests Suite")
 }
