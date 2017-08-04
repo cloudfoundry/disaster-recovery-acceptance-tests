@@ -14,7 +14,7 @@ import (
 func RunDisasterRecoveryAcceptanceTests(configGetter func() Config, testCases []TestCase) {
 	var envsAreSame bool
 	var uniqueTestID string
-	var jumpBoxSession *JumpBoxSession
+	var jumpBoxSession *Session
 	var config Config
 
 	BeforeEach(func() {
@@ -22,7 +22,7 @@ func RunDisasterRecoveryAcceptanceTests(configGetter func() Config, testCases []
 
 		SetDefaultEventuallyTimeout(15 * time.Minute)
 		uniqueTestID = RandomStringNumber()
-		jumpBoxSession = NewJumpBoxSession(uniqueTestID)
+		jumpBoxSession = NewSession(uniqueTestID)
 	})
 
 	It("backups and restores a cf", func() {
@@ -41,7 +41,7 @@ func RunDisasterRecoveryAcceptanceTests(configGetter func() Config, testCases []
 		}
 
 		By("backing up " + MustHaveEnv("DEPLOYMENT_TO_BACKUP"))
-		Eventually(RunOnJumpboxAsVcap(fmt.Sprintf(
+		Eventually(RunCommandSuccessfully(fmt.Sprintf(
 			"cd %s; %s deployment --target %s --ca-cert %s --username %s --password %s --deployment %s backup",
 			jumpBoxSession.WorkspaceDir,
 			jumpBoxSession.BinaryPath,
@@ -59,7 +59,7 @@ func RunDisasterRecoveryAcceptanceTests(configGetter func() Config, testCases []
 		}
 
 		By("restoring to " + MustHaveEnv("DEPLOYMENT_TO_RESTORE"))
-		Eventually(RunOnJumpboxAsVcap(fmt.Sprintf(
+		Eventually(RunCommandSuccessfully(fmt.Sprintf(
 			"cd %s; %s deployment --target %s --ca-cert %s --username %s --password %s --deployment %s restore --artifact-path $(ls %s | grep %s | head -n 1)",
 			jumpBoxSession.WorkspaceDir,
 			jumpBoxSession.BinaryPath,
@@ -80,7 +80,7 @@ func RunDisasterRecoveryAcceptanceTests(configGetter func() Config, testCases []
 
 	AfterEach(func() {
 		By("cleaning up the artifact")
-		Eventually(RunOnJumpboxAsVcap(fmt.Sprintf("cd %s; rm -fr %s",
+		Eventually(RunCommandSuccessfully(fmt.Sprintf("cd %s; rm -fr %s",
 			jumpBoxSession.WorkspaceDir,
 			MustHaveEnv("DEPLOYMENT_TO_RESTORE"),
 		))).Should(gexec.Exit(0))

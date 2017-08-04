@@ -2,7 +2,6 @@ package common
 
 import (
 	"crypto/tls"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -52,17 +51,6 @@ func StatusCode(url string) func() (int, error) {
 	}
 }
 
-func GetCurrentApplicationStateFor(guid string) (string, error) {
-	statusJson := RunCommandSuccessfully(fmt.Sprintf("cf curl /v2/apps/%s/stats", string(guid)))
-	response := AppStatusResponse{}
-	unmarshalError := json.Unmarshal(statusJson.Out.Contents(), &response)
-
-	if unmarshalError != nil {
-		return "", unmarshalError
-	}
-
-	return response["0"].State, nil
-}
 func RandomStringNumber() string {
 	b := make([]byte, 16)
 	_, err := rand.Read(b)
