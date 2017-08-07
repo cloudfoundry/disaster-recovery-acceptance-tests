@@ -37,9 +37,9 @@ func runCommandWithStream(stdout, stderr io.Writer, cmd string, args ...string) 
 	return session
 }
 
-func DownloadManifest(deploymentName string) string {
+func DownloadManifest(deploymentName string, boshConfig BoshConfig) string {
 	session := runCommandWithStream(bytes.NewBufferString(""), GinkgoWriter, join(
-		BoshCommand(),
+		BoshCommand(boshConfig),
 		forDeployment(deploymentName),
 		"manifest",
 	))
@@ -56,12 +56,12 @@ func DeploymentToRestore() string {
 	return MustHaveEnv("DEPLOYMENT_TO_RESTORE")
 }
 
-func BoshCommand() string {
+func BoshCommand(boshConfig BoshConfig) string {
 	return fmt.Sprintf("bosh-cli --non-interactive --environment=%s --ca-cert=%s --client=%s --client-secret=%s",
-		MustHaveEnv("BOSH_URL"),
-		MustHaveEnv("BOSH_CERT_PATH"),
-		MustHaveEnv("BOSH_CLIENT"),
-		MustHaveEnv("BOSH_CLIENT_SECRET"),
+		boshConfig.BoshURL,
+		boshConfig.BoshCertPath,
+		boshConfig.BoshClient,
+		boshConfig.BoshClientSecret,
 	)
 }
 
@@ -74,7 +74,9 @@ func forDeployment(deploymentName string) string {
 
 func MustHaveEnv(keyname string) string {
 	val := os.Getenv(keyname)
-	Expect(val).NotTo(BeEmpty(), "Need "+keyname+" for the test")
+	if val == "" {
+		panic(fmt.Sprintln("Env var %s not set", keyname))
+	}
 	return val
 }
 

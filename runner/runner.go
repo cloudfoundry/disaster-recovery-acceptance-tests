@@ -11,18 +11,18 @@ import (
 	"github.com/onsi/gomega/gexec"
 )
 
-func RunDisasterRecoveryAcceptanceTests(configGetter func() Config, testCases []TestCase) {
+func RunDisasterRecoveryAcceptanceTests(boshConfig BoshConfig, testCases []TestCase) {
 	var envsAreSame bool
 	var uniqueTestID string
 	var jumpBoxSession *Session
 	var config Config
 
 	BeforeEach(func() {
-		config = configGetter()
+		config = readConfigFromBOSHManifest(boshConfig)
 
 		SetDefaultEventuallyTimeout(15 * time.Minute)
 		uniqueTestID = RandomStringNumber()
-		jumpBoxSession = NewSession(uniqueTestID)
+		jumpBoxSession = NewSession(uniqueTestID, boshConfig)
 	})
 
 	It("backups and restores a cf", func() {
@@ -33,7 +33,7 @@ func RunDisasterRecoveryAcceptanceTests(configGetter func() Config, testCases []
 		}
 
 		By("finding credentials for the deployment to backup")
-		urlForDeploymentToBackup, _, _ := FindCredentialsFor(DeploymentToBackup())
+		urlForDeploymentToBackup, _, _ := FindCredentialsFor(DeploymentToBackup(), boshConfig)
 
 		// ### populate state in environment to be backed up
 		for _, testCase := range testCases {
@@ -45,10 +45,10 @@ func RunDisasterRecoveryAcceptanceTests(configGetter func() Config, testCases []
 			"cd %s; %s deployment --target %s --ca-cert %s --username %s --password %s --deployment %s backup",
 			jumpBoxSession.WorkspaceDir,
 			jumpBoxSession.BinaryPath,
-			MustHaveEnv("BOSH_URL"),
+			config.BoshConfig.BoshURL,
 			jumpBoxSession.CertificatePath,
-			MustHaveEnv("BOSH_CLIENT"),
-			MustHaveEnv("BOSH_CLIENT_SECRET"),
+			config.BoshConfig.BoshClient,
+			config.BoshConfig.BoshClientSecret,
 			MustHaveEnv("DEPLOYMENT_TO_BACKUP"),
 		))).Should(gexec.Exit(0))
 
@@ -63,10 +63,10 @@ func RunDisasterRecoveryAcceptanceTests(configGetter func() Config, testCases []
 			"cd %s; %s deployment --target %s --ca-cert %s --username %s --password %s --deployment %s restore --artifact-path $(ls %s | grep %s | head -n 1)",
 			jumpBoxSession.WorkspaceDir,
 			jumpBoxSession.BinaryPath,
-			MustHaveEnv("BOSH_URL"),
+			config.BoshConfig.BoshURL,
 			jumpBoxSession.CertificatePath,
-			MustHaveEnv("BOSH_CLIENT"),
-			MustHaveEnv("BOSH_CLIENT_SECRET"),
+			config.BoshConfig.BoshClient,
+			config.BoshConfig.BoshClientSecret,
 			MustHaveEnv("DEPLOYMENT_TO_RESTORE"),
 			jumpBoxSession.WorkspaceDir,
 			MustHaveEnv("DEPLOYMENT_TO_BACKUP"),
@@ -100,4 +100,23 @@ func printEnvsAreDifferentWarning() {
 	fmt.Println("     one environment and restore to a difference one. Make   ")
 	fmt.Println("     sure this is the intended configuration.                ")
 	fmt.Println("     --------------------------------------------------------")
+}
+
+func readConfigFromBOSHManifest(boshConfig BoshConfig) Config {
+	urlForDeploymentToBackup, usernameForDeploymentToBackup, passwordForDeploymentToBackup := FindCredentialsFor(DeploymentToBackup(), boshConfig)
+	urlForDeploymentToRestore, usernameForDeploymentToRestore, passwordForDeploymentToRestore := FindCredentialsFor(DeploymentToRestore(), boshConfig)
+
+	return Config{
+		DeploymentToBackup: CloudFoundryConfig{
+			ApiUrl:        urlForDeploymentToBackup,
+			AdminUsername: usernameForDeploymentToBackup,
+			AdminPassword: passwordForDeploymentToBackup,
+		},
+		DeploymentToRestore: CloudFoundryConfig{
+			ApiUrl:        urlForDeploymentToRestore,
+			AdminUsername: usernameForDeploymentToRestore,
+			AdminPassword: passwordForDeploymentToRestore,
+		},
+		BoshConfig: boshConfig,
+	}
 }

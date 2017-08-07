@@ -10,7 +10,6 @@ import (
 	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/common"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/runner"
 )
 
 type AppUptimeTestCase struct {
@@ -25,7 +24,7 @@ func NewAppUptimeTestCase() *AppUptimeTestCase {
 	return &AppUptimeTestCase{uniqueTestID: id}
 }
 
-func (tc *AppUptimeTestCase) BeforeBackup(config runner.Config) {
+func (tc *AppUptimeTestCase) BeforeBackup(config Config) {
 	RunCommandSuccessfully("cf login --skip-ssl-validation -a", config.DeploymentToBackup.ApiUrl, "-u", config.DeploymentToBackup.AdminUsername, "-p", config.DeploymentToBackup.AdminPassword)
 	RunCommandSuccessfully("cf create-org acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf create-space acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
@@ -39,7 +38,7 @@ func (tc *AppUptimeTestCase) BeforeBackup(config runner.Config) {
 	tc.stopCheckingAPIGoesDown, tc.valueApiWasDown = checkApiGoesDown()
 }
 
-func (tc *AppUptimeTestCase) AfterBackup(config runner.Config) {
+func (tc *AppUptimeTestCase) AfterBackup(config Config) {
 	By("stopping checking the app")
 	log.Println("writing to stopCheckingAppAlive...")
 	tc.stopCheckingAppAlive <- true
@@ -49,11 +48,11 @@ func (tc *AppUptimeTestCase) AfterBackup(config runner.Config) {
 	Expect(<-tc.valueApiWasDown).To(BeTrue())
 }
 
-func (tc *AppUptimeTestCase) AfterRestore(config runner.Config) {
+func (tc *AppUptimeTestCase) AfterRestore(config Config) {
 
 }
 
-func (tc *AppUptimeTestCase) Cleanup(config runner.Config) {
+func (tc *AppUptimeTestCase) Cleanup(config Config) {
 	By("cleaning up orgs, spaces and apps")
 	RunCommandSuccessfully("cf login --skip-ssl-validation -a", config.DeploymentToBackup.ApiUrl, "-u", config.DeploymentToBackup.AdminUsername, "-p", config.DeploymentToBackup.AdminPassword)
 	RunCommandSuccessfully("cf target -o acceptance-test-org-" + tc.uniqueTestID)

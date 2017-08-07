@@ -7,27 +7,35 @@ import (
 	"gopkg.in/yaml.v1"
 )
 
-func FindCredentialsFor(deploymentName string) (string, string, string) {
-	manifest := DownloadManifest(deploymentName)
+func FindCredentialsFor(deploymentName string, boshConfig BoshConfig) (string, string, string) {
+	manifest := DownloadManifest(deploymentName, boshConfig)
 	deployment := Deployment{}
 	yaml.Unmarshal([]byte(manifest), &deployment)
-	domain := deployment.FindAppDomain()
+	systemDomain := deployment.FindSystemDomain()
 	username, password := deployment.FindCredentials()
-	return fmt.Sprintf("https://api.%s", domain), username, password
+	return fmt.Sprintf("https://api.%s", systemDomain), username, password
 }
 
-func (deployment Deployment) FindAppDomain() string {
+func (deployment Deployment) FindSystemDomain() string {
 	for _, instanceGroup := range deployment.InstanceGroups {
-		if instanceGroup.Name == "api" {
+		if instanceGroup.Name == "api" || //OS
+			instanceGroup.Name == "cloud_controller" { //ERT
 			for _, job := range instanceGroup.Jobs {
 				if job.Name == "cloud_controller_ng" {
-					return job.Properties.AppDomains[0]
+					if job.Properties.SystemDomain != "" {
+						return job.Properties.SystemDomain
+					} else if instanceGroup.Properties.SystemDomain != "" {
+						return instanceGroup.Properties.SystemDomain
+
+					} else {
+						Fail("CC job found, but no system domain found")
+					}
 				}
 			}
 		}
 	}
 
-	Fail("No app domains found")
+	Fail("No system domain found")
 	return ""
 }
 
@@ -36,8 +44,15 @@ func (deployment Deployment) FindCredentials() (string, string) {
 		if instanceGroup.Name == "uaa" {
 			for _, job := range instanceGroup.Jobs {
 				if job.Name == "uaa" {
-					user := job.Properties.UAA.SCIM.Users[0]
-					return user.Name, user.Password
+					if len(job.Properties.UAA.SCIM.Users) > 0 {
+						user := job.Properties.UAA.SCIM.Users[0] //OS
+						return user.Name, user.Password
+					} else if len(instanceGroup.Properties.UAA.SCIM.Users) > 0 {
+						user := instanceGroup.Properties.UAA.SCIM.Users[0] //ERT
+						return user.Name, user.Password
+					} else {
+						Fail("UAA job found, but no admin user found")
+					}
 				}
 			}
 		}
@@ -53,8 +68,8 @@ type Deployment struct {
 		Jobs []struct {
 			Name       string
 			Properties struct {
-				AppDomains []string `yaml:"app_domains"`
-				UAA        struct {
+				SystemDomain string `yaml:"system_domain"`
+				UAA          struct {
 					SCIM struct {
 						Users []struct {
 							Name     string
@@ -63,6 +78,17 @@ type Deployment struct {
 					} `yaml:"scim"`
 				} `yaml:"uaa"`
 			}
+		}
+		Properties struct {
+			SystemDomain string `yaml:"system_domain"`
+			UAA          struct {
+				SCIM struct {
+					Users []struct {
+						Name     string
+						Password string
+					}
+				} `yaml:"scim"`
+			} `yaml:"uaa"`
 		}
 	} `yaml:"instance_groups"`
 }

@@ -6,7 +6,6 @@ import (
 	"path"
 
 	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/common"
-	"github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/runner"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -20,7 +19,7 @@ func NewCfAppTestCase() *CfAppTestCase {
 	return &CfAppTestCase{uniqueTestID: id}
 }
 
-func (tc *CfAppTestCase) BeforeBackup(config runner.Config) {
+func (tc *CfAppTestCase) BeforeBackup(config Config) {
 	By("creating new orgs and spaces")
 	RunCommandSuccessfully("cf login --skip-ssl-validation -a", config.DeploymentToBackup.ApiUrl, "-u", config.DeploymentToBackup.AdminUsername, "-p", config.DeploymentToBackup.AdminPassword)
 	RunCommandSuccessfully("cf create-org acceptance-test-org-" + tc.uniqueTestID)
@@ -30,11 +29,11 @@ func (tc *CfAppTestCase) BeforeBackup(config runner.Config) {
 	RunCommandSuccessfully("cf push test_app_" + tc.uniqueTestID + " -p " + testAppFixturePath)
 }
 
-func (tc *CfAppTestCase) AfterBackup(config runner.Config) {
+func (tc *CfAppTestCase) AfterBackup(config Config) {
 	tc.deletePushedApps(config)
 }
 
-func (tc *CfAppTestCase) AfterRestore(config runner.Config) {
+func (tc *CfAppTestCase) AfterRestore(config Config) {
 	By("finding credentials for the deployment to restore")
 	RunCommandSuccessfully("cf login --skip-ssl-validation -a", config.DeploymentToRestore.ApiUrl, "-u", config.DeploymentToRestore.AdminUsername, "-p", config.DeploymentToRestore.AdminPassword)
 
@@ -50,11 +49,11 @@ func (tc *CfAppTestCase) AfterRestore(config runner.Config) {
 	RunCommandSuccessfully("cf space acceptance-test-space-" + tc.uniqueTestID)
 }
 
-func (tc *CfAppTestCase) Cleanup(config runner.Config) {
+func (tc *CfAppTestCase) Cleanup(config Config) {
 	tc.deletePushedApps(config)
 }
 
-func (tc *CfAppTestCase) deletePushedApps(config runner.Config) {
+func (tc *CfAppTestCase) deletePushedApps(config Config) {
 	By("cleaning up orgs and spaces")
 	RunCommandSuccessfully("cf login --skip-ssl-validation -a", config.DeploymentToBackup.ApiUrl, "-u", config.DeploymentToBackup.AdminUsername, "-p", config.DeploymentToBackup.AdminPassword)
 	RunCommandSuccessfully("cf target -o acceptance-test-org-" + tc.uniqueTestID)

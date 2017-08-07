@@ -1,5 +1,5 @@
-hash: e2a4dd8e8cf0c0a80eef155149071ee6d95beebc989df2c3ed3ba1338063875f
-updated: 2017-08-03T16:32:57.860804027+01:00
+hash: b51331a0a82bb4bc9af41df3d42aaea1cf7dcd891ea226fccc537844d3e0be55
+updated: 2017-08-04T15:26:33.428765927+01:00
 imports:
 - name: github.com/onsi/ginkgo
   version: 7b6efc7d7b052568b49ac02d3141c9d7a5a494a4
@@ -34,8 +34,10 @@ imports:
   - matchers/support/goraph/node
   - matchers/support/goraph/util
   - types
+- name: github.com/smallfish/simpleyaml
+  version: 116d8e577389d62b8f83df98852be7889fd2cea4
 - name: golang.org/x/sys
-  version: d8f5ea21b9295e315e612b4bcf4bedea93454d4d
+  version: b90f89a1e7a9c1f6b918820b3daa7f08488c8594
   subpackages:
   - unix
 - name: gopkg.in/yaml.v1
