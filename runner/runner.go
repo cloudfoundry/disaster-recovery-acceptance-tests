@@ -20,7 +20,7 @@ func RunDisasterRecoveryAcceptanceTests(boshConfig BoshConfig, testCases []TestC
 	BeforeEach(func() {
 		config = readConfigFromBOSHManifest(boshConfig)
 
-		SetDefaultEventuallyTimeout(15 * time.Minute)
+		SetDefaultEventuallyTimeout(30 * time.Minute)
 		uniqueTestID = RandomStringNumber()
 		jumpBoxSession = NewSession(uniqueTestID, boshConfig)
 	})
@@ -42,7 +42,7 @@ func RunDisasterRecoveryAcceptanceTests(boshConfig BoshConfig, testCases []TestC
 
 		By("backing up " + MustHaveEnv("DEPLOYMENT_TO_BACKUP"))
 		Eventually(RunCommandSuccessfully(fmt.Sprintf(
-			"cd %s; %s deployment --target %s --ca-cert %s --username %s --password %s --deployment %s backup",
+			"cd %s && %s deployment --target %s --ca-cert %s --username %s --password %s --deployment %s backup",
 			jumpBoxSession.WorkspaceDir,
 			jumpBoxSession.BinaryPath,
 			config.BoshConfig.BoshURL,
@@ -60,7 +60,7 @@ func RunDisasterRecoveryAcceptanceTests(boshConfig BoshConfig, testCases []TestC
 
 		By("restoring to " + MustHaveEnv("DEPLOYMENT_TO_RESTORE"))
 		Eventually(RunCommandSuccessfully(fmt.Sprintf(
-			"cd %s; %s deployment --target %s --ca-cert %s --username %s --password %s --deployment %s restore --artifact-path $(ls %s | grep %s | head -n 1)",
+			"cd %s && %s deployment --target %s --ca-cert %s --username %s --password %s --deployment %s restore --artifact-path $(ls %s | grep %s | head -n 1)",
 			jumpBoxSession.WorkspaceDir,
 			jumpBoxSession.BinaryPath,
 			config.BoshConfig.BoshURL,
@@ -80,7 +80,7 @@ func RunDisasterRecoveryAcceptanceTests(boshConfig BoshConfig, testCases []TestC
 
 	AfterEach(func() {
 		By("cleaning up the artifact")
-		Eventually(RunCommandSuccessfully(fmt.Sprintf("cd %s; rm -fr %s",
+		Eventually(RunCommandSuccessfully(fmt.Sprintf("cd %s && rm -fr %s",
 			jumpBoxSession.WorkspaceDir,
 			MustHaveEnv("DEPLOYMENT_TO_RESTORE"),
 		))).Should(gexec.Exit(0))
