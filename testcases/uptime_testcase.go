@@ -1,11 +1,10 @@
 package testcases
 
 import (
+	"log"
 	"net/http"
 	"path"
 	"time"
-
-	"log"
 
 	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/common"
 	. "github.com/onsi/ginkgo"

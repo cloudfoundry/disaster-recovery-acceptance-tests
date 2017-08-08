@@ -18,10 +18,17 @@ var _ = Describe("backing up Cloud Foundry", func() {
 		BoshCertPath:     mustHaveEnv("BOSH_CERT_PATH"),
 	}
 
-	runner.RunDisasterRecoveryAcceptanceTests(boshConfig, []runner.TestCase{
-		testcases.NewAppUptimeTestCase(),
-		testcases.NewCfAppTestCase(),
-	})
+	configGetter := common.OSConfigGetter{
+		DeploymentNameForBackup:  mustHaveEnv("DEPLOYMENT_TO_BACKUP"),
+		DeploymentNameForRestore: mustHaveEnv("DEPLOYMENT_TO_RESTORE"),
+		BoshConfig:               boshConfig,
+	}
+
+	runner.RunDisasterRecoveryAcceptanceTests(configGetter,
+		[]runner.TestCase{
+			testcases.NewAppUptimeTestCase(),
+			testcases.NewCfAppTestCase(),
+		})
 })
 
 func mustHaveEnv(keyname string) string {

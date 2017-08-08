@@ -5,7 +5,6 @@ Tests if Cloud Foundry can be backuped and restored. The tests will back up `DEP
 ## Running DRATS
 
 1. Spin up a Cloud Foundry deployment.
-1. Deploy a jumpbox deployment called `integration-jump-box` containing a single VM, `jumpbox`.
 1. Run `scripts/run_acceptance_tests.sh` with the following environment variables set:
   * `DEPLOYMENT_TO_BACKUP` - name of the Cloud Foundry deployment to backup
   * `DEPLOYMENT_TO_RESTORE` - name of the Cloud Foundry deployment to restore
@@ -13,9 +12,6 @@ Tests if Cloud Foundry can be backuped and restored. The tests will back up `DEP
   * `BOSH_CLIENT` - BOSH Director username
   * `BOSH_CLIENT_SECRET` - BOSH Director password
   * `BOSH_CERT_PATH` - path to BOSH Director's CA cert
-  * `BOSH_GATEWAY_USER` - BOSH SSH client username
-  * `BOSH_GATEWAY_HOST` - BOSH SSH client hostname
-  * `BOSH_GATEWAY_KEY` - path to BOSH SSH client private key
   * `BBR_BUILD_PATH` - path to BBR binary
 
 Currently, DRATS backs up from and restores to the same environment.
@@ -24,7 +20,6 @@ Currently, DRATS backs up from and restores to the same environment.
 
 The system tests do the following:
 
-1. Starts a session on the jumpbox VM (creates a workspace directory, copies over the BOSH Director CA cert and key and the BBR binary)
 1. Calls `BeforeBackup()` on all provided TestCases (to e.g. push unique apps to the environment to be backed up).
 1. Backs up the `DEPLOYMENT_TO_BACKUP` Cloud Foundry deployment.
 1. Calls `AfterBackup()` on all provided TestCases.

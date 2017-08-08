@@ -1,14 +1,12 @@
 package common
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"os"
-	"strings"
-
-	"bytes"
-
 	"os/exec"
+	"strings"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -46,14 +44,6 @@ func DownloadManifest(deploymentName string, boshConfig BoshConfig) string {
 	Eventually(session).Should(gexec.Exit(0))
 
 	return string(session.Out.Contents())
-}
-
-func DeploymentToBackup() string {
-	return MustHaveEnv("DEPLOYMENT_TO_BACKUP")
-}
-
-func DeploymentToRestore() string {
-	return MustHaveEnv("DEPLOYMENT_TO_RESTORE")
 }
 
 func BoshCommand(boshConfig BoshConfig) string {

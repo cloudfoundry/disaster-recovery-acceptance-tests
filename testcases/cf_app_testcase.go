@@ -1,9 +1,8 @@
 package testcases
 
 import (
-	"time"
-
 	"path"
+	"time"
 
 	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/common"
 	. "github.com/onsi/ginkgo"

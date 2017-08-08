@@ -1,6 +1,8 @@
-hash: b51331a0a82bb4bc9af41df3d42aaea1cf7dcd891ea226fccc537844d3e0be55
-updated: 2017-08-04T15:26:33.428765927+01:00
+hash: 1d4052393fb600812ce94f8f6586beb4a65eb5ecb447e4f44e04862ad72996e4
+updated: 2017-08-08T16:39:17.610260867+01:00
 imports:
+- name: github.com/ghodss/yaml
+  version: 0ca9ea5df5451ffdf184b4428c902747c2c11cd7
 - name: github.com/onsi/ginkgo
   version: 7b6efc7d7b052568b49ac02d3141c9d7a5a494a4
   subpackages:
@@ -36,6 +38,10 @@ imports:
   - types
 - name: github.com/smallfish/simpleyaml
   version: 116d8e577389d62b8f83df98852be7889fd2cea4
+- name: github.com/totherme/unstructured
+  version: b353b582c8d8acc81ee9535c38c805fc1d537623
+- name: github.com/xeipuuv/gojsonpointer
+  version: 6fe8760cad3569743d51ddbb243b26f8456742dc
 - name: golang.org/x/sys
   version: b90f89a1e7a9c1f6b918820b3daa7f08488c8594
   subpackages:

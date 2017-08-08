@@ -6,6 +6,8 @@ import (
 	"github.com/onsi/gomega/gexec"
 )
 
+//TODO think of the correct name for this
+
 type Session struct {
 	WorkspaceDir    string
 	BinaryPath      string

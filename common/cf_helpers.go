@@ -1,14 +1,12 @@
 package common
 
 import (
+	"crypto/rand"
 	"crypto/tls"
+	"encoding/base64"
 	"fmt"
 	"net/http"
 	"strings"
-
-	"crypto/rand"
-
-	"encoding/base64"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
