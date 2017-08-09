@@ -24,11 +24,7 @@ var _ = Describe("backing up Cloud Foundry", func() {
 		BoshConfig:               boshConfig,
 	}
 
-	runner.RunDisasterRecoveryAcceptanceTests(configGetter,
-		[]runner.TestCase{
-			testcases.NewAppUptimeTestCase(),
-			testcases.NewCfAppTestCase(),
-		})
+	runner.RunDisasterRecoveryAcceptanceTests(configGetter, testcases.OpenSourceTestCases())
 })
 
 func mustHaveEnv(keyname string) string {
