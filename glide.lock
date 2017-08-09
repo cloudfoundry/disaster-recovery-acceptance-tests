@@ -1,10 +1,10 @@
 hash: 1d4052393fb600812ce94f8f6586beb4a65eb5ecb447e4f44e04862ad72996e4
-updated: 2017-08-08T16:39:17.610260867+01:00
+updated: 2017-08-09T12:13:58.284777464+01:00
 imports:
 - name: github.com/ghodss/yaml
   version: 0ca9ea5df5451ffdf184b4428c902747c2c11cd7
 - name: github.com/onsi/ginkgo
-  version: 7b6efc7d7b052568b49ac02d3141c9d7a5a494a4
+  version: 8382b23d18dbaaff8e5f7e83784c53ebb8ec2f47
   subpackages:
   - config
   - internal/codelocation
@@ -13,15 +13,18 @@ imports:
   - internal/leafnodes
   - internal/remote
   - internal/spec
+  - internal/spec_iterator
   - internal/specrunner
   - internal/suite
   - internal/testingtproxy
   - internal/writer
   - reporters
   - reporters/stenographer
+  - reporters/stenographer/support/go-colorable
+  - reporters/stenographer/support/go-isatty
   - types
 - name: github.com/onsi/gomega
-  version: d59fa0ac68bb5dd932ee8d24eed631cdd519efc3
+  version: c893efa28eb45626cdaa76c9f653b62488858837
   subpackages:
   - format
   - gbytes
@@ -42,12 +45,36 @@ imports:
   version: b353b582c8d8acc81ee9535c38c805fc1d537623
 - name: github.com/xeipuuv/gojsonpointer
   version: 6fe8760cad3569743d51ddbb243b26f8456742dc
+- name: golang.org/x/net
+  version: cd95c68ba21fc7ee16ee38cc420473e3d8c4afd8
+  subpackages:
+  - html
+  - html/atom
+  - html/charset
 - name: golang.org/x/sys
-  version: b90f89a1e7a9c1f6b918820b3daa7f08488c8594
+  version: b0e0dd72976dc482b6cb37c5640440f876ac1907
   subpackages:
   - unix
+- name: golang.org/x/text
+  version: 3bd178b88a8180be2df394a1fbb81313916f0e7b
+  subpackages:
+  - encoding
+  - encoding/charmap
+  - encoding/htmlindex
+  - encoding/internal
+  - encoding/internal/identifier
+  - encoding/japanese
+  - encoding/korean
+  - encoding/simplifiedchinese
+  - encoding/traditionalchinese
+  - encoding/unicode
+  - internal/tag
+  - internal/utf8internal
+  - language
+  - runes
+  - transform
 - name: gopkg.in/yaml.v1
   version: 9f9df34309c04878acc86042b16630b0f696e1de
 - name: gopkg.in/yaml.v2
-  version: 31c299268d302dd0aa9a0dcf765a3d58971ac83f
+  version: 25c4ec802a7d637f88d584ab26798e94ad14c13b
 testImports: []
