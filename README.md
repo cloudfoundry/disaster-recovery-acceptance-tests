@@ -31,7 +31,7 @@ The system tests do the following:
 
 DRATS runs a collection of test cases against two Cloud Foundry deployments.
 
-To add extra test cases, create a new TestCase that follows the [TestCase interface](https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/blob/master/acceptance/backup_and_restore/test_cases/test_case.go).
+To add extra test cases, create a new TestCase that follows the [TestCase interface](https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/blob/master/runner/testcase.go).
 
 The methods that need to be implemented are `BeforeBackup(common.Config)`, `AfterBackup(common.Config)`, `AfterRestore(common.Config)` and `Cleanup(common.Config)`.
 
