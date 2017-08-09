@@ -45,23 +45,57 @@ func (configGetter OSConfigGetter) FindConfig() Config {
 }
 
 func (configGetter OSConfigGetter) findCloudFoundryConfigFor(deploymentName string) CloudFoundryConfig {
-	// TODO: deal with errors, make helpful parsing error logs
+	manifestData, err := unstructured.ParseYAML(DownloadManifest(deploymentName, configGetter.BoshConfig))
+	if err != nil {
+		panic("Error downloading manifest")
+	}
 
-	manifestData, _ := unstructured.ParseYAML(DownloadManifest(deploymentName, configGetter.BoshConfig))
+	instanceGroups, err := manifestData.GetByPointer("/instance_groups")
+	if err != nil {
+		panic("Error parsing manifest")
+	}
 
-	instanceGroups, _ := manifestData.GetByPointer("/instance_groups")
+	apiGroup, found := instanceGroups.FindElem(ByName("api"))
+	if !found {
+		panic("Error parsing manifest")
+	}
+	apiGroupJobs, err := apiGroup.GetByPointer("/jobs")
+	if err != nil {
+		panic("Error parsing manifest")
+	}
+	cloudControllerJob, found := apiGroupJobs.FindElem(ByName("cloud_controller_ng"))
+	if !found {
+		panic("Error parsing manifest")
+	}
+	systemDomain, err := cloudControllerJob.GetByPointer("/properties/system_domain")
+	if err != nil {
+		panic("Error parsing manifest")
+	}
 
-	apiGroup, _ := instanceGroups.FindElem(ByName("api"))
-	apiGroupJobs, _ := apiGroup.GetByPointer("/jobs")
-	cloudControllerJob, _ := apiGroupJobs.FindElem(ByName("cloud_controller_ng"))
-	systemDomain, _ := cloudControllerJob.GetByPointer("/properties/system_domain")
-
-	uaaGroup, _ := instanceGroups.FindElem(ByName("uaa"))
-	uaaGroupJobs, _ := uaaGroup.GetByPointer("/jobs")
-	uaaJob, _ := uaaGroupJobs.FindElem(ByName("uaa"))
-	user, _ := uaaJob.GetByPointer("/properties/uaa/scim/users/0")
-	username, _ := user.GetByPointer("/name")
-	password, _ := user.GetByPointer("/password")
+	uaaGroup, found := instanceGroups.FindElem(ByName("uaa"))
+	if !found {
+		panic("Error parsing manifest")
+	}
+	uaaGroupJobs, err := uaaGroup.GetByPointer("/jobs")
+	if err != nil {
+		panic("Error parsing manifest")
+	}
+	uaaJob, found := uaaGroupJobs.FindElem(ByName("uaa"))
+	if !found {
+		panic("Error parsing manifest")
+	}
+	user, err := uaaJob.GetByPointer("/properties/uaa/scim/users/0")
+	if err != nil {
+		panic("Error parsing manifest")
+	}
+	username, err := user.GetByPointer("/name")
+	if err != nil {
+		panic("Error parsing manifest")
+	}
+	password, err := user.GetByPointer("/password")
+	if err != nil {
+		panic("Error parsing manifest")
+	}
 
 	return CloudFoundryConfig{
 		Name:          deploymentName,
@@ -71,7 +105,6 @@ func (configGetter OSConfigGetter) findCloudFoundryConfigFor(deploymentName stri
 	}
 }
 
-//TODO: is there a better place for this?
 func ByName(name string) unstructured.ElementMatcher {
 	return func(element unstructured.Data) bool {
 		return element.HasKey("name") &&

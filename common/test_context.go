@@ -13,7 +13,6 @@ type TestContext struct {
 }
 
 func NewTestContext(uniqueTestID string, boshConfig BoshConfig) *TestContext {
-	//TODO: check this formulation is ok
 	testContext := TestContext{}
 	testContext.WorkspaceDir = "/tmp/backup_workspace" + uniqueTestID
 	var bbrBuildPath = MustHaveEnv("BBR_BUILD_PATH")
