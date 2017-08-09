@@ -71,6 +71,7 @@ func (configGetter OSConfigGetter) findCloudFoundryConfigFor(deploymentName stri
 	}
 }
 
+//TODO: is there a better place for this?
 func ByName(name string) unstructured.ElementMatcher {
 	return func(element unstructured.Data) bool {
 		return element.HasKey("name") &&

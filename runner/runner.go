@@ -12,9 +12,8 @@ import (
 )
 
 func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []TestCase) {
-	var envsAreSame bool
 	var uniqueTestID string
-	var session *Session
+	var testContext *TestContext
 	var config Config
 
 	BeforeEach(func() {
@@ -22,14 +21,12 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 
 		SetDefaultEventuallyTimeout(30 * time.Minute)
 		uniqueTestID = RandomStringNumber()
-		session = NewSession(uniqueTestID, config.BoshConfig)
+		testContext = NewTestContext(uniqueTestID, config.BoshConfig)
 	})
 
 	It("backups and restores a cf", func() {
-		if config.DeploymentToBackup.Name == config.DeploymentToRestore.Name {
-			envsAreSame = true
-		} else {
-			printEnvsAreDifferentWarning()
+		if config.DeploymentToBackup.Name != config.DeploymentToRestore.Name {
+			printDeploymentsAreDifferentWarning()
 		}
 
 		// ### populate state in environment to be backed up
@@ -40,10 +37,10 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 		By("backing up " + config.DeploymentToBackup.Name)
 		Eventually(RunCommandSuccessfully(fmt.Sprintf(
 			"cd %s && %s deployment --target %s --ca-cert %s --username %s --password %s --deployment %s backup",
-			session.WorkspaceDir,
-			session.BinaryPath,
+			testContext.WorkspaceDir,
+			testContext.BinaryPath,
 			config.BoshConfig.BoshURL,
-			session.CertificatePath,
+			testContext.CertificatePath,
 			config.BoshConfig.BoshClient,
 			config.BoshConfig.BoshClientSecret,
 			config.DeploymentToBackup.Name,
@@ -57,15 +54,16 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 
 		By("restoring to " + config.DeploymentToRestore.Name)
 		Eventually(RunCommandSuccessfully(fmt.Sprintf(
-			"cd %s && %s deployment --target %s --ca-cert %s --username %s --password %s --deployment %s restore --artifact-path $(ls %s | grep %s | head -n 1)",
-			session.WorkspaceDir,
-			session.BinaryPath,
+			"cd %s && %s deployment --target %s --ca-cert %s --username %s --password %s "+
+				"--deployment %s restore --artifact-path $(ls %s | grep %s | head -n 1)",
+			testContext.WorkspaceDir,
+			testContext.BinaryPath,
 			config.BoshConfig.BoshURL,
-			session.CertificatePath,
+			testContext.CertificatePath,
 			config.BoshConfig.BoshClient,
 			config.BoshConfig.BoshClientSecret,
 			config.DeploymentToRestore.Name,
-			session.WorkspaceDir,
+			testContext.WorkspaceDir,
 			config.DeploymentToBackup.Name,
 		))).Should(gexec.Exit(0))
 
@@ -76,9 +74,10 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 	})
 
 	AfterEach(func() {
+		//TODO: Can we delete this?
 		By("cleaning up the artifact")
 		Eventually(RunCommandSuccessfully(fmt.Sprintf("cd %s && rm -fr %s",
-			session.WorkspaceDir,
+			testContext.WorkspaceDir,
 			config.DeploymentToRestore.Name,
 		))).Should(gexec.Exit(0))
 
@@ -87,14 +86,14 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 			testCase.Cleanup(config)
 		}
 
-		session.Cleanup()
+		testContext.Cleanup()
 	})
 }
 
-func printEnvsAreDifferentWarning() {
+func printDeploymentsAreDifferentWarning() {
 	fmt.Println("     --------------------------------------------------------")
 	fmt.Println("     NOTE: this suite is currently configured to back up from")
-	fmt.Println("     one environment and restore to a difference one. Make   ")
+	fmt.Println("     one deployment and restore to a different one. Make     ")
 	fmt.Println("     sure this is the intended configuration.                ")
 	fmt.Println("     --------------------------------------------------------")
 }
