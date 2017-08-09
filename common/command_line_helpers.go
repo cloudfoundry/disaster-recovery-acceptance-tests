@@ -8,6 +8,8 @@ import (
 	"os/exec"
 	"strings"
 
+	"time"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"
@@ -17,6 +19,19 @@ func RunCommandSuccessfully(cmd string, args ...string) *gexec.Session {
 	session := runCommandWithStream(GinkgoWriter, GinkgoWriter, cmd, args...)
 	Expect(session).To(gexec.Exit(0))
 	return session
+}
+
+func RunCommandAndRetry(cmd string, retries int, args ...string) *gexec.Session {
+	for i := 0; i < retries; i++ {
+		session := runCommandWithStream(GinkgoWriter, GinkgoWriter, cmd, args...)
+		if session.ExitCode() == 0 {
+			return session
+		}
+		time.Sleep(10 * time.Second)
+	}
+
+	Fail(fmt.Sprintf("Retried command %s times but failed", retries))
+	return nil
 }
 
 func RunCommand(cmd string, args ...string) *gexec.Session {

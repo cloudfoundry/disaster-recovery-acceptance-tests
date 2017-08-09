@@ -13,7 +13,7 @@ import (
 )
 
 func GetAppUrl(appName string) string {
-	appStats := string(RunCommandSuccessfully("cf app " + appName).Out.Contents())
+	appStats := string(RunCommandAndRetry("cf app "+appName, 5).Out.Contents())
 	var appUrl string
 	for _, line := range strings.Split(appStats, "\n") {
 		if strings.HasPrefix(line, "routes:") {
