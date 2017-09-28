@@ -46,7 +46,7 @@ func (tc *AppUptimeTestCase) AfterBackup(config Config) {
 	log.Println("writing to stopCheckingAPIGoesDown...")
 	tc.stopCheckingAPIGoesDown <- true
 	log.Println("reading from valueApiWasDown...")
-	Expect(<-tc.valueApiWasDown).To(BeTrue(), "expected api to have been down, but it")
+	Expect(<-tc.valueApiWasDown).To(BeTrue(), "expected api to be down, but it isn't")
 }
 
 func (tc *AppUptimeTestCase) AfterRestore(config Config) {
