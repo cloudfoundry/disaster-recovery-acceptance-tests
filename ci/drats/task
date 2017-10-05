@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+set -eux
+
+export CF_DEPLOYMENT_NAME
+export CF_ADMIN_USERNAME
+export CF_ADMIN_PASSWORD
+export CF_API_URL
+export BOSH_CLIENT
+export BOSH_CLIENT_SECRET
+export BOSH_CERT_PATH
+export BOSH_URL
+
+export GOPATH=$PWD
+export PATH=$PATH:$GOPATH/bin
+export BOSH_CLIENT
+export BOSH_URL
+
+eval "$(ssh-agent)"
+
+rm -f ~/.gitconfig
+echo "${SSH_GATEWAY_KEY}" > ssh.pem
+chmod 0400 ssh.pem
+ssh-add ssh.pem
+
+sshuttle -r "${SSH_GATEWAY_USER}@${SSH_GATEWAY_HOST}" "${SSH_DESTINATION_CIDR}" --daemon -e 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
+
+sleep 5
+
+echo "$BOSH_CERT" > bosh.cert
+export BOSH_CERT_PATH=`pwd`/bosh.cert
+
+pushd bbr-binary-release
+  tar xvf *.tar
+  export BBR_BUILD_PATH=`pwd`/releases/bbr
+popd
+
+pushd src/github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests
+  scripts/run_acceptance_tests.sh
+popd
