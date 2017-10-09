@@ -12,6 +12,6 @@ export BOSH_CLIENT_SECRET
 export BOSH_URL
 export BBR_BUILD_PATH
 
-go get github.com/onsi/ginkgo/ginkgo
-glide install --strip-vendor
+#go get github.com/onsi/ginkgo/ginkgo
+#glide install --strip-vendor
 ginkgo -v -r --trace .
