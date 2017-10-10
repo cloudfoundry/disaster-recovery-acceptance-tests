@@ -8,22 +8,20 @@ export CF_ADMIN_PASSWORD
 export CF_API_URL
 export BOSH_CLIENT
 export BOSH_CLIENT_SECRET
-export BOSH_CERT_PATH
-export BOSH_URL
+export BOSH_CA_CERT
+export BOSH_ENVIRONMENT
 
 export GOPATH=$PWD
 export PATH=$PATH:$GOPATH/bin
-export BOSH_CLIENT
-export BOSH_URL
 
 eval "$(ssh-agent)"
 
 rm -f ~/.gitconfig
-echo "${SSH_GATEWAY_KEY}" > ssh.pem
+echo "${BOSH_GW_PRIVATE_KEY}" > ssh.pem
 chmod 0400 ssh.pem
 ssh-add ssh.pem
 
-sshuttle -r "${SSH_GATEWAY_USER}@${SSH_GATEWAY_HOST}" "${SSH_DESTINATION_CIDR}" --daemon -e 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
+sshuttle -r "${BOSH_GW_USER}@${BOSH_GW_HOST}" "${SSH_DESTINATION_CIDR}" --daemon -e 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
 
 sleep 5
 
