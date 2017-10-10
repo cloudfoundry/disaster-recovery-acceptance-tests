@@ -25,7 +25,7 @@ sshuttle -r "${BOSH_GW_USER}@${BOSH_GW_HOST}" "${SSH_DESTINATION_CIDR}" --daemon
 
 sleep 5
 
-echo "$BOSH_CERT" > bosh.cert
+echo "$BOSH_CA_CERT" > bosh.cert
 export BOSH_CERT_PATH=`pwd`/bosh.cert
 
 pushd bbr-binary-release
