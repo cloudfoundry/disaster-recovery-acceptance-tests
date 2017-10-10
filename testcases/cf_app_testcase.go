@@ -11,11 +11,17 @@ import (
 
 type CfAppTestCase struct {
 	uniqueTestID string
+	appName string
+	envVarValue string
 }
 
 func NewCfAppTestCase() *CfAppTestCase {
 	id := RandomStringNumber()
-	return &CfAppTestCase{uniqueTestID: id}
+	return &CfAppTestCase{
+		uniqueTestID: id,
+		appName: "test_app_" + id,
+		envVarValue: "winnebago" + id,
+	}
 }
 
 func (tc *CfAppTestCase) BeforeBackup(config Config) {
@@ -25,7 +31,8 @@ func (tc *CfAppTestCase) BeforeBackup(config Config) {
 	RunCommandSuccessfully("cf create-space acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf target -s acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
 	var testAppFixturePath = path.Join(CurrentTestDir(), "/../fixtures/test_app/")
-	RunCommandSuccessfully("cf push test_app_" + tc.uniqueTestID + " -p " + testAppFixturePath)
+	RunCommandSuccessfully("cf push " + tc.appName + " -p " + testAppFixturePath)
+	RunCommandSuccessfully("cf set-env " + tc.appName + " MY_SPECIAL_VAR " + tc.envVarValue)
 }
 
 func (tc *CfAppTestCase) AfterBackup(config Config) {
@@ -43,9 +50,10 @@ func (tc *CfAppTestCase) AfterRestore(config Config) {
 
 	By("verifying apps are back")
 	RunCommandSuccessfully("cf target -s acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
-	url := GetAppUrl("test_app_" + tc.uniqueTestID)
+	url := GetAppUrl(tc.appName)
 
 	Eventually(StatusCode("https://"+url), 5*time.Minute, 5*time.Second).Should(Equal(200))
+	Expect(string(RunCommandSuccessfully("cf env " + tc.appName).Out.Contents())).To(MatchRegexp("winnebago" + tc.uniqueTestID))
 }
 
 func (tc *CfAppTestCase) Cleanup(config Config) {
