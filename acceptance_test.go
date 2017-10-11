@@ -12,7 +12,7 @@ import (
 
 var _ = Describe("backing up Cloud Foundry", func() {
 	boshConfig := common.BoshConfig{
-		BoshURL:          mustHaveEnv("BOSH_URL"),
+		BoshURL:          mustHaveEnv("BOSH_ENVIRONMENT"),
 		BoshClient:       mustHaveEnv("BOSH_CLIENT"),
 		BoshClientSecret: mustHaveEnv("BOSH_CLIENT_SECRET"),
 		BoshCertPath:     mustHaveEnv("BOSH_CERT_PATH"),

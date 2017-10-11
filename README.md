@@ -10,7 +10,7 @@ Tests if Cloud Foundry can be backed up and restored. The tests will back up fro
   * `CF_API_URL` - Cloud Foundry api url
   * `CF_ADMIN_USERNAME` - Cloud Foundry api admin user
   * `CF_ADMIN_PASSWORD` - Cloud Foundry api admin password
-  * `BOSH_URL` - URL of BOSH Director which has deployed the above Cloud Foundries
+  * `BOSH_ENVIRONMENT` - URL of BOSH Director which has deployed the above Cloud Foundries
   * `BOSH_CLIENT` - BOSH Director username
   * `BOSH_CLIENT_SECRET` - BOSH Director password
   * `BOSH_CERT_PATH` - path to BOSH Director's CA cert

@@ -9,7 +9,7 @@ export CF_ADMIN_PASSWORD
 export BOSH_CERT_PATH
 export BOSH_CLIENT
 export BOSH_CLIENT_SECRET
-export BOSH_URL
+export BOSH_ENVIRONMENT
 export BBR_BUILD_PATH
 
 go get github.com/onsi/ginkgo/ginkgo
