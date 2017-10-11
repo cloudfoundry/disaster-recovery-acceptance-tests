@@ -6,5 +6,7 @@ func OpenSourceTestCases() []runner.TestCase {
 	return []runner.TestCase{
 		NewAppUptimeTestCase(),
 		NewCfAppTestCase(),
+		NewCfUaaTestCase(),
 	}
+	
 }
