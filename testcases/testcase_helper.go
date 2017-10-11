@@ -7,6 +7,7 @@ func OpenSourceTestCases() []runner.TestCase {
 		NewAppUptimeTestCase(),
 		NewCfAppTestCase(),
 		NewCfUaaTestCase(),
+		NewCfNetworkingTestCase(),
 	}
-	
+
 }
