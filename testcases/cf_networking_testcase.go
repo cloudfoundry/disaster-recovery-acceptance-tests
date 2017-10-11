@@ -33,6 +33,8 @@ func (tc *CfNetworkingTestCase) BeforeBackup(config Config) {
 
 func (tc *CfNetworkingTestCase) AfterBackup(config Config) {
 	testAppName := fmt.Sprintf("test_app_%s", tc.uniqueTestID)
+	RunCommandSuccessfully("cf login --skip-ssl-validation -a", config.DeploymentToBackup.ApiUrl, "-u", config.DeploymentToBackup.AdminUsername, "-p", config.DeploymentToBackup.AdminPassword)
+	RunCommandSuccessfully("cf target -s acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully(fmt.Sprintf("cf remove-network-policy %s --destination-app %s --port 8080 --protocol tcp", testAppName, testAppName))
 }
 
