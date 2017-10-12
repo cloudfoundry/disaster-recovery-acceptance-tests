@@ -46,3 +46,7 @@ The methods that need to be implemented are `BeforeBackup(common.Config)`, `Afte
 
 1. Create a new TestCase in `test_cases`
 1. In `testcases/testcase_helper.go`, initialise the TestCase and add it to the slice returned by `OpenSourceTestCases()`
+
+## Running DRATs in your CI
+
+We have shared a [task](https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/tree/master/ci/drats) to run drats with your CI. The task would establish an SSH tunnel using [`sshuttle`](http://sshuttle.readthedocs.io) so that it can run from outside the network. Note that this task needs a privileged container 
