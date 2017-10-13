@@ -12,11 +12,16 @@ import (
 
 type CfNetworkingTestCase struct {
 	uniqueTestID string
+	name         string
 }
 
 func NewCfNetworkingTestCase() *CfNetworkingTestCase {
 	id := RandomStringNumber()
-	return &CfNetworkingTestCase{uniqueTestID: id}
+	return &CfNetworkingTestCase{uniqueTestID: id, name: "cf-networking"}
+}
+
+func (tc *CfNetworkingTestCase) Name() string {
+	return tc.name
 }
 
 func (tc *CfNetworkingTestCase) BeforeBackup(config Config) {

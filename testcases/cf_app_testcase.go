@@ -11,17 +11,23 @@ import (
 
 type CfAppTestCase struct {
 	uniqueTestID string
-	appName string
-	envVarValue string
+	appName      string
+	envVarValue  string
+	name         string
 }
 
 func NewCfAppTestCase() *CfAppTestCase {
 	id := RandomStringNumber()
 	return &CfAppTestCase{
 		uniqueTestID: id,
-		appName: "test_app_" + id,
-		envVarValue: "winnebago" + id,
+		appName:      "test_app_" + id,
+		envVarValue:  "winnebago" + id,
+		name:         "cf-app",
 	}
+}
+
+func (tc *CfAppTestCase) Name() string {
+	return tc.name
 }
 
 func (tc *CfAppTestCase) BeforeBackup(config Config) {

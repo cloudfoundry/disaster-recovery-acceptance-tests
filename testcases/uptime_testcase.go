@@ -18,11 +18,16 @@ type AppUptimeTestCase struct {
 	stopCheckingAppAlive    chan<- bool
 	stopCheckingAPIGoesDown chan<- bool
 	valueApiWasDown         <-chan bool
+	name                    string
 }
 
 func NewAppUptimeTestCase() *AppUptimeTestCase {
 	id := RandomStringNumber()
-	return &AppUptimeTestCase{uniqueTestID: id}
+	return &AppUptimeTestCase{uniqueTestID: id, name: "app-uptime"}
+}
+
+func (tc *AppUptimeTestCase) Name() string {
+	return tc.name
 }
 
 func (tc *AppUptimeTestCase) BeforeBackup(config Config) {

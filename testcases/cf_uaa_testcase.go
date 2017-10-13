@@ -9,16 +9,21 @@ import (
 type CfUaaTestCase struct {
 	uniqueTestID string
 	testPassword string
+	name         string
 }
 
 func NewCfUaaTestCase() *CfUaaTestCase {
 	id := RandomStringNumber()
 	password := RandomStringNumber()
-	return &CfUaaTestCase{uniqueTestID: id, testPassword: password}
+	return &CfUaaTestCase{uniqueTestID: id, testPassword: password, name: "cf-uaa"}
 }
 
 func login(config Config, username, password string) {
 	RunCommandSuccessfully("cf login --skip-ssl-validation -a", config.DeploymentToBackup.ApiUrl, "-u", username, "-p", password)
+}
+
+func (tc *CfUaaTestCase) Name() string {
+	return tc.name
 }
 
 func (tc *CfUaaTestCase) BeforeBackup(config Config) {
@@ -48,4 +53,3 @@ func (tc *CfUaaTestCase) Cleanup(config Config) {
 	login(config, config.DeploymentToBackup.AdminUsername, config.DeploymentToBackup.AdminPassword)
 	RunCommandSuccessfully("cf delete-user ", tc.uniqueTestID, "-f")
 }
-

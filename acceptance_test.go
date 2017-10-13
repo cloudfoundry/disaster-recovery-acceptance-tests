@@ -30,13 +30,22 @@ var _ = Describe("backing up Cloud Foundry", func() {
 		BoshConfig:       boshConfig,
 	}
 
-	runner.RunDisasterRecoveryAcceptanceTests(configGetter, testcases.OpenSourceTestCases())
+	var testCases []runner.TestCase
+
+	focusedSuiteName := os.Getenv("FOCUSED_SUITE_NAME")
+	if focusedSuiteName != "" {
+		testCases = testcases.OpenSourceTestCasesWithFocus(focusedSuiteName)
+	} else {
+		testCases = testcases.OpenSourceTestCases()
+	}
+
+	runner.RunDisasterRecoveryAcceptanceTests(configGetter, testCases)
 })
 
 func mustHaveEnv(keyname string) string {
 	val := os.Getenv(keyname)
 	if val == "" {
-		panic(fmt.Sprintln("Env var %s not set", keyname))
+		panic(fmt.Sprintf("Env var %s not set\n", keyname))
 	}
 	return val
 }
