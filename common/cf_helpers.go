@@ -8,6 +8,10 @@ import (
 	"net/http"
 	"strings"
 
+	"time"
+
+	"net/url"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -36,15 +40,24 @@ func Get(url string) *http.Response {
 	return response
 }
 
-func StatusCode(url string) func() (int, error) {
+func StatusCode(rawUrl string) func() (int, error) {
+	parsedUrl, err := url.Parse(rawUrl)
+	Expect(err).NotTo(HaveOccurred(), "error parsing api url")
+	if parsedUrl.Scheme == "" {
+		parsedUrl.Scheme = "https"
+	}
+
 	return func() (int, error) {
-		client := &http.Client{Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}}
-		resp, err := client.Get(url)
-		if err != nil {
-			return 0, err
-		}
+		client := &http.Client{
+			Timeout: time.Minute,
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{
+					InsecureSkipVerify: true,
+				},
+			}}
+		fmt.Fprintf(GinkgoWriter, "Trying to connect to api url: %s\n", parsedUrl.String())
+		resp, err := client.Get(parsedUrl.String())
+		Expect(err).NotTo(HaveOccurred(), "error connecting to api url")
 		return resp.StatusCode, err
 	}
 }

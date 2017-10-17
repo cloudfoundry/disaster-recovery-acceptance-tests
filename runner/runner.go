@@ -19,7 +19,7 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 	BeforeEach(func() {
 		config = configGetter.FindConfig()
 
-		SetDefaultEventuallyTimeout(30 * time.Minute)
+		SetDefaultEventuallyTimeout(15 * time.Minute)
 		uniqueTestID = RandomStringNumber()
 		testContext = NewTestContext(uniqueTestID, config.BoshConfig)
 	})
@@ -46,7 +46,7 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 			config.DeploymentToBackup.Name,
 		))).Should(gexec.Exit(0))
 
-		Eventually(StatusCode(config.DeploymentToBackup.ApiUrl)).Should(Equal(200))
+		Eventually(StatusCode(config.DeploymentToBackup.ApiUrl), 5*time.Minute).Should(Equal(200))
 
 		for _, testCase := range testCases {
 			testCase.AfterBackup(config)
