@@ -5,6 +5,8 @@ Tests if Cloud Foundry can be backed up and restored. The tests will back up fro
 ## Running DRATS
 
 1. Spin up a Cloud Foundry deployment.
+  * CF on BOSH Lite is supported.
+  * [cf-deployment](https://github.com/cloudfoundry/cf-deployment) is supported. Ensure you apply the [backup-restore opsfile](https://github.com/cloudfoundry/cf-deployment/blob/master/operations/experimental/enable-backup-restore.yml) at deploy time to ensure the backup and restore scripts are enabled. This will also deploy a backup restore VM, on which the [Backup and Restore SDK](https://github.com/cloudfoundry-incubator/backup-and-restore-sdk-release) is deployed.
 1. Run `scripts/run_acceptance_tests.sh` with the following environment variables set:
   * `CF_DEPLOYMENT_NAME` - name of the Cloud Foundry deployment to backup and restore
   * `CF_API_URL` - Cloud Foundry api url
@@ -37,7 +39,11 @@ The system tests do the following:
 
 ## Extending DRATS
 
-DRATS runs a collection of test cases against two Cloud Foundry deployments.
+DRATS runs a collection of test cases against a Cloud Foundry deployment.
+
+Test cases should be used for checking that CF components' data has been backed up and restored correctly – e.g. if your release backs up a table in a database, that the table can be altered and is then restored to its original state.
+
+**Backup and restore of apps is covered by the existing CAPI test case.** No new test cases are needed for this – unless you're writing CAPI backup and restore scripts, app backup and restore can be assumed to work.
 
 To add extra test cases, create a new TestCase that follows the [TestCase interface](https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/blob/master/runner/testcase.go).
 
