@@ -31,7 +31,8 @@ func (tc *AppUptimeTestCase) Name() string {
 }
 
 func (tc *AppUptimeTestCase) BeforeBackup(config Config) {
-	RunCommandSuccessfully("cf login --skip-ssl-validation -a", config.DeploymentToBackup.ApiUrl, "-u", config.DeploymentToBackup.AdminUsername, "-p", config.DeploymentToBackup.AdminPassword)
+	RunCommandSuccessfully("cf api --skip-ssl-validation", config.DeploymentToBackup.ApiUrl)
+	RunCommandSuccessfully("cf auth", config.DeploymentToBackup.AdminUsername, config.DeploymentToBackup.AdminPassword)
 	RunCommandSuccessfully("cf create-org acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf create-space acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf target -o acceptance-test-org-" + tc.uniqueTestID + " -s acceptance-test-space-" + tc.uniqueTestID)
@@ -60,7 +61,8 @@ func (tc *AppUptimeTestCase) AfterRestore(config Config) {
 
 func (tc *AppUptimeTestCase) Cleanup(config Config) {
 	By("cleaning up orgs, spaces and apps")
-	RunCommandSuccessfully("cf login --skip-ssl-validation -a", config.DeploymentToBackup.ApiUrl, "-u", config.DeploymentToBackup.AdminUsername, "-p", config.DeploymentToBackup.AdminPassword)
+	RunCommandSuccessfully("cf api --skip-ssl-validation", config.DeploymentToBackup.ApiUrl)
+	RunCommandSuccessfully("cf auth", config.DeploymentToBackup.AdminUsername, config.DeploymentToBackup.AdminPassword)
 	RunCommandSuccessfully("cf target -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf delete-space -f acceptance-test-space-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf delete-org -f acceptance-test-org-" + tc.uniqueTestID)

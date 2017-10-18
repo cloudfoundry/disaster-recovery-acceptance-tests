@@ -19,7 +19,8 @@ func NewCfUaaTestCase() *CfUaaTestCase {
 }
 
 func login(config Config, username, password string) {
-	RunCommandSuccessfully("cf login --skip-ssl-validation -a", config.DeploymentToBackup.ApiUrl, "-u", username, "-p", password)
+	RunCommandSuccessfully("cf api --skip-ssl-validation", config.DeploymentToBackup.ApiUrl)
+	RunCommandSuccessfully("cf auth", username, password)
 }
 
 func (tc *CfUaaTestCase) Name() string {
@@ -39,7 +40,8 @@ func (tc *CfUaaTestCase) AfterBackup(config Config) {
 	login(config, config.DeploymentToBackup.AdminUsername, config.DeploymentToBackup.AdminPassword)
 	RunCommandSuccessfully("cf delete-user ", tc.uniqueTestID, "-f")
 	RunCommandSuccessfully("cf logout")
-	result := RunCommand("cf login --skip-ssl-validation -a", config.DeploymentToBackup.ApiUrl, "-u", tc.uniqueTestID, "-p", "password")
+	RunCommandSuccessfully("cf api --skip-ssl-validation", config.DeploymentToBackup.ApiUrl)
+	result := RunCommand("cf auth", tc.uniqueTestID, "password")
 	Expect(result.ExitCode()).To(Equal(1))
 }
 
