@@ -14,4 +14,4 @@ Please provide the following information:
 
 ### Do you have any other useful information for us?
 
-We're on the #pcf-backup-restore Slack channel if you need us.
+We're on the #bbr cloudfoundry Slack channel if you need us.
