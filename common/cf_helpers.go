@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"crypto/tls"
 	"encoding/base64"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -33,9 +32,7 @@ func Get(url string) *http.Response {
 	client := &http.Client{Transport: &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}}
-	fmt.Fprintf(GinkgoWriter, "Polling url %s\n", url)
 	response, err := client.Get("https://" + url)
-	fmt.Fprintf(GinkgoWriter, "Done polling url %s\n", url)
 	Expect(err).NotTo(HaveOccurred())
 	return response
 }
