@@ -7,15 +7,16 @@ import (
 )
 
 type CfUaaTestCase struct {
-	uniqueTestID string
+	testUser     string
 	testPassword string
 	name         string
 }
 
 func NewCfUaaTestCase() *CfUaaTestCase {
-	id := RandomStringNumber()
-	password := RandomStringNumber()
-	return &CfUaaTestCase{uniqueTestID: id, testPassword: password, name: "cf-uaa"}
+	randomString := RandomStringNumber()
+	testUser := "uaa-test-user-" + randomString
+	testPassword := "uaa-test-password-" + randomString
+	return &CfUaaTestCase{testUser: testUser, testPassword: testPassword, name: "cf-uaa"}
 }
 
 func login(config Config, username, password string) {
@@ -30,28 +31,28 @@ func (tc *CfUaaTestCase) Name() string {
 func (tc *CfUaaTestCase) BeforeBackup(config Config) {
 	By("we create a user and can login")
 	login(config, config.DeploymentToBackup.AdminUsername, config.DeploymentToBackup.AdminPassword)
-	RunCommandSuccessfully("cf create-user ", tc.uniqueTestID, tc.testPassword)
-	login(config, tc.uniqueTestID, tc.testPassword)
+	RunCommandSuccessfully("cf create-user ", tc.testUser, tc.testPassword)
+	login(config, tc.testUser, tc.testPassword)
 	RunCommandSuccessfully("cf logout")
 }
 
 func (tc *CfUaaTestCase) AfterBackup(config Config) {
 	By("we delete the user and verify")
 	login(config, config.DeploymentToBackup.AdminUsername, config.DeploymentToBackup.AdminPassword)
-	RunCommandSuccessfully("cf delete-user ", tc.uniqueTestID, "-f")
+	RunCommandSuccessfully("cf delete-user ", tc.testUser, "-f")
 	RunCommandSuccessfully("cf logout")
 	RunCommandSuccessfully("cf api --skip-ssl-validation", config.DeploymentToBackup.ApiUrl)
-	result := RunCommand("cf auth", tc.uniqueTestID, "password")
+	result := RunCommand("cf auth", tc.testUser, "password")
 	Expect(result.ExitCode()).To(Equal(1))
 }
 
 func (tc *CfUaaTestCase) AfterRestore(config Config) {
 	By("we can login again")
-	login(config, tc.uniqueTestID, tc.testPassword)
+	login(config, tc.testUser, tc.testPassword)
 }
 
 func (tc *CfUaaTestCase) Cleanup(config Config) {
 	By("We delete the user")
 	login(config, config.DeploymentToBackup.AdminUsername, config.DeploymentToBackup.AdminPassword)
-	RunCommandSuccessfully("cf delete-user ", tc.uniqueTestID, "-f")
+	RunCommandSuccessfully("cf delete-user ", tc.testUser, "-f")
 }
