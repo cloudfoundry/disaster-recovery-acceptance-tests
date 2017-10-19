@@ -1,10 +1,12 @@
 package common
 
 type CloudFoundryConfig struct {
-	Name          string
-	ApiUrl        string
-	AdminUsername string
-	AdminPassword string
+	Name                              string
+	ApiUrl                            string
+	AdminUsername                     string
+	AdminPassword                     string
+	NotificationsTemplateClientID     string
+	NotificationsTemplateClientSecret string
 }
 
 type BoshConfig struct {
