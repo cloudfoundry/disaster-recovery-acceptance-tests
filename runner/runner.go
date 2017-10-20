@@ -2,8 +2,11 @@ package runner
 
 import (
 	"fmt"
+	"strconv"
 
 	"time"
+
+	"os"
 
 	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/common"
 	. "github.com/onsi/ginkgo"
@@ -19,7 +22,17 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 	BeforeEach(func() {
 		config = configGetter.FindConfig()
 
-		SetDefaultEventuallyTimeout(15 * time.Minute)
+		timeout := os.Getenv("DEFAULT_TIMEOUT_MINS")
+		if timeout != "" {
+			timeoutInt, err := strconv.Atoi(timeout)
+			SetDefaultEventuallyTimeout(time.Duration(timeoutInt) * time.Minute)
+			if err != nil {
+				panic(fmt.Sprint("DEFAULT_TIMEOUT_MINS, if set, must be an integer\n"))
+			}
+		} else {
+			SetDefaultEventuallyTimeout(15 * time.Minute)
+		}
+
 		uniqueTestID = RandomStringNumber()
 		testContext = NewTestContext(uniqueTestID, config.BoshConfig)
 	})

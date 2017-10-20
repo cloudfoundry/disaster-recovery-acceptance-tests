@@ -24,6 +24,7 @@ params:
   BOSH_GW_PRIVATE_KEY:
   SSH_DESTINATION_CIDR:
   FOCUSED_SUITE_NAME:
+  DEFAULT_TIMEOUT_MINS:
 
 run:
   path: src/github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/ci/drats/task
