@@ -1,12 +1,11 @@
 package testcases
 
 import (
-
-	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/common"
-	"os"
 	"fmt"
+	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/common"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"os"
 )
 
 type NFSTestCase struct {
@@ -35,9 +34,11 @@ func (tc *NFSTestCase) BeforeBackup(config Config) {
 	RunCommandSuccessfully("cf target -s acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf push dratsApp --docker-image docker/httpd --no-start")
 
-	RunCommandSuccessfully("cf create-service-broker " + "nfsbroker-drats-" + tc.uniqueTestID + " " + os.Getenv("BROKER_USER") + " " + os.Getenv("BROKER_PASSWORD") + " " + os.Getenv("BROKER_URL"))
-	RunCommandSuccessfully("cf enable-service-access " + os.Getenv("SERVICE_NAME"))
-	RunCommandSuccessfully("cf create-service " + os.Getenv("SERVICE_NAME")+ " " + os.Getenv("PLAN_NAME") + " " + tc.instanceName + " -c " + fmt.Sprintf("'{\"share\":\"%s%s\"}'", os.Getenv("SERVER_ADDRESS"), os.Getenv("SHARE")))
+	if config.DeploymentToBackup.NFSBrokerUser != "" {
+		RunCommandSuccessfully("cf create-service-broker " + "nfsbroker-drats-" + tc.uniqueTestID + " " + config.DeploymentToBackup.NFSBrokerUser + " " + config.DeploymentToBackup.NFSBrokerPassword + " " + config.DeploymentToBackup.NFSBrokerUrl)
+	}
+	RunCommandSuccessfully("cf enable-service-access " + config.DeploymentToBackup.NFSServiceName)
+	RunCommandSuccessfully("cf create-service " + config.DeploymentToBackup.NFSServiceName + " " + config.DeploymentToBackup.NFSPlanName + " " + tc.instanceName + " -c " + `'{"share":"someserver.someplace.com/someshare"}'`)
 }
 
 func (tc *NFSTestCase) AfterBackup(config Config) {
@@ -53,7 +54,9 @@ func (tc *NFSTestCase) AfterRestore(config Config) {
 func (tc *NFSTestCase) Cleanup(config Config) {
 	By("nfs cleanup")
 	RunCommandSuccessfully("cf delete-org -f acceptance-test-org-" + tc.uniqueTestID)
-	RunCommandSuccessfully("cf delete-service-broker -f " + "nfsbroker-drats-" + tc.uniqueTestID)
+	if config.DeploymentToBackup.NFSBrokerUser != "" {
+		RunCommandSuccessfully("cf delete-service-broker -f " + "nfsbroker-drats-" + tc.uniqueTestID)
+	}
 }
 
 func (tc *NFSTestCase) deletePushedApps(config Config) {

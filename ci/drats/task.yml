@@ -25,6 +25,11 @@ params:
   SSH_DESTINATION_CIDR:
   FOCUSED_SUITE_NAME:
   DEFAULT_TIMEOUT_MINS:
+  NFS_SERVICE_NAME: nfs
+  NFS_PLAN_NAME: Existing
+  NFS_BROKER_USER: nfs-broker
+  NFS_BROKER_PASSWORD:
+  NFS_BROKER_URL:
 
 run:
   path: src/github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/ci/drats/task
