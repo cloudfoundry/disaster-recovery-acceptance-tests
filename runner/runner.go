@@ -87,6 +87,19 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 	})
 
 	AfterEach(func() {
+		By("running bbr backup-cleanup")
+		By("backing up " + config.DeploymentToBackup.Name)
+		Eventually(RunCommandSuccessfully(fmt.Sprintf(
+			"cd %s && %s deployment --target %s --ca-cert %s --username %s --password %s --deployment %s backup-cleanup",
+			testContext.WorkspaceDir,
+			testContext.BinaryPath,
+			config.BoshConfig.BoshURL,
+			testContext.CertificatePath,
+			config.BoshConfig.BoshClient,
+			config.BoshConfig.BoshClientSecret,
+			config.DeploymentToBackup.Name,
+		))).Should(gexec.Exit(0))
+
 		//TODO: Can we delete this?
 		By("cleaning up the artifact")
 		Eventually(RunCommandSuccessfully(fmt.Sprintf("cd %s && rm -fr %s",
