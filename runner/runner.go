@@ -88,7 +88,6 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 
 	AfterEach(func() {
 		By("running bbr backup-cleanup")
-		By("backing up " + config.DeploymentToBackup.Name)
 		Eventually(RunCommandSuccessfully(fmt.Sprintf(
 			"cd %s && %s deployment --target %s --ca-cert %s --username %s --password %s --deployment %s backup-cleanup",
 			testContext.WorkspaceDir,
