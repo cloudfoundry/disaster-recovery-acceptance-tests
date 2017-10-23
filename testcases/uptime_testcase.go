@@ -61,10 +61,6 @@ func (tc *AppUptimeTestCase) AfterRestore(config Config) {
 
 func (tc *AppUptimeTestCase) Cleanup(config Config) {
 	By("cleaning up orgs, spaces and apps")
-	RunCommandSuccessfully("cf api --skip-ssl-validation", config.DeploymentToBackup.ApiUrl)
-	RunCommandSuccessfully("cf auth", config.DeploymentToBackup.AdminUsername, config.DeploymentToBackup.AdminPassword)
-	RunCommandSuccessfully("cf target -o acceptance-test-org-" + tc.uniqueTestID)
-	RunCommandSuccessfully("cf delete-space -f acceptance-test-space-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf delete-org -f acceptance-test-org-" + tc.uniqueTestID)
 }
 

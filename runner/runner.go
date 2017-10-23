@@ -35,6 +35,11 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 
 		uniqueTestID = RandomStringNumber()
 		testContext = NewTestContext(uniqueTestID, config.BoshConfig)
+
+		for _, testCase := range testCases {
+			err := os.Mkdir(cfHomeDir(testCase), 0700)
+			Expect(err).NotTo(HaveOccurred())
+		}
 	})
 
 	It("backups and restores a cf", func() {
@@ -44,6 +49,7 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 
 		// ### populate state in environment to be backed up
 		for _, testCase := range testCases {
+			os.Setenv("CF_HOME", cfHomeDir(testCase))
 			testCase.BeforeBackup(config)
 		}
 
@@ -62,6 +68,7 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 		Eventually(StatusCode(config.DeploymentToBackup.ApiUrl), 5*time.Minute).Should(Equal(200))
 
 		for _, testCase := range testCases {
+			os.Setenv("CF_HOME", cfHomeDir(testCase))
 			testCase.AfterBackup(config)
 		}
 
@@ -82,6 +89,7 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 
 		// ### check state in restored environment
 		for _, testCase := range testCases {
+			os.Setenv("CF_HOME", cfHomeDir(testCase))
 			testCase.AfterRestore(config)
 		}
 	})
@@ -108,11 +116,21 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 
 		// ### clean up backup environment
 		for _, testCase := range testCases {
+			os.Setenv("CF_HOME", cfHomeDir(testCase))
 			testCase.Cleanup(config)
 		}
 
 		testContext.Cleanup()
+
+		for _, testCase := range testCases {
+			cfHomeDir := testCase.Name() + "-cf-home"
+			err := os.RemoveAll(cfHomeDir)
+			Expect(err).NotTo(HaveOccurred())
+		}
 	})
+}
+func cfHomeDir(testCase TestCase) string {
+	return testCase.Name() + "-cf-home"
 }
 
 func printDeploymentsAreDifferentWarning() {

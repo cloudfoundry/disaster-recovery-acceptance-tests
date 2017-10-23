@@ -24,7 +24,7 @@ func (tc *NFSTestCase) Name() string {
 
 func (tc *NFSTestCase) BeforeBackup(config Config) {
 	By("creating an NFS service broker and service instance")
-
+	RunCommandSuccessfully("cf api --skip-ssl-validation", config.DeploymentToBackup.ApiUrl)
 	RunCommandSuccessfully("cf login --skip-ssl-validation -a", config.DeploymentToBackup.ApiUrl,
 		"-u", config.DeploymentToBackup.AdminUsername, "-p", config.DeploymentToBackup.AdminPassword)
 	RunCommandSuccessfully("cf create-org acceptance-test-org-" + tc.uniqueTestID)
@@ -47,26 +47,16 @@ func (tc *NFSTestCase) BeforeBackup(config Config) {
 
 func (tc *NFSTestCase) AfterBackup(config Config) {
 	By("deleting the NFS service instance after backup")
-	RunCommandSuccessfully("cf login --skip-ssl-validation -a", config.DeploymentToBackup.ApiUrl,
-		"-u", config.DeploymentToBackup.AdminUsername, "-p", config.DeploymentToBackup.AdminPassword)
-	RunCommandSuccessfully("cf target -s acceptance-test-space-" + tc.uniqueTestID +
-		" -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf delete-service " + tc.instanceName + " -f")
 }
 
 func (tc *NFSTestCase) AfterRestore(config Config) {
 	By("re-binding the NFS service instance after restore")
-	RunCommandSuccessfully("cf login --skip-ssl-validation -a", config.DeploymentToBackup.ApiUrl,
-		"-u", config.DeploymentToBackup.AdminUsername, "-p", config.DeploymentToBackup.AdminPassword)
-	RunCommandSuccessfully("cf target -s acceptance-test-space-" + tc.uniqueTestID +
-		" -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf bind-service dratsApp " + tc.instanceName + ` -c '{"uid":5000,"gid":5000}'`)
 }
 
 func (tc *NFSTestCase) Cleanup(config Config) {
 	By("nfs cleanup")
-	RunCommandSuccessfully("cf login --skip-ssl-validation -a", config.DeploymentToBackup.ApiUrl,
-		"-u", config.DeploymentToBackup.AdminUsername, "-p", config.DeploymentToBackup.AdminPassword)
 	RunCommandSuccessfully("cf delete-org -f acceptance-test-org-" + tc.uniqueTestID)
 	if config.DeploymentToBackup.NFSBrokerUser != "" {
 		RunCommandSuccessfully("cf delete-service-broker -f " + "nfsbroker-drats-" + tc.uniqueTestID)
