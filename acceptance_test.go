@@ -19,10 +19,15 @@ var _ = Describe("backing up Cloud Foundry", func() {
 	}
 
 	deploymentConfig := common.CloudFoundryConfig{
-		Name:          mustHaveEnv("CF_DEPLOYMENT_NAME"),
-		ApiUrl:        mustHaveEnv("CF_API_URL"),
-		AdminUsername: mustHaveEnv("CF_ADMIN_USERNAME"),
-		AdminPassword: mustHaveEnv("CF_ADMIN_PASSWORD"),
+		Name:              mustHaveEnv("CF_DEPLOYMENT_NAME"),
+		ApiUrl:            mustHaveEnv("CF_API_URL"),
+		AdminUsername:     mustHaveEnv("CF_ADMIN_USERNAME"),
+		AdminPassword:     mustHaveEnv("CF_ADMIN_PASSWORD"),
+		NFSServiceName:    mustHaveEnv("NFS_SERVICE_NAME"),
+		NFSPlanName:       mustHaveEnv("NFS_PLAN_NAME"),
+		NFSBrokerUser:     os.Getenv("NFS_BROKER_USER"),
+		NFSBrokerPassword: os.Getenv("NFS_BROKER_PASSWORD"),
+		NFSBrokerUrl:      os.Getenv("NFS_BROKER_URL"),
 	}
 
 	configGetter := common.OSConfigGetter{

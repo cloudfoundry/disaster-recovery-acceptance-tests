@@ -7,6 +7,11 @@ type CloudFoundryConfig struct {
 	AdminPassword                     string
 	NotificationsTemplateClientID     string
 	NotificationsTemplateClientSecret string
+	NFSServiceName                    string
+	NFSPlanName                       string
+	NFSBrokerUser                     string
+	NFSBrokerPassword                 string
+	NFSBrokerUrl                      string
 }
 
 type BoshConfig struct {

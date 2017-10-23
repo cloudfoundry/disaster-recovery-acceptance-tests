@@ -16,6 +16,12 @@ set -eu -o pipefail
 : "${CF_ADMIN_USERNAME:="admin"}"
 : "${BOSH_ENVIRONMENT:?}"
 : "${SSH_DESTINATION_CIDR:="10.0.0.0/8"}"
+: "${NFS_SERVICE_NAME:?}"
+: "${NFS_PLAN_NAME:?}"
+: "${NFS_BROKER_USER:?}"
+: "${NFS_BROKER_PASSWORD:?}"
+: "${NFS_BROKER_URL:?}"
+
 
 tmpdir="$( mktemp -d /tmp/run-drats.XXXXXXXXXX )"
 
