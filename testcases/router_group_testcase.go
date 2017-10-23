@@ -2,7 +2,6 @@ package testcases
 
 import (
 	"strings"
-	"time"
 
 	"code.cloudfoundry.org/routing-api"
 	"code.cloudfoundry.org/routing-api/models"
@@ -59,9 +58,6 @@ func (tc *CfRouterGroupTestCase) BeforeBackup(config common.Config) {
 	tc.routingAPIClient = routing_api.NewClient(config.DeploymentToBackup.ApiUrl, true)
 	tc.routerGroupsPreBackup, err = tc.readRouterGroups(token)
 	Expect(err).NotTo(HaveOccurred())
-
-	By("Checking availability of reads during backup")
-	tc.done, tc.readAvailability = tc.checkReads(token, config)
 }
 
 // AfterBackup is run after the bbr is done backing up the database.
@@ -74,12 +70,6 @@ func (tc *CfRouterGroupTestCase) BeforeBackup(config common.Config) {
 // It also spawns a goroutine to check that reads are not available during
 // the restore operation after AfterBackup is called.
 func (tc *CfRouterGroupTestCase) AfterBackup(config common.Config) {
-	By("Checking that reads were always available during backup")
-	close(tc.done)
-	var availability status
-	Eventually(tc.readAvailability).Should(Receive(&availability))
-	Expect(availability).To(Equal(alwaysAvailable))
-
 	By("Getting CF OAuth Token")
 	token := refreshToken()
 
@@ -93,9 +83,6 @@ func (tc *CfRouterGroupTestCase) AfterBackup(config common.Config) {
 	}
 	err := tc.routingAPIClient.CreateRouterGroup(routerGroupEntry)
 	Expect(err).NotTo(HaveOccurred())
-
-	By("Checking availability of reads during restore")
-	tc.done, tc.readAvailability = tc.checkReads(token, config)
 }
 
 // AfterRestore is run after the bbr is done restoring the database.
@@ -105,12 +92,6 @@ func (tc *CfRouterGroupTestCase) AfterBackup(config common.Config) {
 // It verifies that the goroutine spawned in AfterBackup verified that reads
 // were not always available during the restore.
 func (tc *CfRouterGroupTestCase) AfterRestore(config common.Config) {
-	By("Checking that reads are not always available during restore")
-	close(tc.done)
-	var availability status
-	Eventually(tc.readAvailability).Should(Receive(&availability))
-	Expect(availability).To(Equal(notAlwaysAvailable))
-
 	By("Getting CF OAuth Token")
 	token := refreshToken()
 
@@ -118,7 +99,6 @@ func (tc *CfRouterGroupTestCase) AfterRestore(config common.Config) {
 	routerGroupsPostRestore, err := tc.readRouterGroups(token)
 	Expect(err).NotTo(HaveOccurred())
 	Expect(routerGroupsPostRestore).To(ConsistOf(tc.routerGroupsPreBackup))
-
 }
 
 // Cleanup is called at the end to remove the test artifacts left behind.
@@ -140,33 +120,4 @@ func refreshToken() string {
 func (tc *CfRouterGroupTestCase) readRouterGroups(token string) (models.RouterGroups, error) {
 	tc.routingAPIClient.SetToken(token)
 	return tc.routingAPIClient.RouterGroups()
-}
-
-func (tc *CfRouterGroupTestCase) checkReads(token string, config common.Config) (chan none, chan status) {
-	done := make(chan none)
-	readStatus := make(chan status)
-
-	go func() {
-		defer GinkgoRecover()
-		readAvailable := true
-		for {
-			select {
-			case <-done:
-				//close ticker, set value, return
-				if readAvailable {
-					readStatus <- alwaysAvailable
-				} else {
-					readStatus <- notAlwaysAvailable
-				}
-				return
-			case <-time.After(100 * time.Millisecond):
-				var err error
-				if _, err = tc.readRouterGroups(token); err != nil {
-					readAvailable = false
-				}
-			}
-		}
-	}()
-
-	return done, readStatus
 }
