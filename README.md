@@ -17,6 +17,7 @@ Tests if Cloud Foundry can be backed up and restored. The tests will back up fro
   * `BOSH_CLIENT_SECRET` - BOSH Director password
   * `BOSH_CERT_PATH` - path to BOSH Director's CA cert
   * `BBR_BUILD_PATH` - path to BBR binary
+  * `DEFAULT_TIMEOUT_MINS` - timeout for commands run in the test. Defaults to 15 minutes.
 
 Currently it is recommended to have DRATS back up from and restore to the same environment.
 
