@@ -8,6 +8,7 @@ import (
 
 func OpenSourceTestCases() []runner.TestCase {
 	return []runner.TestCase{
+		NewRouterGroupTestCase(),
 		NewAppUptimeTestCase(),
 		NewCfAppTestCase(),
 		NewCfUaaTestCase(),
