@@ -25,9 +25,9 @@ var _ = Describe("backing up Cloud Foundry", func() {
 		AdminPassword:     mustHaveEnv("CF_ADMIN_PASSWORD"),
 		NFSServiceName:    mustHaveEnv("NFS_SERVICE_NAME"),
 		NFSPlanName:       mustHaveEnv("NFS_PLAN_NAME"),
-		NFSBrokerUser:     os.Getenv("NFS_BROKER_USER"),
-		NFSBrokerPassword: os.Getenv("NFS_BROKER_PASSWORD"),
-		NFSBrokerUrl:      os.Getenv("NFS_BROKER_URL"),
+		NFSBrokerUser:     mustHaveEnv("NFS_BROKER_USER"),
+		NFSBrokerPassword: mustHaveEnv("NFS_BROKER_PASSWORD"),
+		NFSBrokerUrl:      mustHaveEnv("NFS_BROKER_URL"),
 	}
 
 	configGetter := common.OSConfigGetter{
