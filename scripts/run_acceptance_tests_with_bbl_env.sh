@@ -1,7 +1,9 @@
 #!/bin/bash
 
+: "${CF_VARS_STORE_PATH:="cf-deployment-variables.yml"}"
+
 pushd $1
-    export CF_ADMIN_PASSWORD=$(bosh-cli interpolate --path /cf_admin_password cf-deployment-variables.yml)
+    export CF_ADMIN_PASSWORD=$(bosh-cli interpolate --path /cf_admin_password ${CF_VARS_STORE_PATH})
     export BOSH_CLIENT_SECRET=$(bbl director-password)
     export BOSH_CA_CERT="$(bbl director-ca-cert)"
     export BOSH_ENVIRONMENT=$(bosh-cli interpolate --path /external_ip <(bbl bosh-deployment-vars))
@@ -14,7 +16,7 @@ pushd $1
     export NFS_SERVICE_NAME="nfs"
     export NFS_PLAN_NAME="Existing"
     export NFS_BROKER_USER="nfs-broker"
-    export NFS_BROKER_PASSWORD=$(bosh-cli interpolate --path /nfs-broker-password cf-deployment-variables.yml)
+    export NFS_BROKER_PASSWORD=$(bosh-cli interpolate --path /nfs-broker-password ${CF_VARS_STORE_PATH})
     export NFS_BROKER_URL="http://nfs-broker.${CF_DOMAIN}"
 popd
 
