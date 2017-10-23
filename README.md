@@ -21,11 +21,11 @@ Tests if Cloud Foundry can be backed up and restored. The tests will back up fro
 
 Currently it is recommended to have DRATS back up from and restore to the same environment.
 
-### Focusing a test suite
+### Focusing/Skipping a test suite
 
-Run DRATS as usual but set the environment variable `FOCUSED_SUITE_NAME` set to the name of a test suite. Only that suite will be run.
+Run DRATS as usual but set the environment variable `FOCUSED_SUITE_NAME` and/or `SKIP_SUITE_NAME` to a regex matching the name(s) of test suites. Only those suites that either match `FOCUSED_SUITE_NAME` or don't match `SKIP_SUITE_NAME` will be run.  Leaving either of these unset is supported.
 
-If this variable is not set, all test suites returned by [`testcases.OpenSourceTestCases()`](https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/blob/master/testcases/testcase_helper.go#L9) will be run.
+If these variables are not set, all test suites returned by [`testcases.OpenSourceTestCases()`](https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/blob/master/testcases/testcase_helper.go#L9) will be run.
 
 ## Test Structure
 

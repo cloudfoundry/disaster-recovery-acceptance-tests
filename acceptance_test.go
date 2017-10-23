@@ -11,6 +11,10 @@ import (
 )
 
 var _ = Describe("backing up Cloud Foundry", func() {
+	focusedSuiteName := os.Getenv("FOCUSED_SUITE_NAME")
+	skipSuiteName := os.Getenv("SKIP_SUITE_NAME")
+	testCases := testcases.OpenSourceTestCasesWithRegexes(skipSuiteName, focusedSuiteName)
+
 	boshConfig := common.BoshConfig{
 		BoshURL:          mustHaveEnv("BOSH_ENVIRONMENT"),
 		BoshClient:       mustHaveEnv("BOSH_CLIENT"),
@@ -19,15 +23,18 @@ var _ = Describe("backing up Cloud Foundry", func() {
 	}
 
 	deploymentConfig := common.CloudFoundryConfig{
-		Name:              mustHaveEnv("CF_DEPLOYMENT_NAME"),
-		ApiUrl:            mustHaveEnv("CF_API_URL"),
-		AdminUsername:     mustHaveEnv("CF_ADMIN_USERNAME"),
-		AdminPassword:     mustHaveEnv("CF_ADMIN_PASSWORD"),
-		NFSServiceName:    mustHaveEnv("NFS_SERVICE_NAME"),
-		NFSPlanName:       mustHaveEnv("NFS_PLAN_NAME"),
-		NFSBrokerUser:     mustHaveEnv("NFS_BROKER_USER"),
-		NFSBrokerPassword: mustHaveEnv("NFS_BROKER_PASSWORD"),
-		NFSBrokerUrl:      mustHaveEnv("NFS_BROKER_URL"),
+		Name:          mustHaveEnv("CF_DEPLOYMENT_NAME"),
+		ApiUrl:        mustHaveEnv("CF_API_URL"),
+		AdminUsername: mustHaveEnv("CF_ADMIN_USERNAME"),
+		AdminPassword: mustHaveEnv("CF_ADMIN_PASSWORD"),
+	}
+
+	if containsTestCase(testCases, "cf-nfsbroker") {
+		deploymentConfig.NFSServiceName = mustHaveEnv("NFS_SERVICE_NAME")
+		deploymentConfig.NFSPlanName = mustHaveEnv("NFS_PLAN_NAME")
+		deploymentConfig.NFSBrokerUser = mustHaveEnv("NFS_BROKER_USER")
+		deploymentConfig.NFSBrokerPassword = mustHaveEnv("NFS_BROKER_PASSWORD")
+		deploymentConfig.NFSBrokerUrl = mustHaveEnv("NFS_BROKER_URL")
 	}
 
 	configGetter := common.OSConfigGetter{
@@ -35,18 +42,18 @@ var _ = Describe("backing up Cloud Foundry", func() {
 		BoshConfig:       boshConfig,
 	}
 
-	var testCases []runner.TestCase
-
-	focusedSuiteName := os.Getenv("FOCUSED_SUITE_NAME")
-	if focusedSuiteName != "" {
-		testCases = testcases.OpenSourceTestCasesWithFocus(focusedSuiteName)
-	} else {
-		testCases = testcases.OpenSourceTestCases()
-	}
-
 	runner.RunDisasterRecoveryAcceptanceTests(configGetter, testCases)
 })
 
+func containsTestCase(testCases []runner.TestCase, name string) bool {
+	for _, tc := range testCases {
+		if tc.Name() == name {
+			return true
+		}
+	}
+
+	return false
+}
 func mustHaveEnv(keyname string) string {
 	val := os.Getenv(keyname)
 	if val == "" {
