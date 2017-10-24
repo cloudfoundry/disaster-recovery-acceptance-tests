@@ -17,6 +17,7 @@ export BOSH_CLIENT_SECRET
 export BOSH_ENVIRONMENT
 export BBR_BUILD_PATH
 export FOCUSED_SUITE_NAME
+export SKIP_SUITE_NAME
 
 go get github.com/onsi/ginkgo/ginkgo
 glide install --strip-vendor
