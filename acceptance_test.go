@@ -32,9 +32,9 @@ var _ = Describe("backing up Cloud Foundry", func() {
 	if containsTestCase(testCases, "cf-nfsbroker") {
 		deploymentConfig.NFSServiceName = mustHaveEnv("NFS_SERVICE_NAME")
 		deploymentConfig.NFSPlanName = mustHaveEnv("NFS_PLAN_NAME")
-		deploymentConfig.NFSBrokerUser = mustHaveEnv("NFS_BROKER_USER")
-		deploymentConfig.NFSBrokerPassword = mustHaveEnv("NFS_BROKER_PASSWORD")
-		deploymentConfig.NFSBrokerUrl = mustHaveEnv("NFS_BROKER_URL")
+		deploymentConfig.NFSBrokerUser = os.Getenv("NFS_BROKER_USER")
+		deploymentConfig.NFSBrokerPassword = os.Getenv("NFS_BROKER_PASSWORD")
+		deploymentConfig.NFSBrokerUrl = os.Getenv("NFS_BROKER_URL")
 	}
 
 	configGetter := common.OSConfigGetter{
