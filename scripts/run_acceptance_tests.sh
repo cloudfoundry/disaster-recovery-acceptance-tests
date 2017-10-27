@@ -20,5 +20,5 @@ export FOCUSED_SUITE_NAME
 export SKIP_SUITE_NAME
 
 go get github.com/onsi/ginkgo/ginkgo
-glide install --strip-vendor
+dep ensure
 ginkgo -v -r --trace .

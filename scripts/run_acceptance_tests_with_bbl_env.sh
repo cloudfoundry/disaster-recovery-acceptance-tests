@@ -22,4 +22,3 @@ popd
 
 echo "Running DRATs locally"
 . ./scripts/run_acceptance_tests_local.sh
-
