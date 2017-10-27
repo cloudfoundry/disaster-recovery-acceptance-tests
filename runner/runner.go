@@ -2,8 +2,11 @@ package runner
 
 import (
 	"fmt"
+	"strconv"
 
 	"time"
+
+	"os"
 
 	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/common"
 	. "github.com/onsi/ginkgo"
@@ -19,9 +22,24 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 	BeforeEach(func() {
 		config = configGetter.FindConfig()
 
-		SetDefaultEventuallyTimeout(15 * time.Minute)
+		timeout := os.Getenv("DEFAULT_TIMEOUT_MINS")
+		if timeout != "" {
+			timeoutInt, err := strconv.Atoi(timeout)
+			SetDefaultEventuallyTimeout(time.Duration(timeoutInt) * time.Minute)
+			if err != nil {
+				panic(fmt.Sprint("DEFAULT_TIMEOUT_MINS, if set, must be an integer\n"))
+			}
+		} else {
+			SetDefaultEventuallyTimeout(15 * time.Minute)
+		}
+
 		uniqueTestID = RandomStringNumber()
 		testContext = NewTestContext(uniqueTestID, config.BoshConfig)
+
+		for _, testCase := range testCases {
+			err := os.Mkdir(cfHomeDir(testCase), 0700)
+			Expect(err).NotTo(HaveOccurred())
+		}
 	})
 
 	It("backups and restores a cf", func() {
@@ -31,6 +49,7 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 
 		// ### populate state in environment to be backed up
 		for _, testCase := range testCases {
+			os.Setenv("CF_HOME", cfHomeDir(testCase))
 			testCase.BeforeBackup(config)
 		}
 
@@ -49,6 +68,7 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 		Eventually(StatusCode(config.DeploymentToBackup.ApiUrl), 5*time.Minute).Should(Equal(200))
 
 		for _, testCase := range testCases {
+			os.Setenv("CF_HOME", cfHomeDir(testCase))
 			testCase.AfterBackup(config)
 		}
 
@@ -69,11 +89,24 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 
 		// ### check state in restored environment
 		for _, testCase := range testCases {
+			os.Setenv("CF_HOME", cfHomeDir(testCase))
 			testCase.AfterRestore(config)
 		}
 	})
 
 	AfterEach(func() {
+		By("running bbr backup-cleanup")
+		Eventually(RunCommandSuccessfully(fmt.Sprintf(
+			"cd %s && %s deployment --target %s --ca-cert %s --username %s --password %s --deployment %s backup-cleanup",
+			testContext.WorkspaceDir,
+			testContext.BinaryPath,
+			config.BoshConfig.BoshURL,
+			testContext.CertificatePath,
+			config.BoshConfig.BoshClient,
+			config.BoshConfig.BoshClientSecret,
+			config.DeploymentToBackup.Name,
+		))).Should(gexec.Exit(0))
+
 		//TODO: Can we delete this?
 		By("cleaning up the artifact")
 		Eventually(RunCommandSuccessfully(fmt.Sprintf("cd %s && rm -fr %s",
@@ -83,11 +116,21 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 
 		// ### clean up backup environment
 		for _, testCase := range testCases {
+			os.Setenv("CF_HOME", cfHomeDir(testCase))
 			testCase.Cleanup(config)
 		}
 
 		testContext.Cleanup()
+
+		for _, testCase := range testCases {
+			cfHomeDir := testCase.Name() + "-cf-home"
+			err := os.RemoveAll(cfHomeDir)
+			Expect(err).NotTo(HaveOccurred())
+		}
 	})
+}
+func cfHomeDir(testCase TestCase) string {
+	return testCase.Name() + "-cf-home"
 }
 
 func printDeploymentsAreDifferentWarning() {

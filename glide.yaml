@@ -1,9 +1,0 @@
-package: github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests
-import:
-- package: github.com/onsi/ginkgo
-- package: github.com/onsi/gomega
-  subpackages:
-  - gexec
-- package: gopkg.in/yaml.v1
-- package: github.com/smallfish/simpleyaml
-- package: github.com/totherme/unstructured

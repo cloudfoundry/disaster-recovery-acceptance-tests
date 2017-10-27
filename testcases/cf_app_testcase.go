@@ -48,8 +48,6 @@ func (tc *CfAppTestCase) AfterBackup(config Config) {
 
 func (tc *CfAppTestCase) AfterRestore(config Config) {
 	By("finding credentials for the deployment to restore")
-	RunCommandSuccessfully("cf api --skip-ssl-validation", config.DeploymentToRestore.ApiUrl)
-	RunCommandSuccessfully("cf auth", config.DeploymentToRestore.AdminUsername, config.DeploymentToRestore.AdminPassword)
 
 	By("verify orgs and spaces have been re-created")
 	RunCommandSuccessfully("cf org acceptance-test-org-" + tc.uniqueTestID)
@@ -70,8 +68,6 @@ func (tc *CfAppTestCase) Cleanup(config Config) {
 
 func (tc *CfAppTestCase) deletePushedApps(config Config) {
 	By("cleaning up orgs and spaces")
-	RunCommandSuccessfully("cf api --skip-ssl-validation", config.DeploymentToBackup.ApiUrl)
-	RunCommandSuccessfully("cf auth", config.DeploymentToBackup.AdminUsername, config.DeploymentToBackup.AdminPassword)
 	RunCommandSuccessfully("cf target -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf delete-space -f acceptance-test-space-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf delete-org -f acceptance-test-org-" + tc.uniqueTestID)
