@@ -15,9 +15,19 @@ Tests if Cloud Foundry can be backed up and restored. The tests will back up fro
   * `BOSH_ENVIRONMENT` - URL of BOSH Director which has deployed the above Cloud Foundries
   * `BOSH_CLIENT` - BOSH Director username
   * `BOSH_CLIENT_SECRET` - BOSH Director password
-  * `BOSH_CERT_PATH` - path to BOSH Director's CA cert
+  * `BOSH_CA_CERT` - BOSH Director's CA cert content
+  * `BOSH_GW_HOST` - Gateway host to use for BOSH SSH connection
+  * `BOSH_GW_USER` - Gateway user to use for BOSH SSH connection
+  * `BOSH_GW_PRIVATE_KEY_CONTENTS` - Private key to use for BOSH SSH connection
   * `BBR_BUILD_PATH` - path to BBR binary
   * `DEFAULT_TIMEOUT_MINS` - timeout for commands run in the test. Defaults to 15 minutes.
+1. The following environment variables are optional and could be set depending on test configuration:
+  * `SSH_DESTINATION_CIDR` - Default to "10.0.0.0/8"; change if your cf-deployment is deployed in a different internal network range
+  * `NFS_SERVICE_NAME` - Environment variable required to run NFS test case
+  * `NFS_PLAN_NAME` - Environment variable required to run NFS test case
+  * `NFS_BROKER_USER` - Environment variable required to run NFS test case
+  * `NFS_BROKER_PASSWORD` - Environment variable required to run NFS test case
+  * `NFS_BROKER_URL` - Environment variable required to run NFS test case
 
 Currently it is recommended to have DRATS back up from and restore to the same environment.
 
