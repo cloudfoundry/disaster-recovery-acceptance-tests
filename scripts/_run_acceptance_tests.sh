@@ -21,4 +21,4 @@ export SKIP_SUITE_NAME
 
 go get github.com/onsi/ginkgo/ginkgo
 dep ensure
-ginkgo -v -r --trace .
+ginkgo -v --trace acceptance

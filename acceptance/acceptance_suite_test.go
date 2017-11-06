@@ -1,4 +1,4 @@
-package disaster_recovery_acceptance_tests
+package acceptance
 
 import (
 	"testing"
