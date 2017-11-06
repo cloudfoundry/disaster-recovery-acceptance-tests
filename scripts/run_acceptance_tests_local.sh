@@ -49,6 +49,6 @@ export BBR_BUILD_PATH=$(which bbr)
 export BOSH_URL="${BOSH_ENVIRONMENT}"
 
 echo "Running DRATs..."
-. ./scripts/run_acceptance_tests.sh
+. ./scripts/_run_acceptance_tests.sh
 
 echo "Successfully ran DRATs!"

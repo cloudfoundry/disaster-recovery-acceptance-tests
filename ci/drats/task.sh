@@ -39,5 +39,5 @@ pushd bbr-binary-release
 popd
 
 pushd src/github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests
-  scripts/run_acceptance_tests.sh
+  scripts/_run_acceptance_tests.sh
 popd

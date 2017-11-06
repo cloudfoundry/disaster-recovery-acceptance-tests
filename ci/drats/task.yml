@@ -33,4 +33,4 @@ params:
   NFS_BROKER_URL:
 
 run:
-  path: src/github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/ci/drats/task
+  path: src/github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/ci/drats/task.sh
