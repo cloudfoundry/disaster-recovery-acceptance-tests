@@ -2,6 +2,30 @@
 
 
 [[projects]]
+  branch = "master"
+  name = "code.cloudfoundry.org/routing-api"
+  packages = [".","models"]
+  revision = "19a313d357db153fe852114558e66030de95d945"
+
+[[projects]]
+  branch = "master"
+  name = "code.cloudfoundry.org/trace-logger"
+  packages = ["."]
+  revision = "107ef08a939d5be6092ce2b5f171a16aba149cb2"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/bmizerany/pat"
+  packages = ["."]
+  revision = "6226ea591a40176dd3ff9cd8eff81ed6ca721a00"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/nu7hatch/gouuid"
+  packages = ["."]
+  revision = "179d4d0c4d8d407a32af483c2354df1d2c91e6c3"
+
+[[projects]]
   name = "github.com/onsi/ginkgo"
   packages = [".","config","internal/codelocation","internal/containernode","internal/failer","internal/leafnodes","internal/remote","internal/spec","internal/spec_iterator","internal/specrunner","internal/suite","internal/testingtproxy","internal/writer","reporters","reporters/stenographer","reporters/stenographer/support/go-colorable","reporters/stenographer/support/go-isatty","types"]
   revision = "8382b23d18dbaaff8e5f7e83784c53ebb8ec2f47"
@@ -11,6 +35,18 @@
   packages = [".","format","gbytes","gexec","internal/assertion","internal/asyncassertion","internal/oraclematcher","internal/testingtsupport","matchers","matchers/support/goraph/bipartitegraph","matchers/support/goraph/edge","matchers/support/goraph/node","matchers/support/goraph/util","types"]
   revision = "c893efa28eb45626cdaa76c9f653b62488858837"
   version = "v1.2.0"
+
+[[projects]]
+  name = "github.com/tedsuo/rata"
+  packages = ["."]
+  revision = "0649c23705dfb45a9693b668c4fc1c0666f485d9"
+  version = "v1.0.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/vito/go-sse"
+  packages = ["sse"]
+  revision = "fd69d275caac5d78d793e77ddbe9bd2001d9b88d"
 
 [[projects]]
   name = "golang.org/x/net"
@@ -35,6 +71,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e786ecd2fcf0180b701484153d8e6ea5f50a8a5acd3be59ff06035e619764a53"
+  inputs-digest = "674cf35c05e9ef96ee67350d83f2d2092337c13f833c8dcca0b2725968d95897"
   solver-name = "gps-cdcl"
   solver-version = 1
