@@ -32,7 +32,7 @@ func (tc *NFSTestCase) BeforeBackup(config Config) {
 		" -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf target -s acceptance-test-space-" + tc.uniqueTestID +
 		" -o acceptance-test-org-" + tc.uniqueTestID)
-	RunCommandSuccessfully("cf push dratsApp --docker-image docker/httpd --no-start --route-path " + tc.uniqueTestID)
+	RunCommandSuccessfully("cf push dratsApp --docker-image docker/httpd --no-start --random-route")
 
 	if config.DeploymentToBackup.NFSBrokerUser != "" {
 		RunCommandSuccessfully("cf create-service-broker " + "nfsbroker-drats-" + tc.uniqueTestID + " " +
