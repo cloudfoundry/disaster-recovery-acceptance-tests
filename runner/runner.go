@@ -18,8 +18,10 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 	var uniqueTestID string
 	var testContext *TestContext
 	var config Config
+	var backupRunning bool
 
 	BeforeEach(func() {
+		backupRunning = false
 		config = configGetter.FindConfig()
 
 		timeout := os.Getenv("DEFAULT_TIMEOUT_MINS")
@@ -53,6 +55,7 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 			testCase.BeforeBackup(config)
 		}
 
+		backupRunning = true
 		By("backing up " + config.DeploymentToBackup.Name)
 		Eventually(RunCommandSuccessfully(fmt.Sprintf(
 			"cd %s && %s deployment --target %s --ca-cert %s --username %s --password %s --deployment %s backup",
@@ -64,6 +67,7 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 			config.BoshConfig.BoshClientSecret,
 			config.DeploymentToBackup.Name,
 		))).Should(gexec.Exit(0))
+		backupRunning = false
 
 		Eventually(StatusCode(config.DeploymentToBackup.ApiUrl), 5*time.Minute).Should(Equal(200))
 
@@ -95,17 +99,19 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 	})
 
 	AfterEach(func() {
-		By("running bbr backup-cleanup")
-		Eventually(RunCommandSuccessfully(fmt.Sprintf(
-			"cd %s && %s deployment --target %s --ca-cert %s --username %s --password %s --deployment %s backup-cleanup",
-			testContext.WorkspaceDir,
-			testContext.BinaryPath,
-			config.BoshConfig.BoshURL,
-			testContext.CertificatePath,
-			config.BoshConfig.BoshClient,
-			config.BoshConfig.BoshClientSecret,
-			config.DeploymentToBackup.Name,
-		))).Should(gexec.Exit(0))
+		if backupRunning {
+			By("running bbr backup-cleanup")
+			Eventually(RunCommandSuccessfully(fmt.Sprintf(
+				"cd %s && %s deployment --target %s --ca-cert %s --username %s --password %s --deployment %s backup-cleanup",
+				testContext.WorkspaceDir,
+				testContext.BinaryPath,
+				config.BoshConfig.BoshURL,
+				testContext.CertificatePath,
+				config.BoshConfig.BoshClient,
+				config.BoshConfig.BoshClientSecret,
+				config.DeploymentToBackup.Name,
+			))).Should(gexec.Exit(0))
+		}
 
 		//TODO: Can we delete this?
 		By("cleaning up the artifact")
