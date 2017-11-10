@@ -12,6 +12,8 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"
+	"io/ioutil"
+	"path"
 )
 
 func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []TestCase) {
@@ -19,6 +21,8 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 	var testContext *TestContext
 	var config Config
 	var backupRunning bool
+	var cfHomeTmpDir string
+	var err error
 
 	BeforeEach(func() {
 		backupRunning = false
@@ -38,8 +42,11 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 		uniqueTestID = RandomStringNumber()
 		testContext = NewTestContext(uniqueTestID, config.BoshConfig)
 
+		cfHomeTmpDir, err = ioutil.TempDir("", "drats-cf-home")
+		Expect(err).NotTo(HaveOccurred())
+
 		for _, testCase := range testCases {
-			err := os.Mkdir(cfHomeDir(testCase), 0700)
+			err := os.Mkdir(cfHomeDir(cfHomeTmpDir,testCase), 0700)
 			Expect(err).NotTo(HaveOccurred())
 		}
 	})
@@ -51,7 +58,7 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 
 		// ### populate state in environment to be backed up
 		for _, testCase := range testCases {
-			os.Setenv("CF_HOME", cfHomeDir(testCase))
+			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir,testCase))
 			testCase.BeforeBackup(config)
 		}
 
@@ -72,7 +79,7 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 		Eventually(StatusCode(config.DeploymentToBackup.ApiUrl), 5*time.Minute).Should(Equal(200))
 
 		for _, testCase := range testCases {
-			os.Setenv("CF_HOME", cfHomeDir(testCase))
+			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir,testCase))
 			testCase.AfterBackup(config)
 		}
 
@@ -93,7 +100,7 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 
 		// ### check state in restored environment
 		for _, testCase := range testCases {
-			os.Setenv("CF_HOME", cfHomeDir(testCase))
+			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir,testCase))
 			testCase.AfterRestore(config)
 		}
 	})
@@ -122,7 +129,7 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 
 		// ### clean up backup environment
 		for _, testCase := range testCases {
-			os.Setenv("CF_HOME", cfHomeDir(testCase))
+			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir,testCase))
 			testCase.Cleanup(config)
 		}
 
@@ -135,8 +142,8 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 		}
 	})
 }
-func cfHomeDir(testCase TestCase) string {
-	return testCase.Name() + "-cf-home"
+func cfHomeDir(root string, testCase TestCase) string {
+	return path.Join(root, testCase.Name()+"-cf-home")
 }
 
 func printDeploymentsAreDifferentWarning() {

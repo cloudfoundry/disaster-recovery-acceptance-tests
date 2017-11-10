@@ -5,6 +5,7 @@ import (
 	"regexp"
 
 	"github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/runner"
+	"strings"
 )
 
 func OpenSourceTestCases() []runner.TestCase {
@@ -33,6 +34,7 @@ func OpenSourceTestCasesWithFocus(suiteName string) []runner.TestCase {
 // (Inspired by ginkgo's --skip and --focus flags)
 func OpenSourceTestCasesWithRegexes(skip, focus string) []runner.TestCase {
 	allCases := OpenSourceTestCases()
+
 	if skip == "" && focus == "" {
 		return allCases
 	}
@@ -64,9 +66,10 @@ func shouldSkipCase(skip, focus string, tc runner.TestCase) bool {
 	}
 
 	if skip != "" {
+		skip = strings.TrimSpace(skip)
 		skipFilter := regexp.MustCompile(skip)
 		matchesSkip = skipFilter.MatchString(caseName)
 	}
-
+	
 	return !matchesFocus || matchesSkip
 }
