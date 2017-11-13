@@ -64,7 +64,7 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 
 		backupRunning = true
 		By("backing up " + config.DeploymentToBackup.Name)
-		Eventually(RunCommandSuccessfully(fmt.Sprintf(
+		backupSess := RunCommandSuccessfully(fmt.Sprintf(
 			"cd %s && %s deployment --target %s --ca-cert %s --username %s --password %s --deployment %s backup",
 			testContext.WorkspaceDir,
 			testContext.BinaryPath,
@@ -73,7 +73,9 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 			config.BoshConfig.BoshClient,
 			config.BoshConfig.BoshClientSecret,
 			config.DeploymentToBackup.Name,
-		))).Should(gexec.Exit(0))
+		))
+		Eventually(backupSess).Should(gexec.Exit(), "`bbr backup` timed out")
+		Expect(backupSess.ExitCode()).To(BeZero(), "`bbr backup` exited with non-zero exit code")
 		backupRunning = false
 
 		Eventually(StatusCode(config.DeploymentToBackup.ApiUrl), 5*time.Minute).Should(Equal(200))
@@ -84,7 +86,7 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 		}
 
 		By("restoring to " + config.DeploymentToRestore.Name)
-		Eventually(RunCommandSuccessfully(fmt.Sprintf(
+		restoreSess := RunCommandSuccessfully(fmt.Sprintf(
 			"cd %s && %s deployment --target %s --ca-cert %s --username %s --password %s "+
 				"--deployment %s restore --artifact-path $(ls %s | grep %s | head -n 1)",
 			testContext.WorkspaceDir,
@@ -96,7 +98,9 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 			config.DeploymentToRestore.Name,
 			testContext.WorkspaceDir,
 			config.DeploymentToBackup.Name,
-		))).Should(gexec.Exit(0))
+		))
+		Eventually(restoreSess).Should(gexec.Exit(), "`bbr restore` timed out")
+		Expect(restoreSess.ExitCode()).To(BeZero(), "`bbr restore` exited with non-zero exit code")
 
 		// ### check state in restored environment
 		for _, testCase := range testCases {
