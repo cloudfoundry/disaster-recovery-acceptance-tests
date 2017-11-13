@@ -18,7 +18,7 @@ func NewTestContext(uniqueTestID string, boshConfig BoshConfig) *TestContext {
 	var bbrBuildPath = MustHaveEnv("BBR_BUILD_PATH")
 
 	By("setting up the test context")
-	Eventually(RunCommandSuccessfully("mkdir -p", testContext.WorkspaceDir, "&& chmod 0777", testContext.WorkspaceDir)).Should(gexec.Exit(0))
+	RunCommandSuccessfully("mkdir -p", testContext.WorkspaceDir, "&& chmod 0777", testContext.WorkspaceDir)
 	testContext.BinaryPath = bbrBuildPath
 	testContext.CertificatePath = boshConfig.BoshCertPath
 
