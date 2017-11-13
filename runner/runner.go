@@ -75,6 +75,7 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 			config.DeploymentToBackup.Name,
 		))
 		Eventually(backupSess).Should(gexec.Exit(), "`bbr backup` timed out")
+
 		Expect(backupSess.ExitCode()).To(BeZero(), "`bbr backup` exited with non-zero exit code")
 		backupRunning = false
 
@@ -110,9 +111,11 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 	})
 
 	AfterEach(func() {
+		var backupCleanupSession, artifactCleanupSession *gexec.Session
+		var removeHomeDirErr error
 		if backupRunning {
 			By("running bbr backup-cleanup")
-			Eventually(RunCommandSuccessfully(fmt.Sprintf(
+			backupCleanupSession = RunCommand(fmt.Sprintf(
 				"cd %s && %s deployment --target %s --ca-cert %s --username %s --password %s --deployment %s backup-cleanup",
 				testContext.WorkspaceDir,
 				testContext.BinaryPath,
@@ -121,29 +124,37 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 				config.BoshConfig.BoshClient,
 				config.BoshConfig.BoshClientSecret,
 				config.DeploymentToBackup.Name,
-			))).Should(gexec.Exit(0))
+			))
 		}
-
 		//TODO: Can we delete this?
 		By("cleaning up the artifact")
-		Eventually(RunCommandSuccessfully(fmt.Sprintf("cd %s && rm -fr %s",
+		artifactCleanupSession = RunCommand(fmt.Sprintf("cd %s && rm -fr %s",
 			testContext.WorkspaceDir,
 			config.DeploymentToRestore.Name,
-		))).Should(gexec.Exit(0))
+		))
 
-		// ### clean up backup environment
+		By("running the individual test-case cleanup commands")
 		for _, testCase := range testCases {
 			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir,testCase))
 			testCase.Cleanup(config)
 		}
 
-		testContext.Cleanup()
-
+		By("removing individual test-case cf-home directory")
 		for _, testCase := range testCases {
 			cfHomeDir := testCase.Name() + "-cf-home"
-			err := os.RemoveAll(cfHomeDir)
-			Expect(err).NotTo(HaveOccurred())
+			removeHomeDirErr = os.RemoveAll(cfHomeDir)
 		}
+
+		By("cleaning up the test context")
+		testContext.Cleanup()
+
+		if backupRunning {
+			Expect(backupCleanupSession).To(gexec.Exit(0))
+		}
+
+		Expect(artifactCleanupSession).To(gexec.Exit(0))
+		Expect(removeHomeDirErr).ToNot(HaveOccurred())
+
 	})
 }
 func cfHomeDir(root string, testCase TestCase) string {
