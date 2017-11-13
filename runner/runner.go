@@ -64,7 +64,9 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 
 		backupRunning = true
 		By("backing up " + config.DeploymentToBackup.Name)
-		backupSess := RunCommandSuccessfully(fmt.Sprintf(
+		RunCommandSuccessfullyWithFailureMessage(
+			"bbr deployment backup",
+			fmt.Sprintf(
 			"cd %s && %s deployment --target %s --ca-cert %s --username %s --password %s --deployment %s backup",
 			testContext.WorkspaceDir,
 			testContext.BinaryPath,
@@ -74,9 +76,6 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 			config.BoshConfig.BoshClientSecret,
 			config.DeploymentToBackup.Name,
 		))
-		Eventually(backupSess).Should(gexec.Exit(), "`bbr backup` timed out")
-
-		Expect(backupSess.ExitCode()).To(BeZero(), "`bbr backup` exited with non-zero exit code")
 		backupRunning = false
 
 		Eventually(StatusCode(config.DeploymentToBackup.ApiUrl), 5*time.Minute).Should(Equal(200))
@@ -87,7 +86,9 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 		}
 
 		By("restoring to " + config.DeploymentToRestore.Name)
-		restoreSess := RunCommandSuccessfully(fmt.Sprintf(
+		RunCommandSuccessfullyWithFailureMessage(
+			"bbr deployment restore",
+			fmt.Sprintf(
 			"cd %s && %s deployment --target %s --ca-cert %s --username %s --password %s "+
 				"--deployment %s restore --artifact-path $(ls %s | grep %s | head -n 1)",
 			testContext.WorkspaceDir,
@@ -100,8 +101,6 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 			testContext.WorkspaceDir,
 			config.DeploymentToBackup.Name,
 		))
-		Eventually(restoreSess).Should(gexec.Exit(), "`bbr restore` timed out")
-		Expect(restoreSess.ExitCode()).To(BeZero(), "`bbr restore` exited with non-zero exit code")
 
 		// ### check state in restored environment
 		for _, testCase := range testCases {
@@ -115,7 +114,9 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 		var removeHomeDirErr error
 		if backupRunning {
 			By("running bbr backup-cleanup")
-			backupCleanupSession = RunCommand(fmt.Sprintf(
+			backupCleanupSession = RunCommandWithFailureMessage(
+				"bbr deployment backup-cleanup",
+				fmt.Sprintf(
 				"cd %s && %s deployment --target %s --ca-cert %s --username %s --password %s --deployment %s backup-cleanup",
 				testContext.WorkspaceDir,
 				testContext.BinaryPath,

@@ -16,14 +16,20 @@ import (
 )
 
 func RunCommandSuccessfully(cmd string, args ...string) *gexec.Session {
-	session := runCommandWithStream(GinkgoWriter, GinkgoWriter, cmd, args...)
+	session := runCommandWithStream("", GinkgoWriter, GinkgoWriter, cmd, args...)
 	Expect(session).To(gexec.Exit(0))
+	return session
+}
+
+func RunCommandSuccessfullyWithFailureMessage(commandDescription, cmd string, args ...string) *gexec.Session {
+	session := runCommandWithStream(commandDescription, GinkgoWriter, GinkgoWriter, cmd, args...)
+	Expect(session).To(gexec.Exit(0), "Command errored: " + commandDescription)
 	return session
 }
 
 func RunCommandAndRetry(cmd string, retries int, args ...string) *gexec.Session {
 	for i := 0; i < retries; i++ {
-		session := runCommandWithStream(GinkgoWriter, GinkgoWriter, cmd, args...)
+		session := runCommandWithStream("", GinkgoWriter, GinkgoWriter, cmd, args...)
 		if session.ExitCode() == 0 {
 			return session
 		}
@@ -35,10 +41,14 @@ func RunCommandAndRetry(cmd string, retries int, args ...string) *gexec.Session 
 }
 
 func RunCommand(cmd string, args ...string) *gexec.Session {
-	return runCommandWithStream(GinkgoWriter, GinkgoWriter, cmd, args...)
+	return runCommandWithStream("", GinkgoWriter, GinkgoWriter, cmd, args...)
 }
 
-func runCommandWithStream(stdout, stderr io.Writer, cmd string, args ...string) *gexec.Session {
+func RunCommandWithFailureMessage(commandDescription string, cmd string, args ...string) *gexec.Session {
+	return runCommandWithStream(commandDescription, GinkgoWriter, GinkgoWriter, cmd, args...)
+}
+
+func runCommandWithStream(commandDescription string, stdout, stderr io.Writer, cmd string, args ...string) *gexec.Session {
 	cmdToRunArgs := strings.Join(args, " ")
 	cmdToRun := cmd + " " + cmdToRunArgs
 
@@ -46,12 +56,12 @@ func runCommandWithStream(stdout, stderr io.Writer, cmd string, args ...string) 
 	session, err := gexec.Start(command, stdout, stderr)
 
 	Expect(err).ToNot(HaveOccurred())
-	Eventually(session).Should(gexec.Exit())
+	Eventually(session).Should(gexec.Exit(), "Command timed out: " + commandDescription)
 	return session
 }
 
 func DownloadManifest(deploymentName string, boshConfig BoshConfig) string {
-	session := runCommandWithStream(bytes.NewBufferString(""), GinkgoWriter, join(
+	session := runCommandWithStream("", bytes.NewBufferString(""), GinkgoWriter, join(
 		BoshCommand(boshConfig),
 		forDeployment(deploymentName),
 		"manifest",
