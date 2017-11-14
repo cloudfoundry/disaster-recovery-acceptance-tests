@@ -16,6 +16,7 @@ func OpenSourceTestCases() []runner.TestCase {
 		NewCfUaaTestCase(),
 		NewCfNetworkingTestCase(),
 		NewNFSTestCases(),
+		NewCfCredhubSSITestCase(),
 	}
 }
 
