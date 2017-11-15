@@ -21,7 +21,7 @@ func NewCfCredhubSSITestCase() *CfCredhubSSITestCase {
 	id := RandomStringNumber()
 	return &CfCredhubSSITestCase{
 		uniqueTestID:  id,
-		name:          "cf-ch-ssi",
+		name:          "cf-credhub",
 		svcName:       "service",
 		svcInstance:   "instance",
 		brokerName:    "broker",
@@ -35,6 +35,9 @@ func (tc *CfCredhubSSITestCase) Name() string {
 }
 
 func (tc *CfCredhubSSITestCase) BeforeBackup(config Config) {
+	cmdResponse := RunCommandSuccessfully("cf running-environment-variable-group").Out.Contents()
+	Expect(cmdResponse).To(ContainSubstring("CREDHUB_API"))
+
 	RunCommandSuccessfully("cf api --skip-ssl-validation", config.DeploymentToBackup.ApiUrl)
 	RunCommandSuccessfully("cf auth", config.DeploymentToBackup.AdminUsername, config.DeploymentToBackup.AdminPassword)
 	RunCommandSuccessfully("cf create-org acceptance-test-org-" + tc.uniqueTestID)
