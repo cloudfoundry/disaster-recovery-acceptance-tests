@@ -3,9 +3,10 @@ package testcases
 import (
 	"path"
 
+	"strings"
+
 	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/common"
 	. "github.com/onsi/gomega"
-	"strings"
 )
 
 type CfCredhubSSITestCase struct {
@@ -23,11 +24,11 @@ func NewCfCredhubSSITestCase() *CfCredhubSSITestCase {
 	return &CfCredhubSSITestCase{
 		uniqueTestID:  id,
 		name:          "cf-credhub",
-		svcName:       "service",
-		svcInstance:   "instance",
-		brokerName:    "broker",
-		appName:       "app",
-		secondAppName: "second-app",
+		svcName:       "service" + id,
+		svcInstance:   "instance" + id,
+		brokerName:    "broker" + id,
+		appName:       "app" + id,
+		secondAppName: "second-app" + id,
 	}
 }
 
@@ -39,7 +40,7 @@ func (tc *CfCredhubSSITestCase) BeforeBackup(config Config) {
 	RunCommandSuccessfully("cf api --skip-ssl-validation", config.DeploymentToBackup.ApiUrl)
 	RunCommandSuccessfully("cf auth", config.DeploymentToBackup.AdminUsername, config.DeploymentToBackup.AdminPassword)
 	cmdResponse := RunCommandSuccessfully("cf running-environment-variable-group").Out.Contents()
-	if !strings.Contains(string(cmdResponse),"CREDHUB_API") {
+	if !strings.Contains(string(cmdResponse), "CREDHUB_API") {
 		RunCommandSuccessfully("cf set-running-environment-variable-group '{ \"CREDHUB_API\": \"https://credhub.service.cf.internal:8844\"}'")
 	}
 	RunCommandSuccessfully("cf create-org acceptance-test-org-" + tc.uniqueTestID)
