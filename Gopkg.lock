@@ -20,6 +20,18 @@
   revision = "6226ea591a40176dd3ff9cd8eff81ed6ca721a00"
 
 [[projects]]
+  name = "github.com/gorilla/context"
+  packages = ["."]
+  revision = "1ea25387ff6f684839d82767c1733ff4d4d15d0a"
+  version = "v1.1"
+
+[[projects]]
+  name = "github.com/gorilla/mux"
+  packages = ["."]
+  revision = "7f08801859139f86dfafd1c296e2cba9a80d292e"
+  version = "v1.6.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/nu7hatch/gouuid"
   packages = ["."]
@@ -35,6 +47,12 @@
   packages = [".","format","gbytes","gexec","internal/assertion","internal/asyncassertion","internal/oraclematcher","internal/testingtsupport","matchers","matchers/support/goraph/bipartitegraph","matchers/support/goraph/edge","matchers/support/goraph/node","matchers/support/goraph/util","types"]
   revision = "c893efa28eb45626cdaa76c9f653b62488858837"
   version = "v1.2.0"
+
+[[projects]]
+  name = "github.com/satori/go.uuid"
+  packages = ["."]
+  revision = "879c5887cd475cd7864858769793b2ceb0d44feb"
+  version = "v1.1.0"
 
 [[projects]]
   name = "github.com/tedsuo/rata"
@@ -71,6 +89,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "674cf35c05e9ef96ee67350d83f2d2092337c13f833c8dcca0b2725968d95897"
+  inputs-digest = "c83945556c539f6ea1d1cf6792ff79b3f689fa405b9d9251ab5c1f406c79d4b4"
   solver-name = "gps-cdcl"
   solver-version = 1
