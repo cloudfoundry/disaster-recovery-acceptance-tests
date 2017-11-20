@@ -9,28 +9,12 @@ inputs:
 - name: disaster-recovery-acceptance-tests
   path: src/github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests
 - name: bbr-binary-release
+- name: drats-integration-config
 
 params:
-  CF_DEPLOYMENT_NAME:
-  CF_ADMIN_USERNAME:
-  CF_ADMIN_PASSWORD:
-  CF_API_URL:
-  BOSH_CLIENT:
-  BOSH_CLIENT_SECRET:
-  BOSH_CA_CERT:
-  BOSH_ENVIRONMENT:
-  BOSH_GW_USER:
-  BOSH_GW_HOST:
-  BOSH_GW_PRIVATE_KEY:
-  SSH_DESTINATION_CIDR:
-  FOCUSED_SUITE_NAME:
+  CONFIG_FILE_PATH: drats_integration_config.json
+  DEFAULT_TIMEOUT_MINS: 15
   SKIP_SUITE_NAME:
-  DEFAULT_TIMEOUT_MINS:
-  NFS_SERVICE_NAME:
-  NFS_PLAN_NAME:
-  NFS_BROKER_USER:
-  NFS_BROKER_PASSWORD:
-  NFS_BROKER_URL:
 
 run:
   path: src/github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/ci/drats/task.sh

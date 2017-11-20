@@ -16,17 +16,15 @@ import (
 	"path"
 )
 
-func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []TestCase) {
+func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 	var uniqueTestID string
 	var testContext *TestContext
-	var config Config
 	var backupRunning bool
 	var cfHomeTmpDir string
 	var err error
 
 	BeforeEach(func() {
 		backupRunning = false
-		config = configGetter.FindConfig()
 
 		timeout := os.Getenv("DEFAULT_TIMEOUT_MINS")
 		if timeout != "" {
@@ -40,7 +38,8 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 		}
 
 		uniqueTestID = RandomStringNumber()
-		testContext = NewTestContext(uniqueTestID, config.BoshConfig)
+		testContext, err = NewTestContext(uniqueTestID, config.BoshConfig)
+		Expect(err).NotTo(HaveOccurred())
 
 		cfHomeTmpDir, err = ioutil.TempDir("", "drats-cf-home")
 		Expect(err).NotTo(HaveOccurred())
@@ -64,6 +63,7 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 
 		backupRunning = true
 		By("backing up " + config.DeploymentToBackup.Name)
+		fmt.Printf("config is: %#v\n", config)
 		RunCommandSuccessfullyWithFailureMessage(
 			"bbr deployment backup",
 			fmt.Sprintf(

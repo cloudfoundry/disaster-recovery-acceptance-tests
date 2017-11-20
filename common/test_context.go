@@ -2,6 +2,7 @@ package common
 
 import (
 	. "github.com/onsi/ginkgo"
+	"io/ioutil"
 )
 
 type TestContext struct {
@@ -10,7 +11,7 @@ type TestContext struct {
 	CertificatePath string
 }
 
-func NewTestContext(uniqueTestID string, boshConfig BoshConfig) *TestContext {
+func NewTestContext(uniqueTestID string, boshConfig BoshConfig) (*TestContext, error) {
 	testContext := TestContext{}
 	testContext.WorkspaceDir = "/tmp/backup_workspace" + uniqueTestID
 	var bbrBuildPath = MustHaveEnv("BBR_BUILD_PATH")
@@ -22,12 +23,30 @@ func NewTestContext(uniqueTestID string, boshConfig BoshConfig) *TestContext {
 		"&& chmod 0777",
 		testContext.WorkspaceDir)
 	testContext.BinaryPath = bbrBuildPath
-	testContext.CertificatePath = boshConfig.BoshCertPath
 
-	return &testContext
+	var err error
+	testContext.CertificatePath, err = writeBoshCaCertToFile(testContext.WorkspaceDir, boshConfig.BoshCaCert)
+
+	return &testContext, err
 }
 
 func (testContext *TestContext) Cleanup() {
 	By("remove workspace directory")
 	RunCommandSuccessfullyWithFailureMessage("removing workspace directory", "rm -rf", testContext.WorkspaceDir)
+}
+
+func writeBoshCaCertToFile(tmpDir, boshCaCert string) (string, error) {
+	dir, err := ioutil.TempDir(tmpDir, "drats")
+	if err != nil {
+		return "", err
+	}
+
+	boshCaCertFile, err := ioutil.TempFile(dir, "boshca")
+	if err != nil {
+		return "", err
+	}
+
+	_, err = boshCaCertFile.WriteString(boshCaCert)
+
+	return boshCaCertFile.Name(), err
 }

@@ -2,22 +2,12 @@
 
 set -eu
 
-export CF_DEPLOYMENT_NAME
-export CF_ADMIN_USERNAME
-export CF_ADMIN_PASSWORD
-export CF_API_URL
-export BOSH_CLIENT
-export BOSH_CLIENT_SECRET
-export BOSH_CA_CERT
-export BOSH_ENVIRONMENT
-export NFS_SERVICE_NAME
-export NFS_PLAN_NAME
-export NFS_BROKER_USER
-export NFS_BROKER_PASSWORD
-export NFS_BROKER_URL
+export CONFIG="$PWD/drats-integration-config/${CONFIG_FILE_PATH}"
 
 export GOPATH=$PWD
 export PATH=$PATH:$GOPATH/bin
+export DEFAULT_TIMEOUT_MINS
+export SKIP_SUITE_NAME
 
 eval "$(ssh-agent)"
 
@@ -29,9 +19,6 @@ ssh-add ssh.pem
 sshuttle -r "${BOSH_GW_USER}@${BOSH_GW_HOST}" "${SSH_DESTINATION_CIDR}" --daemon -e 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
 
 sleep 5
-
-echo "$BOSH_CA_CERT" > bosh.cert
-export BOSH_CERT_PATH=`pwd`/bosh.cert
 
 pushd bbr-binary-release
   tar xvf *.tar
