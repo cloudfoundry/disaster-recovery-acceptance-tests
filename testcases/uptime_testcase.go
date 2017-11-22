@@ -79,7 +79,7 @@ func checkApiGoesDown(apiUrl string) (chan<- bool, <-chan bool) {
 				valueApiWasDown <- apiWasDown
 				return
 			case <-tickerChannel:
-				if RunCommand("curl", "-k", "--fail", apiUrl, "> /dev/null").ExitCode() == CURL_ERROR_FOR_404 {
+				if RunCommand("curl", "-k", "--fail", apiUrl, " 2>/dev/null > /dev/null").ExitCode() == CURL_ERROR_FOR_404 {
 					apiWasDown = true
 					ticker.Stop()
 				}
