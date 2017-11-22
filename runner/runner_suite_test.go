@@ -1,4 +1,4 @@
-package testcases_test
+package runner_test
 
 import (
 	. "github.com/onsi/ginkgo"
@@ -9,5 +9,5 @@ import (
 
 func TestTestcases(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Testcases Suite")
+	RunSpecs(t, "Runner Suite")
 }

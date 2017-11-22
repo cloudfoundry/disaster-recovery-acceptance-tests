@@ -6,7 +6,7 @@ import (
 	"path"
 	"time"
 
-	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/common"
+	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/runner"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

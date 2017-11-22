@@ -1,4 +1,4 @@
-package common
+package runner
 
 type CloudFoundryConfig struct {
 	Name                              string
@@ -28,18 +28,5 @@ type Config struct {
 }
 
 type ConfigGetter interface {
-	FindConfig() Config
-}
-
-type OSConfigGetter struct {
-	DeploymentConfig CloudFoundryConfig
-	BoshConfig       BoshConfig
-}
-
-func (configGetter OSConfigGetter) FindConfig() Config {
-	return Config{
-		DeploymentToBackup:  configGetter.DeploymentConfig,
-		DeploymentToRestore: configGetter.DeploymentConfig,
-		BoshConfig:          configGetter.BoshConfig,
-	}
+	FindConfig([]TestCase) Config
 }

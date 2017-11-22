@@ -8,7 +8,6 @@ import (
 
 	"os"
 
-	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/common"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"
@@ -23,10 +22,19 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 	var backupRunning bool
 	var cfHomeTmpDir string
 	var err error
+	var filteredTestCases []TestCase
 
 	BeforeEach(func() {
+		focusedSuiteName := os.Getenv("FOCUSED_SUITE_NAME")
+		skipSuiteName := os.Getenv("SKIP_SUITE_NAME")
+		filteredTestCases = FilterTestCasesWithRegexes(testCases, skipSuiteName, focusedSuiteName)
+		fmt.Println("Running testcases:")
+		for _, testCase := range filteredTestCases {
+			fmt.Println(testCase.Name())
+		}
+
 		backupRunning = false
-		config = configGetter.FindConfig()
+		config = configGetter.FindConfig(filteredTestCases)
 
 		timeout := os.Getenv("DEFAULT_TIMEOUT_MINS")
 		if timeout != "" {
@@ -45,8 +53,8 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 		cfHomeTmpDir, err = ioutil.TempDir("", "drats-cf-home")
 		Expect(err).NotTo(HaveOccurred())
 
-		for _, testCase := range testCases {
-			err := os.Mkdir(cfHomeDir(cfHomeTmpDir,testCase), 0700)
+		for _, testCase := range filteredTestCases {
+			err := os.Mkdir(cfHomeDir(cfHomeTmpDir, testCase), 0700)
 			Expect(err).NotTo(HaveOccurred())
 		}
 	})
@@ -57,8 +65,8 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 		}
 
 		// ### populate state in environment to be backed up
-		for _, testCase := range testCases {
-			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir,testCase))
+		for _, testCase := range filteredTestCases {
+			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir, testCase))
 			testCase.BeforeBackup(config)
 		}
 
@@ -67,21 +75,21 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 		RunCommandSuccessfullyWithFailureMessage(
 			"bbr deployment backup",
 			fmt.Sprintf(
-			"cd %s && %s deployment --target %s --ca-cert %s --username %s --password %s --deployment %s backup",
-			testContext.WorkspaceDir,
-			testContext.BinaryPath,
-			config.BoshConfig.BoshURL,
-			testContext.CertificatePath,
-			config.BoshConfig.BoshClient,
-			config.BoshConfig.BoshClientSecret,
-			config.DeploymentToBackup.Name,
-		))
+				"cd %s && %s deployment --target %s --ca-cert %s --username %s --password %s --deployment %s backup",
+				testContext.WorkspaceDir,
+				testContext.BinaryPath,
+				config.BoshConfig.BoshURL,
+				testContext.CertificatePath,
+				config.BoshConfig.BoshClient,
+				config.BoshConfig.BoshClientSecret,
+				config.DeploymentToBackup.Name,
+			))
 		backupRunning = false
 
 		Eventually(StatusCode(config.DeploymentToBackup.ApiUrl), 5*time.Minute).Should(Equal(200))
 
-		for _, testCase := range testCases {
-			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir,testCase))
+		for _, testCase := range filteredTestCases {
+			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir, testCase))
 			testCase.AfterBackup(config)
 		}
 
@@ -89,22 +97,22 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 		RunCommandSuccessfullyWithFailureMessage(
 			"bbr deployment restore",
 			fmt.Sprintf(
-			"cd %s && %s deployment --target %s --ca-cert %s --username %s --password %s "+
-				"--deployment %s restore --artifact-path $(ls %s | grep %s | head -n 1)",
-			testContext.WorkspaceDir,
-			testContext.BinaryPath,
-			config.BoshConfig.BoshURL,
-			testContext.CertificatePath,
-			config.BoshConfig.BoshClient,
-			config.BoshConfig.BoshClientSecret,
-			config.DeploymentToRestore.Name,
-			testContext.WorkspaceDir,
-			config.DeploymentToBackup.Name,
-		))
+				"cd %s && %s deployment --target %s --ca-cert %s --username %s --password %s "+
+					"--deployment %s restore --artifact-path $(ls %s | grep %s | head -n 1)",
+				testContext.WorkspaceDir,
+				testContext.BinaryPath,
+				config.BoshConfig.BoshURL,
+				testContext.CertificatePath,
+				config.BoshConfig.BoshClient,
+				config.BoshConfig.BoshClientSecret,
+				config.DeploymentToRestore.Name,
+				testContext.WorkspaceDir,
+				config.DeploymentToBackup.Name,
+			))
 
 		// ### check state in restored environment
-		for _, testCase := range testCases {
-			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir,testCase))
+		for _, testCase := range filteredTestCases {
+			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir, testCase))
 			testCase.AfterRestore(config)
 		}
 	})
@@ -117,15 +125,15 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 			backupCleanupSession = RunCommandWithFailureMessage(
 				"bbr deployment backup-cleanup",
 				fmt.Sprintf(
-				"cd %s && %s deployment --target %s --ca-cert %s --username %s --password %s --deployment %s backup-cleanup",
-				testContext.WorkspaceDir,
-				testContext.BinaryPath,
-				config.BoshConfig.BoshURL,
-				testContext.CertificatePath,
-				config.BoshConfig.BoshClient,
-				config.BoshConfig.BoshClientSecret,
-				config.DeploymentToBackup.Name,
-			))
+					"cd %s && %s deployment --target %s --ca-cert %s --username %s --password %s --deployment %s backup-cleanup",
+					testContext.WorkspaceDir,
+					testContext.BinaryPath,
+					config.BoshConfig.BoshURL,
+					testContext.CertificatePath,
+					config.BoshConfig.BoshClient,
+					config.BoshConfig.BoshClientSecret,
+					config.DeploymentToBackup.Name,
+				))
 		}
 		//TODO: Can we delete this?
 		By("cleaning up the artifact")
@@ -135,15 +143,14 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 		))
 
 		By("running the individual test-case cleanup commands")
-		for _, testCase := range testCases {
-			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir,testCase))
+		for _, testCase := range filteredTestCases {
+			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir, testCase))
 			testCase.Cleanup(config)
 		}
 
 		By("removing individual test-case cf-home directory")
-		for _, testCase := range testCases {
-			cfHomeDir := testCase.Name() + "-cf-home"
-			removeHomeDirErr = os.RemoveAll(cfHomeDir)
+		for _, testCase := range filteredTestCases {
+			removeHomeDirErr = os.RemoveAll(cfHomeDir(cfHomeTmpDir, testCase))
 		}
 
 		By("cleaning up the test context")

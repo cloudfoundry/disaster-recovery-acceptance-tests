@@ -5,7 +5,7 @@ import (
 
 	"code.cloudfoundry.org/routing-api"
 	"code.cloudfoundry.org/routing-api/models"
-	"github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/common"
+	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/runner"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -32,7 +32,7 @@ type CfRouterGroupTestCase struct {
 
 // NewRouterGroupTestCase creates an instance with random id.
 func NewRouterGroupTestCase() *CfRouterGroupTestCase {
-	id := common.RandomStringNumber()
+	id := RandomStringNumber()
 	return &CfRouterGroupTestCase{
 		uniqueTestID: id,
 		name:         "cf-routing",
@@ -49,7 +49,7 @@ func (tc *CfRouterGroupTestCase) Name() string {
 //
 // It also spawns a goroutine to check that reads are always available during
 // the backup.
-func (tc *CfRouterGroupTestCase) BeforeBackup(config common.Config) {
+func (tc *CfRouterGroupTestCase) BeforeBackup(config Config) {
 	By("Getting CF OAuth Token")
 	token := loginAndGetToken(config)
 	By("Creating a pre-backup router group backup")
@@ -69,7 +69,7 @@ func (tc *CfRouterGroupTestCase) BeforeBackup(config common.Config) {
 //
 // It also spawns a goroutine to check that reads are not available during
 // the restore operation after AfterBackup is called.
-func (tc *CfRouterGroupTestCase) AfterBackup(config common.Config) {
+func (tc *CfRouterGroupTestCase) AfterBackup(config Config) {
 	By("Getting CF OAuth Token")
 	token := refreshToken()
 
@@ -91,7 +91,7 @@ func (tc *CfRouterGroupTestCase) AfterBackup(config common.Config) {
 //
 // It verifies that the goroutine spawned in AfterBackup verified that reads
 // were not always available during the restore.
-func (tc *CfRouterGroupTestCase) AfterRestore(config common.Config) {
+func (tc *CfRouterGroupTestCase) AfterRestore(config Config) {
 	By("Getting CF OAuth Token")
 	token := refreshToken()
 
@@ -102,16 +102,16 @@ func (tc *CfRouterGroupTestCase) AfterRestore(config common.Config) {
 }
 
 // Cleanup is called at the end to remove the test artifacts left behind.
-func (tc *CfRouterGroupTestCase) Cleanup(config common.Config) {
+func (tc *CfRouterGroupTestCase) Cleanup(config Config) {
 }
 
-func loginAndGetToken(config common.Config) string {
-	common.RunCommandSuccessfully("cf login --skip-ssl-validation -a", config.DeploymentToBackup.ApiUrl, "-u", config.DeploymentToBackup.AdminUsername, "-p", config.DeploymentToBackup.AdminPassword)
+func loginAndGetToken(config Config) string {
+	RunCommandSuccessfully("cf login --skip-ssl-validation -a", config.DeploymentToBackup.ApiUrl, "-u", config.DeploymentToBackup.AdminUsername, "-p", config.DeploymentToBackup.AdminPassword)
 	return refreshToken()
 }
 
 func refreshToken() string {
-	token := string(common.RunCommandSuccessfully("cf oauth-token").Out.Contents()[:])
+	token := string(RunCommandSuccessfully("cf oauth-token").Out.Contents()[:])
 	token = strings.Split(token, " ")[1]
 	token = strings.Trim(token, "\r\n\t ")
 	return token
