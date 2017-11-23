@@ -78,3 +78,10 @@ The methods that need to be implemented are `BeforeBackup(common.Config)`, `Afte
 ## Running DRATs in your CI
 
 We have shared a [task](https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/tree/master/ci/drats) to run DRATS with your CI. The task establishes an SSH tunnel using [`sshuttle`](http://sshuttle.readthedocs.io) so that it can run from outside the network. Note that this task needs a privileged container.
+
+## Debugging your DRATS run
+
+DRATS runs multiple interwoven test cases (for app uptime and each of the components under test) so it can be a little tricky to work out what's gone wrong when there's an error or failure. Here are some tips on investigating DRATS failures - please PR in additions to this doc if you think of more tips that might help other teams!
+
+1. The `bbr backup-cleanup` command runs if the test run errored during the `bbr backup` step. If you see an error in the `backup-cleanup` step, it's likely that a similar problem happened in the `backup` step which caused the original failure - scroll up to see.
+1. The easiest way to see where the failure / error happened is to look for the nearest `STEP` statement in the logs
