@@ -58,7 +58,7 @@ func (tc *CfCredhubSSITestCase) BeforeBackup(config Config) {
 	RunCommandSuccessfully("cf create-service " + tc.svcName + " credhub-read-plan " + tc.svcInstance)
 
 	var testAppPath = path.Join(CurrentTestDir(), "/../fixtures/credhub_enabled_app/credhub-enabled-app.jar")
-	RunCommandSuccessfully("cf push " + tc.appName + " -p " + testAppPath + " --no-start" + " -b java_buildpack" + " -n " + tc.appName)
+	RunCommandSuccessfully("cf push " + tc.appName + " -p " + testAppPath + " --no-start" + " -n " + tc.appName)
 	RunCommandSuccessfully("cf set-env " + tc.appName + " SERVICE_NAME " + tc.svcName)
 	RunCommandSuccessfully("cf bind-service " + tc.appName + " " + tc.svcInstance)
 	RunCommandSuccessfully("cf start " + tc.appName)
@@ -68,7 +68,7 @@ func (tc *CfCredhubSSITestCase) BeforeBackup(config Config) {
 	Expect(appResponse).To(ContainSubstring("pinkyPie"))
 	Expect(appResponse).To(ContainSubstring("rainbowDash"))
 
-	RunCommandSuccessfully("cf push " + tc.secondAppName + " -p " + testAppPath + " -b java_buildpack" + " -n " + tc.secondAppName)
+	RunCommandSuccessfully("cf push " + tc.secondAppName + " -p " + testAppPath + " -n " + tc.secondAppName)
 }
 
 func (tc *CfCredhubSSITestCase) AfterBackup(config Config) {
