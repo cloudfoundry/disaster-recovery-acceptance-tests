@@ -43,12 +43,15 @@ If these variables are not set, all test suites returned by [`testcases.OpenSour
 
 The system tests do the following:
 
+1. Sets up a temporary local working directory for storing the backup artifact, and CF_HOME directories for all the test cases.
 1. Calls `BeforeBackup(common.Config)` on all provided TestCases (to e.g. push unique apps to the environment to be backed up).
 1. Backs up the `CF_DEPLOYMENT_NAME` Cloud Foundry deployment.
 1. Calls `AfterBackup(common.Config)` on all provided TestCases.
 1. Restores to the `CF_DEPLOYMENT_NAME` Cloud Foundry deployment.
 1. Calls `AfterRestore(common.Config)` on all provided TestCases (to e.g. check the apps pushed are present in the restored environment).
-1. Calls `Cleanup(common.Config)` on all provided TestCases (to e.g. clean up the apps from the backup environment).
+1. Calls `Cleanup(common.Config)` on all provided TestCases (to e.g. clean up the apps from the backup environment). It will do this even if an error or failure occurred in a previous step
+1. Cleans up the temporary directories created in the setup
+1. If an error occurred during a `bbr backup` command, DRATS runs `bbr backup-cleanup` to remove temporary bbr artifacts from your deployment (which would otherwise cause subsequent DRATS runs to fail)
 
 ## Extending DRATS
 
