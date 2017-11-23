@@ -35,7 +35,7 @@ Tests if Cloud Foundry can be backed up and restored. The tests will back up fro
 
 ### Focusing/Skipping a test suite
 
-Run DRATS as usual but set the environment variable `FOCUSED_SUITE_NAME` and/or `SKIP_SUITE_NAME` to a regex matching the name(s) of test suites. Only those suites that either match `FOCUSED_SUITE_NAME` or don't match `SKIP_SUITE_NAME` will be run.  Leaving either of these unset is supported.
+Run DRATS as usual but set the environment variable `FOCUSED_SUITE_NAME` and/or `SKIP_SUITE_NAME` to a regex matching the name(s) of test suites. Only those suites that either match `FOCUSED_SUITE_NAME` or don't match `SKIP_SUITE_NAME` will be run.  Leaving either of these unset is supported. (Note that at the moment it is not possible to use the `SKIP_SUITE_NAME` parameter with `run_acceptance_tests_with_bbl_env.sh` if NFS is not configured, as in the absence of the optional NFS environment variables the `SKIP_SUITE_NAME` environment variable is overridden in that script).
 
 If these variables are not set, all test suites returned by [`testcases.OpenSourceTestCases()`](https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/blob/master/testcases/testcase_helper.go#L9) will be run.
 
