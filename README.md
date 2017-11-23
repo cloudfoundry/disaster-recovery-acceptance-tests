@@ -35,7 +35,7 @@ Tests if Cloud Foundry can be backed up and restored. The tests will back up fro
 
 ### Focusing/Skipping a test suite
 
-Run DRATS as usual but set the environment variable `FOCUSED_SUITE_NAME` and/or `SKIP_SUITE_NAME` to a regex matching the name(s) of test suites. Only those suites that either match `FOCUSED_SUITE_NAME` or don't match `SKIP_SUITE_NAME` will be run.  Leaving either of these unset is supported.
+Run DRATS as usual but set the environment variable `FOCUSED_SUITE_NAME` and/or `SKIP_SUITE_NAME` to a regex matching the name(s) of test suites. Only those suites that either match `FOCUSED_SUITE_NAME` or don't match `SKIP_SUITE_NAME` will be run.  Leaving either of these unset is supported. (Note that at the moment it is not possible to use the `SKIP_SUITE_NAME` parameter with `run_acceptance_tests_with_bbl_env.sh` if NFS is not configured, as in the absence of the optional NFS environment variables the `SKIP_SUITE_NAME` environment variable is overridden in that script).
 
 If these variables are not set, all test suites returned by [`testcases.OpenSourceTestCases()`](https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/blob/master/testcases/testcase_helper.go#L9) will be run.
 
@@ -43,12 +43,15 @@ If these variables are not set, all test suites returned by [`testcases.OpenSour
 
 The system tests do the following:
 
+1. Sets up a temporary local working directory for storing the backup artifact, and CF_HOME directories for all the test cases.
 1. Calls `BeforeBackup(common.Config)` on all provided TestCases (to e.g. push unique apps to the environment to be backed up).
 1. Backs up the `CF_DEPLOYMENT_NAME` Cloud Foundry deployment.
 1. Calls `AfterBackup(common.Config)` on all provided TestCases.
 1. Restores to the `CF_DEPLOYMENT_NAME` Cloud Foundry deployment.
 1. Calls `AfterRestore(common.Config)` on all provided TestCases (to e.g. check the apps pushed are present in the restored environment).
-1. Calls `Cleanup(common.Config)` on all provided TestCases (to e.g. clean up the apps from the backup environment).
+1. Calls `Cleanup(common.Config)` on all provided TestCases (to e.g. clean up the apps from the backup environment). It will do this even if an error or failure occurred in a previous step
+1. Cleans up the temporary directories created in the setup
+1. If an error occurred during a `bbr backup` command, DRATS runs `bbr backup-cleanup` to remove temporary bbr artifacts from your deployment (which would otherwise cause subsequent DRATS runs to fail)
 
 ## Extending DRATS
 
@@ -75,3 +78,10 @@ The methods that need to be implemented are `BeforeBackup(common.Config)`, `Afte
 ## Running DRATs in your CI
 
 We have shared a [task](https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/tree/master/ci/drats) to run DRATS with your CI. The task establishes an SSH tunnel using [`sshuttle`](http://sshuttle.readthedocs.io) so that it can run from outside the network. Note that this task needs a privileged container.
+
+## Debugging your DRATS run
+
+DRATS runs multiple interwoven test cases (for app uptime and each of the components under test) so it can be a little tricky to work out what's gone wrong when there's an error or failure. Here are some tips on investigating DRATS failures - please PR in additions to this doc if you think of more tips that might help other teams!
+
+1. The `bbr backup-cleanup` command runs if the test run errored during the `bbr backup` step. If you see an error in the `backup-cleanup` step, it's likely that a similar problem happened in the `backup` step which caused the original failure - scroll up to see.
+1. The easiest way to see where the failure / error happened is to look for the nearest `STEP` statement in the logs
