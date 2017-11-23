@@ -67,6 +67,7 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 		// ### populate state in environment to be backed up
 		for _, testCase := range filteredTestCases {
 			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir, testCase))
+			By("running the BeforeBackup step for "+ testCase.Name())
 			testCase.BeforeBackup(config)
 		}
 
@@ -89,6 +90,7 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 		Eventually(StatusCode(config.DeploymentToBackup.ApiUrl), 5*time.Minute).Should(Equal(200))
 
 		for _, testCase := range filteredTestCases {
+			By("running the AfterBackup step for "+ testCase.Name())
 			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir, testCase))
 			testCase.AfterBackup(config)
 		}
@@ -112,6 +114,7 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 
 		// ### check state in restored environment
 		for _, testCase := range filteredTestCases {
+			By("running the AfterRestore step for "+ testCase.Name())
 			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir, testCase))
 			testCase.AfterRestore(config)
 		}
@@ -142,8 +145,8 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 			config.DeploymentToRestore.Name,
 		))
 
-		By("running the individual test-case cleanup commands")
 		for _, testCase := range filteredTestCases {
+			By("running the Cleanup step for "+ testCase.Name())
 			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir, testCase))
 			testCase.Cleanup(config)
 		}
