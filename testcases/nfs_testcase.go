@@ -24,9 +24,9 @@ func (tc *NFSTestCase) Name() string {
 
 func (tc *NFSTestCase) BeforeBackup(config Config) {
 	By("creating an NFS service broker and service instance")
-	RunCommandSuccessfully("cf api --skip-ssl-validation", config.DeploymentToBackup.ApiUrl)
-	RunCommandSuccessfully("cf login --skip-ssl-validation -a", config.DeploymentToBackup.ApiUrl,
-		"-u", config.DeploymentToBackup.AdminUsername, "-p", config.DeploymentToBackup.AdminPassword)
+	RunCommandSuccessfully("cf api --skip-ssl-validation", config.Deployment.ApiUrl)
+	RunCommandSuccessfully("cf login --skip-ssl-validation -a", config.Deployment.ApiUrl,
+		"-u", config.Deployment.AdminUsername, "-p", config.Deployment.AdminPassword)
 	RunCommandSuccessfully("cf create-org acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf create-space acceptance-test-space-" + tc.uniqueTestID +
 		" -o acceptance-test-org-" + tc.uniqueTestID)
@@ -34,14 +34,14 @@ func (tc *NFSTestCase) BeforeBackup(config Config) {
 		" -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf push dratsApp --docker-image docker/httpd --no-start --random-route")
 
-	if config.DeploymentToBackup.NFSBrokerUser != "" {
+	if config.Deployment.NFSBrokerUser != "" {
 		RunCommandSuccessfully("cf create-service-broker " + "nfsbroker-drats-" + tc.uniqueTestID + " " +
-			config.DeploymentToBackup.NFSBrokerUser + " " + config.DeploymentToBackup.NFSBrokerPassword + " " +
-			config.DeploymentToBackup.NFSBrokerUrl)
+			config.Deployment.NFSBrokerUser + " " + config.Deployment.NFSBrokerPassword + " " +
+			config.Deployment.NFSBrokerUrl)
 	}
-	RunCommandSuccessfully("cf enable-service-access " + config.DeploymentToBackup.NFSServiceName)
-	RunCommandSuccessfully("cf create-service " + config.DeploymentToBackup.NFSServiceName + " " +
-		config.DeploymentToBackup.NFSPlanName + " " + tc.instanceName + " -c " +
+	RunCommandSuccessfully("cf enable-service-access " + config.Deployment.NFSServiceName)
+	RunCommandSuccessfully("cf create-service " + config.Deployment.NFSServiceName + " " +
+		config.Deployment.NFSPlanName + " " + tc.instanceName + " -c " +
 		`'{"share":"someserver.someplace.com/someshare"}'`)
 }
 
@@ -58,7 +58,7 @@ func (tc *NFSTestCase) AfterRestore(config Config) {
 func (tc *NFSTestCase) Cleanup(config Config) {
 	By("nfs cleanup")
 	RunCommandSuccessfully("cf delete-org -f acceptance-test-org-" + tc.uniqueTestID)
-	if config.DeploymentToBackup.NFSBrokerUser != "" {
+	if config.Deployment.NFSBrokerUser != "" {
 		RunCommandSuccessfully("cf delete-service-broker -f " + "nfsbroker-drats-" + tc.uniqueTestID)
 	}
 }

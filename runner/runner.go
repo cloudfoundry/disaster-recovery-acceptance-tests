@@ -64,7 +64,7 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 			printDeploymentsAreDifferentWarning()
 		}
 
-		// ### populate state in environment to be backed up
+		By("populating state in environment to be backed up")
 		for _, testCase := range filteredTestCases {
 			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir, testCase))
 			By("running the BeforeBackup step for "+ testCase.Name())
@@ -72,7 +72,7 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 		}
 
 		backupRunning = true
-		By("backing up " + config.DeploymentToBackup.Name)
+		By("backing up " + config.Deployment.Name)
 		RunCommandSuccessfullyWithFailureMessage(
 			"bbr deployment backup",
 			fmt.Sprintf(
@@ -83,11 +83,11 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 				testContext.CertificatePath,
 				config.BoshConfig.BoshClient,
 				config.BoshConfig.BoshClientSecret,
-				config.DeploymentToBackup.Name,
+				config.Deployment.Name,
 			))
 		backupRunning = false
 
-		Eventually(StatusCode(config.DeploymentToBackup.ApiUrl), 5*time.Minute).Should(Equal(200))
+		Eventually(StatusCode(config.Deployment.ApiUrl), 5*time.Minute).Should(Equal(200))
 
 		for _, testCase := range filteredTestCases {
 			By("running the AfterBackup step for "+ testCase.Name())
@@ -95,7 +95,7 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 			testCase.AfterBackup(config)
 		}
 
-		By("restoring to " + config.DeploymentToRestore.Name)
+		By("restoring to " + config.Deployment.Name)
 		RunCommandSuccessfullyWithFailureMessage(
 			"bbr deployment restore",
 			fmt.Sprintf(
@@ -107,12 +107,12 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 				testContext.CertificatePath,
 				config.BoshConfig.BoshClient,
 				config.BoshConfig.BoshClientSecret,
-				config.DeploymentToRestore.Name,
+				config.Deployment.Name,
 				testContext.WorkspaceDir,
-				config.DeploymentToBackup.Name,
+				config.Deployment.Name,
 			))
 
-		// ### check state in restored environment
+		By("checking state in restored environment")
 		for _, testCase := range filteredTestCases {
 			By("running the AfterRestore step for "+ testCase.Name())
 			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir, testCase))
@@ -135,14 +135,13 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 					testContext.CertificatePath,
 					config.BoshConfig.BoshClient,
 					config.BoshConfig.BoshClientSecret,
-					config.DeploymentToBackup.Name,
+					config.Deployment.Name,
 				))
 		}
-		//TODO: Can we delete this?
 		By("cleaning up the artifact")
 		artifactCleanupSession = RunCommand(fmt.Sprintf("cd %s && rm -fr %s",
 			testContext.WorkspaceDir,
-			config.DeploymentToRestore.Name,
+			config.Deployment.Name,
 		))
 
 		for _, testCase := range filteredTestCases {
@@ -172,10 +171,3 @@ func cfHomeDir(root string, testCase TestCase) string {
 	return path.Join(root, testCase.Name()+"-cf-home")
 }
 
-func printDeploymentsAreDifferentWarning() {
-	fmt.Println("     --------------------------------------------------------")
-	fmt.Println("     NOTE: this suite is currently configured to back up from")
-	fmt.Println("     one deployment and restore to a different one. Make     ")
-	fmt.Println("     sure this is the intended configuration.                ")
-	fmt.Println("     --------------------------------------------------------")
-}

@@ -38,9 +38,8 @@ func (configGetter OSConfigGetter) FindConfig(testCases []runner.TestCase) runne
 
 
 	return runner.Config{
-		DeploymentToBackup:  deploymentConfig,
-		DeploymentToRestore: deploymentConfig,
-		BoshConfig:  				boshConfig,
+		Deployment: deploymentConfig,
+		BoshConfig: boshConfig,
 	}
 }
 func containsTestCase(testCases []runner.TestCase, name string) bool {
