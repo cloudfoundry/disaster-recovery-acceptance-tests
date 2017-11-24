@@ -60,9 +60,8 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 	})
 
 	It("backups and restores a cf", func() {
-		if config.DeploymentToBackup.Name != config.DeploymentToRestore.Name {
-			printDeploymentsAreDifferentWarning()
-		}
+		deleteAndRedeployCF := os.Getenv("DELETE_AND_REDEPLOY_CF")
+
 
 		By("populating state in environment to be backed up")
 		for _, testCase := range filteredTestCases {
@@ -93,6 +92,9 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 			By("running the AfterBackup step for "+ testCase.Name())
 			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir, testCase))
 			testCase.AfterBackup(config)
+		}
+		if deleteAndRedeployCF == "true" {
+			By("deleting the deployment")
 		}
 
 		By("restoring to " + config.Deployment.Name)

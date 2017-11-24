@@ -31,6 +31,7 @@ params:
   NFS_BROKER_USER:
   NFS_BROKER_PASSWORD:
   NFS_BROKER_URL:
+  DELETE_AND_REDEPLOY_CF: false
 
 run:
   path: src/github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/ci/drats/task.sh

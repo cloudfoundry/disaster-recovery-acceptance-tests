@@ -22,9 +22,8 @@ type BoshConfig struct {
 }
 
 type Config struct {
-	DeploymentToBackup  CloudFoundryConfig
-	DeploymentToRestore CloudFoundryConfig
-	BoshConfig          BoshConfig
+	Deployment CloudFoundryConfig
+	BoshConfig BoshConfig
 }
 
 type ConfigGetter interface {
