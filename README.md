@@ -28,6 +28,7 @@ Tests if Cloud Foundry can be backed up and restored. The tests will back up fro
     * `NFS_BROKER_USER` - Environment variable required to run NFS test case
     * `NFS_BROKER_PASSWORD` - Environment variable required to run NFS test case
     * `NFS_BROKER_URL` - Environment variable required to run NFS test case
+    * `DELETE_AND_REDEPLOY_CF` - set to "true" to have the CF deployment destroyed and redeployed from scratch during the test cycle. **<span style="color:red"> Exercise extreme care when using this option!</span>**
 1. If you wish to run DRATS against a director deployed with `bbl`, run `scripts/run_acceptance_tests_with_bbl_env.sh <path-to-bbl-state-dir>`.
     * Set `CF_VARS_STORE_PATH` to the path to the CF vars-store file.
     * Set `BOSH_CLI_NAME` to the name of the BOSH CLI executable on your machine if it isn't `bosh`.
