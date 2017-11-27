@@ -23,7 +23,7 @@ func RunCommandSuccessfully(cmd string, args ...string) *gexec.Session {
 
 func RunCommandSuccessfullyWithFailureMessage(commandDescription, cmd string, args ...string) *gexec.Session {
 	session := runCommandWithStream(commandDescription, GinkgoWriter, GinkgoWriter, cmd, args...)
-	Expect(session).To(gexec.Exit(0), "Command errored: " + commandDescription)
+	Expect(session).To(gexec.Exit(0), "Command errored: "+commandDescription)
 	return session
 }
 
@@ -56,7 +56,7 @@ func runCommandWithStream(commandDescription string, stdout, stderr io.Writer, c
 	session, err := gexec.Start(command, stdout, stderr)
 
 	Expect(err).ToNot(HaveOccurred())
-	Eventually(session).Should(gexec.Exit(), "Command timed out: " + commandDescription)
+	Eventually(session).Should(gexec.Exit(), "Command timed out: "+commandDescription)
 	return session
 }
 

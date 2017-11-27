@@ -8,11 +8,12 @@ import (
 
 	"os"
 
+	"io/ioutil"
+	"path"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"
-	"io/ioutil"
-	"path"
 )
 
 func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []TestCase) {
@@ -62,11 +63,10 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 	It("backups and restores a cf", func() {
 		deleteAndRedeployCF := os.Getenv("DELETE_AND_REDEPLOY_CF")
 
-
 		By("populating state in environment to be backed up")
 		for _, testCase := range filteredTestCases {
 			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir, testCase))
-			By("running the BeforeBackup step for "+ testCase.Name())
+			By("running the BeforeBackup step for " + testCase.Name())
 			testCase.BeforeBackup(config)
 		}
 
@@ -89,12 +89,39 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 		Eventually(StatusCode(config.Deployment.ApiUrl), 5*time.Minute).Should(Equal(200))
 
 		for _, testCase := range filteredTestCases {
-			By("running the AfterBackup step for "+ testCase.Name())
+			By("running the AfterBackup step for " + testCase.Name())
 			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir, testCase))
 			testCase.AfterBackup(config)
 		}
 		if deleteAndRedeployCF == "true" {
 			By("deleting the deployment")
+			manifestSession := RunCommandSuccessfully("bosh-cli",
+				"--ca-cert", testContext.CertificatePath,
+				"--client", config.BoshConfig.BoshClient,
+				"--client-secret", config.BoshConfig.BoshClientSecret,
+				"-d", config.Deployment.Name,
+				"manifest",
+			)
+			file, err := ioutil.TempFile("", "cf")
+			Expect(err).NotTo(HaveOccurred())
+			_, err = file.Write(manifestSession.Out.Contents())
+			Expect(err).NotTo(HaveOccurred())
+
+			RunCommandSuccessfully("bosh-cli", "-n",
+				"--ca-cert", testContext.CertificatePath,
+				"--client", config.BoshConfig.BoshClient,
+				"--client-secret", config.BoshConfig.BoshClientSecret,
+				"-d", config.Deployment.Name,
+				"delete-deployment",
+			)
+
+			RunCommandSuccessfully("bosh-cli", "-n",
+				"--ca-cert", testContext.CertificatePath,
+				"--client", config.BoshConfig.BoshClient,
+				"--client-secret", config.BoshConfig.BoshClientSecret,
+				"-d", config.Deployment.Name,
+				"deploy", file.Name(),
+			)
 		}
 
 		By("restoring to " + config.Deployment.Name)
@@ -116,7 +143,7 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 
 		By("checking state in restored environment")
 		for _, testCase := range filteredTestCases {
-			By("running the AfterRestore step for "+ testCase.Name())
+			By("running the AfterRestore step for " + testCase.Name())
 			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir, testCase))
 			testCase.AfterRestore(config)
 		}
@@ -147,7 +174,7 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 		))
 
 		for _, testCase := range filteredTestCases {
-			By("running the Cleanup step for "+ testCase.Name())
+			By("running the Cleanup step for " + testCase.Name())
 			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir, testCase))
 			testCase.Cleanup(config)
 		}
@@ -172,4 +199,3 @@ func RunDisasterRecoveryAcceptanceTests(configGetter ConfigGetter, testCases []T
 func cfHomeDir(root string, testCase TestCase) string {
 	return path.Join(root, testCase.Name()+"-cf-home")
 }
-
