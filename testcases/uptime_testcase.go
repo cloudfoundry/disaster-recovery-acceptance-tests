@@ -31,8 +31,8 @@ func (tc *AppUptimeTestCase) Name() string {
 }
 
 func (tc *AppUptimeTestCase) BeforeBackup(config Config) {
-	RunCommandSuccessfully("cf api --skip-ssl-validation", config.Deployment.ApiUrl)
-	RunCommandSuccessfully("cf auth", config.Deployment.AdminUsername, config.Deployment.AdminPassword)
+	RunCommandSuccessfully("cf api --skip-ssl-validation", config.DeploymentToBackup.ApiUrl)
+	RunCommandSuccessfully("cf auth", config.DeploymentToBackup.AdminUsername, config.DeploymentToBackup.AdminPassword)
 	RunCommandSuccessfully("cf create-org acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf create-space acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf target -o acceptance-test-org-" + tc.uniqueTestID + " -s acceptance-test-space-" + tc.uniqueTestID)
@@ -42,7 +42,7 @@ func (tc *AppUptimeTestCase) BeforeBackup(config Config) {
 	By("checking the app stays up")
 	appUrl := GetAppUrl("test_app_" + tc.uniqueTestID)
 	tc.stopCheckingAppAlive = checkAppRemainsAlive(appUrl)
-	tc.stopCheckingAPIGoesDown, tc.valueApiWasDown = checkApiGoesDown(config.Deployment.ApiUrl)
+	tc.stopCheckingAPIGoesDown, tc.valueApiWasDown = checkApiGoesDown(config.DeploymentToBackup.ApiUrl)
 }
 
 func (tc *AppUptimeTestCase) AfterBackup(config Config) {

@@ -20,7 +20,7 @@ func NewCfUaaTestCase() *CfUaaTestCase {
 }
 
 func login(config Config, username, password string) {
-	RunCommandSuccessfully("cf api --skip-ssl-validation", config.Deployment.ApiUrl)
+	RunCommandSuccessfully("cf api --skip-ssl-validation", config.DeploymentToBackup.ApiUrl)
 	RunCommandSuccessfully("cf auth", username, password)
 }
 
@@ -30,7 +30,7 @@ func (tc *CfUaaTestCase) Name() string {
 
 func (tc *CfUaaTestCase) BeforeBackup(config Config) {
 	By("we create a user and can login")
-	login(config, config.Deployment.AdminUsername, config.Deployment.AdminPassword)
+	login(config, config.DeploymentToBackup.AdminUsername, config.DeploymentToBackup.AdminPassword)
 	RunCommandSuccessfully("cf create-user ", tc.testUser, tc.testPassword)
 	login(config, tc.testUser, tc.testPassword)
 	RunCommandSuccessfully("cf logout")
@@ -38,11 +38,11 @@ func (tc *CfUaaTestCase) BeforeBackup(config Config) {
 
 func (tc *CfUaaTestCase) AfterBackup(config Config) {
 	By("we delete the user and verify")
-	login(config, config.Deployment.AdminUsername, config.Deployment.AdminPassword)
+	login(config, config.DeploymentToBackup.AdminUsername, config.DeploymentToBackup.AdminPassword)
 	RunCommandSuccessfully("cf delete-user ", tc.testUser, "-f")
 	RunCommandSuccessfully("cf logout")
 
-	RunCommandSuccessfully("cf api --skip-ssl-validation", config.Deployment.ApiUrl)
+	RunCommandSuccessfully("cf api --skip-ssl-validation", config.DeploymentToBackup.ApiUrl)
 	//user has been deleted. authentication should fail
 	result := RunCommand("cf auth", tc.testUser, tc.testPassword)
 
@@ -56,6 +56,6 @@ func (tc *CfUaaTestCase) AfterRestore(config Config) {
 
 func (tc *CfUaaTestCase) Cleanup(config Config) {
 	By("We delete the user")
-	login(config, config.Deployment.AdminUsername, config.Deployment.AdminPassword)
+	login(config, config.DeploymentToBackup.AdminUsername, config.DeploymentToBackup.AdminPassword)
 	RunCommandSuccessfully("cf delete-user ", tc.testUser, "-f")
 }

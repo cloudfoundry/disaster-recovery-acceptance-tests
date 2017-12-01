@@ -37,8 +37,8 @@ func (tc *CfCredhubSSITestCase) Name() string {
 }
 
 func (tc *CfCredhubSSITestCase) BeforeBackup(config Config) {
-	RunCommandSuccessfully("cf api --skip-ssl-validation", config.Deployment.ApiUrl)
-	RunCommandSuccessfully("cf auth", config.Deployment.AdminUsername, config.Deployment.AdminPassword)
+	RunCommandSuccessfully("cf api --skip-ssl-validation", config.DeploymentToBackup.ApiUrl)
+	RunCommandSuccessfully("cf auth", config.DeploymentToBackup.AdminUsername, config.DeploymentToBackup.AdminPassword)
 	cmdResponse := RunCommandSuccessfully("cf running-environment-variable-group").Out.Contents()
 	if !strings.Contains(string(cmdResponse), "CREDHUB_API") {
 		RunCommandSuccessfully("cf set-running-environment-variable-group '{ \"CREDHUB_API\": \"https://credhub.service.cf.internal:8844\"}'")
@@ -53,7 +53,7 @@ func (tc *CfCredhubSSITestCase) BeforeBackup(config Config) {
 	RunCommandSuccessfully("cf restart " + tc.brokerName)
 
 	serviceUrl := GetAppUrl(tc.brokerName)
-	RunCommandSuccessfully("cf create-service-broker " + tc.brokerName + " " + config.Deployment.AdminUsername + " " + config.Deployment.AdminPassword + " https://" + serviceUrl)
+	RunCommandSuccessfully("cf create-service-broker " + tc.brokerName + " " + config.DeploymentToBackup.AdminUsername + " " + config.DeploymentToBackup.AdminPassword + " https://" + serviceUrl)
 	RunCommandSuccessfully("cf enable-service-access " + tc.svcName + " -o " + "acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf create-service " + tc.svcName + " credhub-read-plan " + tc.svcInstance)
 

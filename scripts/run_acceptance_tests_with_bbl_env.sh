@@ -4,13 +4,11 @@
 
 pushd $1
     export CF_ADMIN_PASSWORD=$(${BOSH_CLI_NAME} interpolate --path /cf_admin_password ${CF_VARS_STORE_PATH})
-    export BOSH_CLIENT_SECRET=$(bbl director-password)
-    export BOSH_CA_CERT="$(bbl director-ca-cert)"
-    export BOSH_ENVIRONMENT=$(${BOSH_CLI_NAME} interpolate --path /external_ip <(bbl bosh-deployment-vars))
+    eval "$(bbl print-env | sed '$ d'| sed '$ d'| sed '$ d')"
     export BOSH_GW_USER="jumpbox"
-    export BOSH_GW_HOST=$(${BOSH_CLI_NAME} interpolate --path /external_ip <(bbl bosh-deployment-vars))
-    export BOSH_GW_PRIVATE_KEY_CONTENTS="$(bbl ssh-key)"
-    export BOSH_CLIENT="admin"
+    export BOSH_GW_HOST=$(bbl director-address | cut -d'/' -f3 | cut -d':' -f1)
+    export BOSH_GW_PRIVATE_KEY_CONTENTS="$(bbl director-ssh-key)"
+
     CF_DOMAIN=$(jq .lb.domain bbl-state.json -r)
     export CF_API_URL="https://api.${CF_DOMAIN}"
     if grep "nfs-broker-password" ${CF_VARS_STORE_PATH}>/dev/null; then

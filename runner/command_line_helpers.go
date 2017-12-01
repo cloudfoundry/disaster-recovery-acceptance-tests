@@ -74,7 +74,7 @@ func DownloadManifest(deploymentName string, boshConfig BoshConfig) string {
 func BoshCommand(boshConfig BoshConfig) string {
 	return fmt.Sprintf("bosh-cli --non-interactive --environment=%s --ca-cert=%s --client=%s --client-secret=%s",
 		boshConfig.BoshURL,
-		boshConfig.BoshCertPath,
+		boshConfig.BoshCaCert,
 		boshConfig.BoshClient,
 		boshConfig.BoshClientSecret,
 	)
