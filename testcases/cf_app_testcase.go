@@ -68,7 +68,5 @@ func (tc *CfAppTestCase) Cleanup(config Config) {
 
 func (tc *CfAppTestCase) deletePushedApps(config Config) {
 	By("cleaning up orgs and spaces")
-	RunCommandSuccessfully("cf target -o acceptance-test-org-" + tc.uniqueTestID)
-	RunCommandSuccessfully("cf delete-space -f acceptance-test-space-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf delete-org -f acceptance-test-org-" + tc.uniqueTestID)
 }

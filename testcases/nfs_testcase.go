@@ -62,6 +62,3 @@ func (tc *NFSTestCase) Cleanup(config Config) {
 		RunCommandSuccessfully("cf delete-service-broker -f " + "nfsbroker-drats-" + tc.uniqueTestID)
 	}
 }
-
-func (tc *NFSTestCase) deletePushedApps(config Config) {
-}
