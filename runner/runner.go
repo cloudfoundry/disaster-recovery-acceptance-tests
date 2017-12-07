@@ -60,10 +60,6 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 	})
 
 	It("backups and restores a cf", func() {
-		if config.DeploymentToBackup.Name != config.DeploymentToRestore.Name {
-			printDeploymentsAreDifferentWarning()
-		}
-
 		deleteAndRedeployCF := os.Getenv("DELETE_AND_REDEPLOY_CF")
 
 		By("populating state in environment to be backed up")
@@ -74,7 +70,7 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 		}
 
 		backupRunning = true
-		By("backing up " + config.DeploymentToBackup.Name)
+		By("backing up " + config.Deployment.Name)
 		RunCommandSuccessfullyWithFailureMessage(
 			"bbr deployment backup",
 			fmt.Sprintf(
@@ -85,11 +81,11 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 				testContext.CertificatePath,
 				config.BoshConfig.BoshClient,
 				config.BoshConfig.BoshClientSecret,
-				config.DeploymentToBackup.Name,
+				config.Deployment.Name,
 			))
 		backupRunning = false
 
-		Eventually(StatusCode(config.DeploymentToBackup.ApiUrl), 5*time.Minute).Should(Equal(200))
+		Eventually(StatusCode(config.Deployment.ApiUrl), 5*time.Minute).Should(Equal(200))
 
 		for _, testCase := range filteredTestCases {
 			By("running the AfterBackup step for " + testCase.Name())
@@ -102,7 +98,7 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 				"--ca-cert", testContext.CertificatePath,
 				"--client", config.BoshConfig.BoshClient,
 				"--client-secret", config.BoshConfig.BoshClientSecret,
-				"-d", config.DeploymentToBackup.Name,
+				"-d", config.Deployment.Name,
 				"manifest",
 			)
 			file, err := ioutil.TempFile("", "cf")
@@ -114,7 +110,7 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 				"--ca-cert", testContext.CertificatePath,
 				"--client", config.BoshConfig.BoshClient,
 				"--client-secret", config.BoshConfig.BoshClientSecret,
-				"-d", config.DeploymentToBackup.Name,
+				"-d", config.Deployment.Name,
 				"delete-deployment",
 			)
 
@@ -122,12 +118,12 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 				"--ca-cert", testContext.CertificatePath,
 				"--client", config.BoshConfig.BoshClient,
 				"--client-secret", config.BoshConfig.BoshClientSecret,
-				"-d", config.DeploymentToBackup.Name,
+				"-d", config.Deployment.Name,
 				"deploy", file.Name(),
 			)
 		}
 
-		By("restoring to " + config.DeploymentToRestore.Name)
+		By("restoring to " + config.Deployment.Name)
 		RunCommandSuccessfullyWithFailureMessage(
 			"bbr deployment restore",
 			fmt.Sprintf(
@@ -139,9 +135,9 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 				testContext.CertificatePath,
 				config.BoshConfig.BoshClient,
 				config.BoshConfig.BoshClientSecret,
-				config.DeploymentToBackup.Name,
+				config.Deployment.Name,
 				testContext.WorkspaceDir,
-				config.DeploymentToBackup.Name,
+				config.Deployment.Name,
 			))
 
 		By("checking state in restored environment")
@@ -167,13 +163,13 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 					testContext.CertificatePath,
 					config.BoshConfig.BoshClient,
 					config.BoshConfig.BoshClientSecret,
-					config.DeploymentToBackup.Name,
+					config.Deployment.Name,
 				))
 		}
 		By("cleaning up the artifact")
 		artifactCleanupSession = RunCommand(fmt.Sprintf("cd %s && rm -fr %s",
 			testContext.WorkspaceDir,
-			config.DeploymentToBackup.Name,
+			config.Deployment.Name,
 		))
 
 		for _, testCase := range filteredTestCases {
@@ -201,12 +197,4 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 }
 func cfHomeDir(root string, testCase TestCase) string {
 	return path.Join(root, testCase.Name()+"-cf-home")
-}
-
-func printDeploymentsAreDifferentWarning() {
-	fmt.Println("     --------------------------------------------------------")
-	fmt.Println("     NOTE: this suite is currently configured to back up from")
-	fmt.Println("     one deployment and restore to a different one. Make     ")
-	fmt.Println("     sure this is the intended configuration.                ")
-	fmt.Println("     --------------------------------------------------------")
 }

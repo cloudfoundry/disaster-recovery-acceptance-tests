@@ -47,9 +47,8 @@ func setConfigFromFile(path string) runner.Config {
 	}
 
 	return runner.Config{
-		DeploymentToBackup:  cfConfig,
-		DeploymentToRestore: cfConfig,
-		BoshConfig:          boshConfig,
+		Deployment: cfConfig,
+		BoshConfig: boshConfig,
 	}
 }
 
@@ -76,9 +75,8 @@ func setConfigFromEnv(shouldIncludeNfsBroker bool) runner.Config {
 	}
 
 	return runner.Config{
-		DeploymentToBackup:  deploymentConfig,
-		DeploymentToRestore: deploymentConfig,
-		BoshConfig:          boshConfig,
+		Deployment: deploymentConfig,
+		BoshConfig: boshConfig,
 	}
 }
 

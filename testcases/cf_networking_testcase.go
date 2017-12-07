@@ -26,8 +26,8 @@ func (tc *CfNetworkingTestCase) Name() string {
 
 func (tc *CfNetworkingTestCase) BeforeBackup(config Config) {
 	By("creating new orgs and spaces")
-	RunCommandSuccessfully("cf api --skip-ssl-validation", config.DeploymentToBackup.ApiUrl)
-	RunCommandSuccessfully("cf auth", config.DeploymentToBackup.AdminUsername, config.DeploymentToBackup.AdminPassword)
+	RunCommandSuccessfully("cf api --skip-ssl-validation", config.Deployment.ApiUrl)
+	RunCommandSuccessfully("cf auth", config.Deployment.AdminUsername, config.Deployment.AdminPassword)
 	RunCommandSuccessfully("cf create-org acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf create-space acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf target -s acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
