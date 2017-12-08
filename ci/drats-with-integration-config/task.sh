@@ -6,8 +6,11 @@ export CONFIG="$PWD/drats-integration-config/${CONFIG_FILE_PATH}"
 
 export GOPATH=$PWD
 export PATH=$PATH:$GOPATH/bin
-export DEFAULT_TIMEOUT_MINS
-export SKIP_SUITE_NAME
+
+BOSH_GW_USER=`jq -r .ssh_proxy_user ${CONFIG}`
+BOSH_GW_HOST=`jq -r .ssh_proxy_host ${CONFIG}`
+BOSH_GW_PRIVATE_KEY=`jq -r .ssh_proxy_private_key ${CONFIG}`
+SSH_DESTINATION_CIDR=`jq -r .ssh_proxy_cidr ${CONFIG}`
 
 eval "$(ssh-agent)"
 

@@ -13,8 +13,6 @@ inputs:
 
 params:
   CONFIG_FILE_PATH: drats_integration_config.json
-  DEFAULT_TIMEOUT_MINS: 15
-  SKIP_SUITE_NAME:
 
 run:
   path: src/github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/ci/drats/task.sh
