@@ -96,6 +96,11 @@ func (tc *CfCredhubSSITestCase) AfterRestore(config Config) {
 }
 
 func (tc *CfCredhubSSITestCase) Cleanup(config Config) {
+	targetCommand := RunCommand("cf target -o acceptance-test-org-" + tc.uniqueTestID)
+	if targetCommand.ExitCode() != 0{
+		return
+	}
+	RunCommandSuccessfully("cf purge-service-instance -f " + tc.svcInstance)
 	RunCommandSuccessfully("cf delete-service-broker -f " + tc.brokerName)
 	RunCommandSuccessfully("cf delete-org -f acceptance-test-org-" + tc.uniqueTestID)
 }
