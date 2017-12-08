@@ -10,7 +10,11 @@ import (
 	"github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/testcases"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"strconv"
+	"time"
 )
+
+const defaultTimeout = 15 * time.Minute
 
 var _ = Describe("backing up Cloud Foundry", func() {
 	var config runner.Config
@@ -33,18 +37,15 @@ func getConfigFromFile(path string) runner.Config {
 	configFromFile, err := ioutil.ReadFile(path)
 	Expect(err).ToNot(HaveOccurred(), fmt.Sprintf("Could not load config from file: %s\n", path))
 
-	var cfConfig runner.CloudFoundryConfig
-	err = json.Unmarshal(configFromFile, &cfConfig)
-	Expect(err).ToNot(HaveOccurred(), "Could not unmarshal CloudFoundryConfig")
+	conf := runner.Config{}
+	err = json.Unmarshal(configFromFile, &conf)
 
-	var boshConfig runner.BoshConfig
-	err = json.Unmarshal(configFromFile, &boshConfig)
-	Expect(err).ToNot(HaveOccurred(), "Could not unmarshal BoshConfig")
-
-	return runner.Config{
-		Deployment: cfConfig,
-		BoshConfig: boshConfig,
+	Expect(err).ToNot(HaveOccurred(), "Could not unmarshal Config")
+	if conf.Timeout == 0 {
+		conf.Timeout = defaultTimeout
 	}
+
+	return conf
 }
 
 func getConfigFromEnv() runner.Config {
@@ -67,9 +68,25 @@ func getConfigFromEnv() runner.Config {
 	deploymentConfig.NFSBrokerPassword = os.Getenv("NFS_BROKER_PASSWORD")
 	deploymentConfig.NFSBrokerUrl = os.Getenv("NFS_BROKER_URL")
 
+	var timeout time.Duration
+	timeoutStr := os.Getenv("DEFAULT_TIMEOUT_MINS")
+	if timeoutStr != "" {
+		timeoutInt, err := strconv.Atoi(timeoutStr)
+		if err != nil {
+			panic(fmt.Sprint("DEFAULT_TIMEOUT_MINS, if set, must be an integer\n"))
+		}
+		timeout = time.Duration(timeoutInt) * time.Minute
+	} else {
+		timeout = defaultTimeout
+	}
+
+	deleteAndRedeployCF := os.Getenv("DELETE_AND_REDEPLOY_CF") == "true"
+
 	return runner.Config{
-		Deployment: deploymentConfig,
-		BoshConfig: boshConfig,
+		CloudFoundryConfig:  deploymentConfig,
+		BoshConfig:          boshConfig,
+		Timeout:             timeout,
+		DeleteAndRedeployCF: deleteAndRedeployCF,
 	}
 }
 

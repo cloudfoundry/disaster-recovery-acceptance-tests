@@ -1,5 +1,7 @@
 package runner
 
+import "time"
+
 type CloudFoundryConfig struct {
 	Name              string `json:"cf_deployment_name"`
 	ApiUrl            string `json:"cf_api_url"`
@@ -20,6 +22,8 @@ type BoshConfig struct {
 }
 
 type Config struct {
-	Deployment CloudFoundryConfig
-	BoshConfig BoshConfig
+	CloudFoundryConfig
+	BoshConfig
+	Timeout             time.Duration `json: "timeout"`
+	DeleteAndRedeployCF bool          `json: "delete_and_redeploy_cf"`
 }

@@ -2,8 +2,6 @@ package runner
 
 import (
 	"fmt"
-	"strconv"
-
 	"time"
 
 	"os"
@@ -31,16 +29,7 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 
 		backupRunning = false
 
-		timeout := os.Getenv("DEFAULT_TIMEOUT_MINS")
-		if timeout != "" {
-			timeoutInt, err := strconv.Atoi(timeout)
-			SetDefaultEventuallyTimeout(time.Duration(timeoutInt) * time.Minute)
-			if err != nil {
-				panic(fmt.Sprint("DEFAULT_TIMEOUT_MINS, if set, must be an integer\n"))
-			}
-		} else {
-			SetDefaultEventuallyTimeout(15 * time.Minute)
-		}
+		SetDefaultEventuallyTimeout(config.Timeout)
 
 		uniqueTestID = RandomStringNumber()
 		testContext, err = NewTestContext(uniqueTestID, config.BoshConfig)
@@ -56,8 +45,6 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 	})
 
 	It("backups and restores a cf", func() {
-		deleteAndRedeployCF := os.Getenv("DELETE_AND_REDEPLOY_CF")
-
 		By("populating state in environment to be backed up")
 		for _, testCase := range testCases {
 			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir, testCase))
@@ -66,7 +53,7 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 		}
 
 		backupRunning = true
-		By("backing up " + config.Deployment.Name)
+		By("backing up " + config.CloudFoundryConfig.Name)
 		RunCommandSuccessfullyWithFailureMessage(
 			"bbr deployment backup",
 			fmt.Sprintf(
@@ -77,24 +64,25 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 				testContext.CertificatePath,
 				config.BoshConfig.BoshClient,
 				config.BoshConfig.BoshClientSecret,
-				config.Deployment.Name,
+				config.CloudFoundryConfig.Name,
 			))
 		backupRunning = false
 
-		Eventually(StatusCode(config.Deployment.ApiUrl), 5*time.Minute).Should(Equal(200))
+		Eventually(StatusCode(config.CloudFoundryConfig.ApiUrl), 5*time.Minute).Should(Equal(200))
 
 		for _, testCase := range testCases {
 			By("running the AfterBackup step for " + testCase.Name())
 			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir, testCase))
 			testCase.AfterBackup(config)
 		}
-		if deleteAndRedeployCF == "true" {
+
+		if config.DeleteAndRedeployCF {
 			By("deleting the deployment")
 			manifestSession := RunCommandSuccessfully("bosh-cli",
 				"--ca-cert", testContext.CertificatePath,
 				"--client", config.BoshConfig.BoshClient,
 				"--client-secret", config.BoshConfig.BoshClientSecret,
-				"-d", config.Deployment.Name,
+				"-d", config.CloudFoundryConfig.Name,
 				"manifest",
 			)
 			file, err := ioutil.TempFile("", "cf")
@@ -106,7 +94,7 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 				"--ca-cert", testContext.CertificatePath,
 				"--client", config.BoshConfig.BoshClient,
 				"--client-secret", config.BoshConfig.BoshClientSecret,
-				"-d", config.Deployment.Name,
+				"-d", config.CloudFoundryConfig.Name,
 				"delete-deployment",
 			)
 
@@ -114,12 +102,12 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 				"--ca-cert", testContext.CertificatePath,
 				"--client", config.BoshConfig.BoshClient,
 				"--client-secret", config.BoshConfig.BoshClientSecret,
-				"-d", config.Deployment.Name,
+				"-d", config.CloudFoundryConfig.Name,
 				"deploy", file.Name(),
 			)
 		}
 
-		By("restoring to " + config.Deployment.Name)
+		By("restoring to " + config.CloudFoundryConfig.Name)
 		RunCommandSuccessfullyWithFailureMessage(
 			"bbr deployment restore",
 			fmt.Sprintf(
@@ -131,9 +119,9 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 				testContext.CertificatePath,
 				config.BoshConfig.BoshClient,
 				config.BoshConfig.BoshClientSecret,
-				config.Deployment.Name,
+				config.CloudFoundryConfig.Name,
 				testContext.WorkspaceDir,
-				config.Deployment.Name,
+				config.CloudFoundryConfig.Name,
 			))
 
 		By("checking state in restored environment")
@@ -159,13 +147,13 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 					testContext.CertificatePath,
 					config.BoshConfig.BoshClient,
 					config.BoshConfig.BoshClientSecret,
-					config.Deployment.Name,
+					config.CloudFoundryConfig.Name,
 				))
 		}
 		By("cleaning up the artifact")
 		artifactCleanupSession = RunCommand(fmt.Sprintf("cd %s && rm -fr %s",
 			testContext.WorkspaceDir,
-			config.Deployment.Name,
+			config.CloudFoundryConfig.Name,
 		))
 
 		for _, testCase := range testCases {
