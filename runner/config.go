@@ -24,6 +24,6 @@ type BoshConfig struct {
 type Config struct {
 	CloudFoundryConfig
 	BoshConfig
-	Timeout             time.Duration `json: "timeout"`
-	DeleteAndRedeployCF bool          `json: "delete_and_redeploy_cf"`
+	Timeout             time.Duration `json:"timeout"`
+	DeleteAndRedeployCF bool          `json:"delete_and_redeploy_cf"`
 }
