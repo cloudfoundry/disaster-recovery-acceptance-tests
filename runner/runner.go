@@ -22,14 +22,10 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 	var backupRunning bool
 	var cfHomeTmpDir string
 	var err error
-	var filteredTestCases []TestCase
 
 	BeforeEach(func() {
-		focusedSuiteName := os.Getenv("FOCUSED_SUITE_NAME")
-		skipSuiteName := os.Getenv("SKIP_SUITE_NAME")
-		filteredTestCases = FilterTestCasesWithRegexes(testCases, skipSuiteName, focusedSuiteName)
 		fmt.Println("Running testcases:")
-		for _, testCase := range filteredTestCases {
+		for _, testCase := range testCases {
 			fmt.Println(testCase.Name())
 		}
 
@@ -53,7 +49,7 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 		cfHomeTmpDir, err = ioutil.TempDir("", "drats-cf-home")
 		Expect(err).NotTo(HaveOccurred())
 
-		for _, testCase := range filteredTestCases {
+		for _, testCase := range testCases {
 			err := os.Mkdir(cfHomeDir(cfHomeTmpDir, testCase), 0700)
 			Expect(err).NotTo(HaveOccurred())
 		}
@@ -63,7 +59,7 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 		deleteAndRedeployCF := os.Getenv("DELETE_AND_REDEPLOY_CF")
 
 		By("populating state in environment to be backed up")
-		for _, testCase := range filteredTestCases {
+		for _, testCase := range testCases {
 			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir, testCase))
 			By("running the BeforeBackup step for " + testCase.Name())
 			testCase.BeforeBackup(config)
@@ -87,7 +83,7 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 
 		Eventually(StatusCode(config.Deployment.ApiUrl), 5*time.Minute).Should(Equal(200))
 
-		for _, testCase := range filteredTestCases {
+		for _, testCase := range testCases {
 			By("running the AfterBackup step for " + testCase.Name())
 			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir, testCase))
 			testCase.AfterBackup(config)
@@ -141,7 +137,7 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 			))
 
 		By("checking state in restored environment")
-		for _, testCase := range filteredTestCases {
+		for _, testCase := range testCases {
 			By("running the AfterRestore step for " + testCase.Name())
 			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir, testCase))
 			testCase.AfterRestore(config)
@@ -172,14 +168,14 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 			config.Deployment.Name,
 		))
 
-		for _, testCase := range filteredTestCases {
+		for _, testCase := range testCases {
 			By("running the Cleanup step for " + testCase.Name())
 			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir, testCase))
 			testCase.Cleanup(config)
 		}
 
 		By("removing individual test-case cf-home directory")
-		for _, testCase := range filteredTestCases {
+		for _, testCase := range testCases {
 			removeHomeDirErr = os.RemoveAll(cfHomeDir(cfHomeTmpDir, testCase))
 		}
 
@@ -195,6 +191,7 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 
 	})
 }
+
 func cfHomeDir(root string, testCase TestCase) string {
 	return path.Join(root, testCase.Name()+"-cf-home")
 }
