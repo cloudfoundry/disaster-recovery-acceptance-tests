@@ -9,6 +9,7 @@ import (
 	"github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/runner"
 	"github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/testcases"
 	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("backing up Cloud Foundry", func() {
@@ -30,21 +31,15 @@ var _ = Describe("backing up Cloud Foundry", func() {
 
 func getConfigFromFile(path string) runner.Config {
 	configFromFile, err := ioutil.ReadFile(path)
-	if err != nil {
-		panic(fmt.Sprintf("Could not load config from file: %s\n", path))
-	}
+	Expect(err).ToNot(HaveOccurred(), fmt.Sprintf("Could not load config from file: %s\n", path))
 
 	var cfConfig runner.CloudFoundryConfig
 	err = json.Unmarshal(configFromFile, &cfConfig)
-	if err != nil {
-		panic("Could not unmarshal CloudFoundryConfig")
-	}
+	Expect(err).ToNot(HaveOccurred(), "Could not unmarshal CloudFoundryConfig")
 
 	var boshConfig runner.BoshConfig
 	err = json.Unmarshal(configFromFile, &boshConfig)
-	if err != nil {
-		panic("Could not unmarshal BoshConfig")
-	}
+	Expect(err).ToNot(HaveOccurred(), "Could not unmarshal BoshConfig")
 
 	return runner.Config{
 		Deployment: cfConfig,
