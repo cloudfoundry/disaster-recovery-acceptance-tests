@@ -57,7 +57,7 @@ func setConfigFromEnv(shouldIncludeNfsBroker bool) runner.Config {
 		BoshURL:          mustHaveEnv("BOSH_ENVIRONMENT"),
 		BoshClient:       mustHaveEnv("BOSH_CLIENT"),
 		BoshClientSecret: mustHaveEnv("BOSH_CLIENT_SECRET"),
-		BoshCaCert:       mustHaveEnv("BOSH_CERT_PATH"),
+		BoshCaCert:       mustHaveEnv("BOSH_CA_CERT"),
 	}
 	deploymentConfig := runner.CloudFoundryConfig{
 		Name:          mustHaveEnv("CF_DEPLOYMENT_NAME"),
