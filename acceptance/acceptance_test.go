@@ -20,15 +20,15 @@ var _ = Describe("backing up Cloud Foundry", func() {
 	testCases = runner.FilterTestCasesWithRegexes(testcases.OpenSourceTestCases(), skipSuiteName, focusedSuiteName)
 
 	if os.Getenv("CONFIG") != "" {
-		config = setConfigFromFile(os.Getenv("CONFIG"))
+		config = getConfigFromFile(os.Getenv("CONFIG"))
 	} else {
-		config = setConfigFromEnv()
+		config = getConfigFromEnv()
 	}
 
 	runner.RunDisasterRecoveryAcceptanceTests(config, testCases)
 })
 
-func setConfigFromFile(path string) runner.Config {
+func getConfigFromFile(path string) runner.Config {
 	configFromFile, err := ioutil.ReadFile(path)
 	if err != nil {
 		panic(fmt.Sprintf("Could not load config from file: %s\n", path))
@@ -52,7 +52,7 @@ func setConfigFromFile(path string) runner.Config {
 	}
 }
 
-func setConfigFromEnv() runner.Config {
+func getConfigFromEnv() runner.Config {
 	boshConfig := runner.BoshConfig{
 		BoshURL:          mustHaveEnv("BOSH_ENVIRONMENT"),
 		BoshClient:       mustHaveEnv("BOSH_CLIENT"),
