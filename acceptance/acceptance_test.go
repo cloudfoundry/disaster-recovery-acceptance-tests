@@ -22,7 +22,7 @@ var _ = Describe("backing up Cloud Foundry", func() {
 	if os.Getenv("CONFIG") != "" {
 		config = setConfigFromFile(os.Getenv("CONFIG"))
 	} else {
-		config = setConfigFromEnv(containsTestCase(testCases, "cf-nfsbroker"))
+		config = setConfigFromEnv()
 	}
 
 	runner.RunDisasterRecoveryAcceptanceTests(config, testCases)
@@ -52,7 +52,7 @@ func setConfigFromFile(path string) runner.Config {
 	}
 }
 
-func setConfigFromEnv(shouldIncludeNfsBroker bool) runner.Config {
+func setConfigFromEnv() runner.Config {
 	boshConfig := runner.BoshConfig{
 		BoshURL:          mustHaveEnv("BOSH_ENVIRONMENT"),
 		BoshClient:       mustHaveEnv("BOSH_CLIENT"),
@@ -66,13 +66,11 @@ func setConfigFromEnv(shouldIncludeNfsBroker bool) runner.Config {
 		AdminPassword: mustHaveEnv("CF_ADMIN_PASSWORD"),
 	}
 
-	if shouldIncludeNfsBroker {
-		deploymentConfig.NFSServiceName = mustHaveEnv("NFS_SERVICE_NAME")
-		deploymentConfig.NFSPlanName = mustHaveEnv("NFS_PLAN_NAME")
-		deploymentConfig.NFSBrokerUser = os.Getenv("NFS_BROKER_USER")
-		deploymentConfig.NFSBrokerPassword = os.Getenv("NFS_BROKER_PASSWORD")
-		deploymentConfig.NFSBrokerUrl = os.Getenv("NFS_BROKER_URL")
-	}
+	deploymentConfig.NFSServiceName = os.Getenv("NFS_SERVICE_NAME")
+	deploymentConfig.NFSPlanName = os.Getenv("NFS_PLAN_NAME")
+	deploymentConfig.NFSBrokerUser = os.Getenv("NFS_BROKER_USER")
+	deploymentConfig.NFSBrokerPassword = os.Getenv("NFS_BROKER_PASSWORD")
+	deploymentConfig.NFSBrokerUrl = os.Getenv("NFS_BROKER_URL")
 
 	return runner.Config{
 		Deployment: deploymentConfig,
@@ -80,15 +78,6 @@ func setConfigFromEnv(shouldIncludeNfsBroker bool) runner.Config {
 	}
 }
 
-func containsTestCase(testCases []runner.TestCase, name string) bool {
-	for _, tc := range testCases {
-		if tc.Name() == name {
-			return true
-		}
-	}
-
-	return false
-}
 func mustHaveEnv(keyname string) string {
 	val := os.Getenv(keyname)
 	if val == "" {

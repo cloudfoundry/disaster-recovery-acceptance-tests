@@ -5,6 +5,7 @@ import (
 
 	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/runner"
 	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 type NFSTestCase struct {
@@ -23,6 +24,10 @@ func (tc *NFSTestCase) Name() string {
 }
 
 func (tc *NFSTestCase) BeforeBackup(config Config) {
+	By("checking the service name and plane name are provided")
+	Expect(config.Deployment.NFSServiceName).NotTo(BeEmpty(), "required config NFS service name not set")
+	Expect(config.Deployment.NFSPlanName).NotTo(BeEmpty(), "required config NFS plan name not set")
+
 	By("creating an NFS service broker and service instance")
 	RunCommandSuccessfully("cf api --skip-ssl-validation", config.Deployment.ApiUrl)
 	RunCommandSuccessfully("cf login --skip-ssl-validation -a", config.Deployment.ApiUrl,
@@ -35,7 +40,7 @@ func (tc *NFSTestCase) BeforeBackup(config Config) {
 	RunCommandSuccessfully("cf push dratsApp --docker-image docker/httpd --no-start --random-route")
 
 	if config.Deployment.NFSBrokerUser != "" {
-		RunCommandSuccessfully("cf create-service-broker " + "nfsbroker-drats-" + tc.uniqueTestID + " " +
+		RunCommandSuccessfully("cf create-service-broker nfsbroker-drats-" + tc.uniqueTestID + " " +
 			config.Deployment.NFSBrokerUser + " " + config.Deployment.NFSBrokerPassword + " " +
 			config.Deployment.NFSBrokerUrl)
 	}
@@ -59,7 +64,7 @@ func (tc *NFSTestCase) Cleanup(config Config) {
 	By("nfs cleanup")
 	RunCommandSuccessfully("cf delete-org -f acceptance-test-org-" + tc.uniqueTestID)
 	if config.Deployment.NFSBrokerUser != "" {
-		RunCommandSuccessfully("cf delete-service-broker -f " + "nfsbroker-drats-" + tc.uniqueTestID)
+		RunCommandSuccessfully("cf delete-service-broker -f nfsbroker-drats-" + tc.uniqueTestID)
 	}
 }
 
