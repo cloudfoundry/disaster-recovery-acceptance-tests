@@ -1,8 +1,10 @@
 package runner
 
 import (
-	. "github.com/onsi/ginkgo"
+	"fmt"
 	"io/ioutil"
+
+	. "github.com/onsi/ginkgo"
 )
 
 type TestContext struct {

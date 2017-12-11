@@ -6,12 +6,12 @@ import (
 	"io/ioutil"
 	"os"
 
+	"strconv"
+	"time"
+
 	"github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/runner"
 	"github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/testcases"
 	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-	"strconv"
-	"time"
 )
 
 const defaultTimeout = 15 * time.Minute
@@ -35,12 +35,16 @@ var _ = Describe("backing up Cloud Foundry", func() {
 
 func getConfigFromFile(path string) runner.Config {
 	configFromFile, err := ioutil.ReadFile(path)
-	Expect(err).ToNot(HaveOccurred(), fmt.Sprintf("Could not load config from file: %s\n", path))
+	if err != nil {
+		panic(fmt.Sprint(fmt.Sprintf("Could not load config from file: %s\n", path)))
+	}
 
 	conf := runner.Config{}
 	err = json.Unmarshal(configFromFile, &conf)
+	if err != nil {
+		panic(fmt.Sprint("Could not unmarshal Config"))
+	}
 
-	Expect(err).ToNot(HaveOccurred(), "Could not unmarshal Config")
 	if conf.Timeout == 0 {
 		conf.Timeout = defaultTimeout
 	}
