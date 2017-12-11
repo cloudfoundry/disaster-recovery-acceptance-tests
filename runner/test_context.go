@@ -1,7 +1,6 @@
 package runner
 
 import (
-	"fmt"
 	"io/ioutil"
 
 	. "github.com/onsi/ginkgo"
