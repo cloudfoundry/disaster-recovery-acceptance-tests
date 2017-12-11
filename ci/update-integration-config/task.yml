@@ -1,0 +1,27 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: relintdockerhubpushbot/cf-deployment-concourse-tasks
+    tag: v3.19.0
+
+inputs:
+- name: disaster-recovery-acceptance-tests
+- name: integration-configs
+- name: vars-store
+- name: bbl-state-store
+
+outputs:
+- name: updated-integration-configs
+
+params:
+  CF_DEPLOYMENT_NAME: cf
+  INTEGRATION_CONFIG_FILE_PATH: ci/integration_config.json
+  VARS_STORE_FILE_PATH: deployment-vars.yml
+  BBL_STATE_DIR_PATH:
+  SYSTEM_DOMAIN:
+
+run:
+  path: disaster-recovery-acceptance-tests/ci/update-integration-config/task.sh

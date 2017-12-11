@@ -1,0 +1,19 @@
+{
+  "cf_deployment_name": "",
+  "cf_api_url": "",
+  "cf_admin_username": "",
+  "cf_admin_password": "",
+  "nfs_service_name": "",
+  "nfs_plan_name": "",
+  "nfs_broker_user": "",
+  "nfs_broker_password": "",
+  "nfs_broker_url": "",
+  "bosh_environment": "",
+  "bosh_client": "",
+  "bosh_client_secret": "",
+  "bosh_ca_cert": "",
+  "ssh_proxy_user":"",
+  "ssh_proxy_host":"",
+  "ssh_proxy_cidr":"",
+  "ssh_proxy_private_key":""
+}
