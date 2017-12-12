@@ -1,0 +1,18 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source: {repository: cloudfoundrylondon/backup-and-restore}
+
+inputs:
+- name: disaster-recovery-acceptance-tests
+  path: src/github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests
+- name: bbr-binary-release
+- name: drats-integration-config
+
+params:
+  CONFIG_FILE_PATH: drats_integration_config.json
+
+run:
+  path: src/github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/ci/drats-with-integration-config/task.sh

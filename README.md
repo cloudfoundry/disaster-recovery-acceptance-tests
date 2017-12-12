@@ -2,7 +2,15 @@
 
 Tests if Cloud Foundry can be backed up and restored. The tests will back up from and restore to `CF_DEPLOYMENT_NAME`.
 
-## Running DRATS
+## Prerequisites
+1. Install golang, per golang.org.   
+1. Install `ginkgo`
+   ```bash
+   go get github.com/onsi/ginkgo/ginkgo
+   ```
+1. Install `dep`
+
+## Running DRATS with Envrironment Variables
 
 1. Spin up a Cloud Foundry deployment.
     * CF on BOSH Lite is supported.
@@ -33,6 +41,59 @@ Tests if Cloud Foundry can be backed up and restored. The tests will back up fro
     * Set `CF_VARS_STORE_PATH` to the path to the CF vars-store file.
     * Set `BOSH_CLI_NAME` to the name of the BOSH CLI executable on your machine if it isn't `bosh`.
     * The script will search for NFS broker credentials in the CF vars-store file and will skip the NFS test case if those credentials are not present.
+
+## Running DRATS with Integration Config
+
+#### From a jumpbox
+1. Create an integration config json file, for example:
+   ```bash
+   cat > integration_config.json <<EOF
+    {
+     "cf_api_url": "api.<cf_system_domain>",
+     "cf_deployment_name": "cf",
+     "cf_admin_username": "admin",
+     "cf_admin_password": "<cf_admin_password>",
+     "bosh_environment": "https://<bosh_director_ip>:25555",
+     "bosh_client": "admin",
+     "bosh_client_secret": "<bosh_admin_password>",
+     "bosh_ca_cert": "-----BEGIN CERTIFICATE------\n...\n------END CERTIFICATE-----"
+   }
+   EOF
+   export CONFIG=$PWD/integration_config.json
+   ```
+1. Setup the following environment variables:
+   * `BBR_BUILD_PATH`
+1. [Optional] Change the default timeout by setting `DEFAULT_TIMEOUT_MINS`.
+1. Run the tests
+   ```bash
+   dep ensure
+   ginkgo -v --trace acceptance
+   ```
+#### Locally
+1. Follow first two steps in jumpbox instructions.
+1. Add the following additional properties to the integration config:
+   *  `ssh_proxy_user`
+   *  `ssh_proxy_host`
+   *  `ssh_proxy_private_key`
+   *  `ssh_proxy_cidr`
+1. Run `scripts/run_acceptance_tests_local_with_config.sh`
+
+### Integration Config Variables
+* `cf_deployment_name` - name of the Cloud Foundry deployment to backup and restore
+* `cf_api_url` - Cloud Foundry api url
+* `cf_admin_username` - Cloud Foundry api admin user
+* `cf_admin_password` - Cloud Foundry api admin password
+* `bosh_environment` - URL of BOSH Director which has deployed the above Cloud Foundries
+* `bosh_client` - BOSH Director username
+* `bosh_client_secret` - BOSH Director password
+* `bosh_ca_cert` - BOSH Director's CA cert content
+
+#### Optional Variables
+* `nfs_service_name` - Environment variable required to run NFS test case
+* `nfs_plan_name` - Environment variable required to run NFS test case
+* `nfs_broker_user` - Environment variable required to run NFS test case
+* `nfs_broker_password` - Environment variable required to run NFS test case
+* `nfs_broker_url` - Environment variable required to run NFS test case
 
 ### Focusing/Skipping a test suite
 

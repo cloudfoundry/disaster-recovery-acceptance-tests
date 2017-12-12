@@ -8,7 +8,7 @@ import (
 
 // Return all test cases whose names DO NOT match the skip regex or DO match the focus regex
 // (Inspired by ginkgo's --skip and --focus flags)
-func FilterTestCasesWithRegexes(allCases []TestCase , skip, focus string) []TestCase {
+func FilterTestCasesWithRegexes(allCases []TestCase, skip, focus string) []TestCase {
 	if skip == "" && focus == "" {
 		return allCases
 	}
