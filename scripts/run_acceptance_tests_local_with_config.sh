@@ -5,18 +5,18 @@ set -eu -o pipefail
 # ENV
 : "${GOPATH:?}"
 : "${CONFIG:?}"
-: "${BOSH_GW_HOST:?}"
-: "${BOSH_GW_USER:?}"
-: "${BOSH_GW_PRIVATE_KEY_CONTENTS:?}"
-: "${SSH_DESTINATION_CIDR:="10.0.0.0/8"}"
-
 # The following params are optional
 : "${SKIP_SUITE_NAME:=""}"
 
 tmpdir="$( mktemp -d /tmp/run-drats.XXXXXXXXXX )"
 
+BOSH_GW_USER=`jq -r .ssh_proxy_user ${CONFIG}`
+BOSH_GW_HOST=`jq -r .ssh_proxy_host ${CONFIG}`
+BOSH_GW_PRIVATE_KEY=`jq -r .ssh_proxy_private_key ${CONFIG}`
+SSH_DESTINATION_CIDR=`jq -r .ssh_proxy_cidr ${CONFIG}`
+
 ssh_key="${tmpdir}/bosh.pem"
-echo "${BOSH_GW_PRIVATE_KEY_CONTENTS}" > "${ssh_key}"
+echo "${BOSH_GW_PRIVATE_KEY}" > "${ssh_key}"
 chmod 600 "${ssh_key}"
 echo "Starting SSH tunnel, you may be prompted for your OS password..."
 sudo true # prompt for password

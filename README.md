@@ -71,11 +71,11 @@ Tests if Cloud Foundry can be backed up and restored. The tests will back up fro
    ```
 #### Locally
 1. Follow first two steps in jumpbox instructions.
-1. Setup the following environment variables:
-   *  `SSH_DESTINATION_CIDR`
-   *  `BOSH_GW_HOST`
-   *  `BOSH_GW_USER`
-   *  `BOSH_GW_PRIVATE_KEY_CONTENTS`
+1. Add the following additional properties to the integration config:
+   *  `ssh_proxy_user`
+   *  `ssh_proxy_host`
+   *  `ssh_proxy_private_key`
+   *  `ssh_proxy_cidr`
 1. Run `scripts/run_acceptance_tests_local_with_config.sh`
 
 ### Integration Config Variables
