@@ -12,8 +12,10 @@
   "bosh_client": "",
   "bosh_client_secret": "",
   "bosh_ca_cert": "",
-  "ssh_proxy_user":"",
-  "ssh_proxy_host":"",
-  "ssh_proxy_cidr":"",
-  "ssh_proxy_private_key":""
+  "ssh_proxy_user": "",
+  "ssh_proxy_host": "",
+  "ssh_proxy_cidr": "",
+  "ssh_proxy_private_key": "",
+  "timeout": 1800000,
+  "delete_and_redeploy_cf": false
 }
