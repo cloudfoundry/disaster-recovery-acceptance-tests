@@ -45,11 +45,23 @@ func getConfigFromFile(path string) runner.Config {
 		panic(fmt.Sprint("Could not unmarshal Config"))
 	}
 
-	if conf.Timeout == 0 {
+	timeoutConfig := timeoutConfig{}
+	err = json.Unmarshal(configFromFile, &timeoutConfig)
+	if err != nil {
+		panic(fmt.Sprint("Could not unmarshal timeout"))
+	}
+
+	if timeoutConfig.TimeoutInMinutes == 0 {
 		conf.Timeout = defaultTimeout
+	} else {
+		conf.Timeout = time.Minute * time.Duration(timeoutConfig.TimeoutInMinutes)
 	}
 
 	return conf
+}
+
+type timeoutConfig struct {
+	TimeoutInMinutes int64 `json:"timeout_in_minutes"`
 }
 
 func getConfigFromEnv() runner.Config {

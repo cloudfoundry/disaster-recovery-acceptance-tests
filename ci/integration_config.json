@@ -16,6 +16,6 @@
   "ssh_proxy_host": "",
   "ssh_proxy_cidr": "",
   "ssh_proxy_private_key": "",
-  "timeout": 1800000,
+  "timeout_in_minutes": 30,
   "delete_and_redeploy_cf": false
 }
