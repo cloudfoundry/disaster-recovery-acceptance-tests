@@ -42,9 +42,15 @@ Tests if Cloud Foundry can be backed up and restored. The tests will back up fro
     * Set `BOSH_CLI_NAME` to the name of the BOSH CLI executable on your machine if it isn't `bosh`.
     * The script will search for NFS broker credentials in the CF vars-store file and will skip the NFS test case if those credentials are not present.
 
+### Focusing/Skipping a test suite
+
+Run DRATS as usual but set the environment variable `FOCUSED_SUITE_NAME` and/or `SKIP_SUITE_NAME` to a regex matching the name(s) of test suites. Only those suites that both match `FOCUSED_SUITE_NAME` and don't match `SKIP_SUITE_NAME` will be run. Leaving either of these unset is supported. (Note that at the moment it is not possible to use the `SKIP_SUITE_NAME` parameter with `run_acceptance_tests_with_bbl_env.sh` if NFS is not configured, as in the absence of the optional NFS environment variables the `SKIP_SUITE_NAME` environment variable is overridden in that script).
+
+If these variables are not set, all test suites returned by [`testcases.OpenSourceTestCases()`](https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/blob/master/testcases/testcase_helper.go#L9) will be run.
+
 ## Running DRATS with Integration Config
 
-#### From a jumpbox
+### From a jumpbox
 1. Create an integration config json file, for example:
    ```bash
    cat > integration_config.json <<EOF
@@ -56,7 +62,13 @@ Tests if Cloud Foundry can be backed up and restored. The tests will back up fro
      "bosh_environment": "https://<bosh_director_ip>:25555",
      "bosh_client": "admin",
      "bosh_client_secret": "<bosh_admin_password>",
-     "bosh_ca_cert": "-----BEGIN CERTIFICATE------\n...\n------END CERTIFICATE-----"
+     "bosh_ca_cert": "-----BEGIN CERTIFICATE------\n...\n------END CERTIFICATE-----",
+     "include_cf-app": true,
+     "include_cf-networking": true,
+     "include_cf-uaa": true,
+     "include_cf-credhub": true,
+     "include_cf-routing": true,
+     "include_app-uptime": true
    }
    EOF
    export CONFIG=$PWD/integration_config.json
@@ -69,7 +81,7 @@ Tests if Cloud Foundry can be backed up and restored. The tests will back up fro
    dep ensure
    ginkgo -v --trace acceptance
    ```
-#### Locally
+### Locally
 1. Follow first two steps in jumpbox instructions.
 1. Add the following additional properties to the integration config:
    *  `ssh_proxy_user`
@@ -87,6 +99,7 @@ Tests if Cloud Foundry can be backed up and restored. The tests will back up fro
 * `bosh_client` - BOSH Director username
 * `bosh_client_secret` - BOSH Director password
 * `bosh_ca_cert` - BOSH Director's CA cert content
+* `include_<testcase-name>` - Flag for whether to run a given testcase. If omitted defaults to false
 
 #### Optional Variables
 * `nfs_service_name` - Environment variable required to run NFS test case
@@ -94,12 +107,8 @@ Tests if Cloud Foundry can be backed up and restored. The tests will back up fro
 * `nfs_broker_user` - Environment variable required to run NFS test case
 * `nfs_broker_password` - Environment variable required to run NFS test case
 * `nfs_broker_url` - Environment variable required to run NFS test case
-
-### Focusing/Skipping a test suite
-
-Run DRATS as usual but set the environment variable `FOCUSED_SUITE_NAME` and/or `SKIP_SUITE_NAME` to a regex matching the name(s) of test suites. Only those suites that either match `FOCUSED_SUITE_NAME` or don't match `SKIP_SUITE_NAME` will be run.  Leaving either of these unset is supported. (Note that at the moment it is not possible to use the `SKIP_SUITE_NAME` parameter with `run_acceptance_tests_with_bbl_env.sh` if NFS is not configured, as in the absence of the optional NFS environment variables the `SKIP_SUITE_NAME` environment variable is overridden in that script).
-
-If these variables are not set, all test suites returned by [`testcases.OpenSourceTestCases()`](https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/blob/master/testcases/testcase_helper.go#L9) will be run.
+* `timeout_in_minutes` - Default ginkgo `Eventually` timeout. Defaults to 15
+* `delete_and_redeploy_cf` - Destroy and redeploy the cf between after backup and restore. Defaults to false.
 
 ## Test Structure
 
