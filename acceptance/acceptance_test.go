@@ -60,7 +60,7 @@ func getConfigAndFilterFromFile(path string) (runner.Config, runner.TestCaseFilt
 		panic(fmt.Sprint("Could not unmarshal Filter"))
 	}
 
-	return conf, nil
+	return conf, filter
 }
 
 type timeoutConfig struct {
