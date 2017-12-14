@@ -21,7 +21,11 @@ pushd $1
         export NFS_BROKER_URL="http://nfs-broker.${CF_DOMAIN}"
     else
         echo "Skipping cf-nfsrboker testcase because nfs-broker-password is not present in ${CF_VARS_STORE_PATH}"
-        export SKIP_SUITE_NAME="cf-nfsbroker"
+        if [ -z ${SKIP_SUITE_NAME} ]; then
+            export SKIP_SUITE_NAME="cf-nfsbroker"
+        else
+            export SKIP_SUITE_NAME="(${SKIP_SUITE_NAME})|cf-nfsbroker"
+        fi
     fi
 popd
 
