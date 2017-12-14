@@ -1,49 +1,75 @@
 package runner
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
-	"fmt"
 )
 
-// Return all test cases whose names DO NOT match the skip regex or DO match the focus regex
-// (Inspired by ginkgo's --skip and --focus flags)
-func FilterTestCasesWithRegexes(allCases []TestCase, skip, focus string) []TestCase {
-	if skip == "" && focus == "" {
-		return allCases
-	}
+type TestCaseFilter interface {
+	Filter([]TestCase) []TestCase
+}
 
-	testCases := []TestCase{}
-	for _, tc := range allCases {
-		if !shouldSkipCase(skip, focus, tc) {
-			testCases = append(testCases, tc)
-		}
-	}
+type RegexTestCaseFilter struct {
+	focusedSuiteName string
+	skipSuiteName    string
+}
 
-	if (len(testCases)) > 0 {
+func NewRegexTestCaseFilter(focusedSuiteName, skipSuiteName string) RegexTestCaseFilter {
+	return RegexTestCaseFilter{focusedSuiteName: focusedSuiteName, skipSuiteName: skipSuiteName}
+}
+
+func (f RegexTestCaseFilter) Filter(testCases []TestCase) []TestCase {
+	if f.skipSuiteName == "" && f.focusedSuiteName == "" {
 		return testCases
 	}
 
-	panic(fmt.Sprintf("Unable to find test case matching regex %s for focus or %s for skipping\n", focus, skip))
+	var filteredTestCases []TestCase
+	for _, testCase := range testCases {
+		if shouldRun(f.skipSuiteName, f.focusedSuiteName, testCase) {
+			filteredTestCases = append(filteredTestCases, testCase)
+		}
+	}
+
+	if (len(filteredTestCases)) > 0 {
+		return filteredTestCases
+	}
+
+	panic(fmt.Sprintf("Unable to find test case matching regex %s for focus or %s for skipping\n", f.focusedSuiteName, f.skipSuiteName))
 }
 
-func shouldSkipCase(skip, focus string, tc TestCase) bool {
+func shouldRun(skip, focus string, testCase TestCase) bool {
+	caseName := testCase.Name()
+
 	matchesFocus := true
-	matchesSkip := false
-
-	caseName := tc.Name()
-
 	if focus != "" {
 		focusFilter := regexp.MustCompile(focus)
 		matchesFocus = focusFilter.MatchString(caseName)
 	}
 
+	matchesSkip := false
 	if skip != "" {
 		skip = strings.TrimSpace(skip)
 		skipFilter := regexp.MustCompile(skip)
 		matchesSkip = skipFilter.MatchString(caseName)
 	}
 
-	return !matchesFocus || matchesSkip
+	return matchesFocus && !matchesSkip
 }
 
+type IntegrationConfigTestCaseFilter map[string]interface{}
+
+func (f IntegrationConfigTestCaseFilter) Filter(testCases []TestCase) []TestCase {
+	var filteredTestCases []TestCase
+	for _, testCase := range testCases {
+		if f["include_"+testCase.Name()] == true {
+			filteredTestCases = append(filteredTestCases, testCase)
+		}
+	}
+
+	if (len(filteredTestCases)) > 0 {
+		return filteredTestCases
+	}
+
+	panic(fmt.Sprintf("Unable to find any test case included by the config"))
+}

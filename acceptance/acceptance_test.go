@@ -18,22 +18,19 @@ const defaultTimeout = 15 * time.Minute
 
 var _ = Describe("backing up Cloud Foundry", func() {
 	var config runner.Config
-	var testCases []runner.TestCase
-
-	focusedSuiteName := os.Getenv("FOCUSED_SUITE_NAME")
-	skipSuiteName := os.Getenv("SKIP_SUITE_NAME")
-	testCases = runner.FilterTestCasesWithRegexes(testcases.OpenSourceTestCases(), skipSuiteName, focusedSuiteName)
+	var filter runner.TestCaseFilter
 
 	if os.Getenv("CONFIG") != "" {
-		config = getConfigFromFile(os.Getenv("CONFIG"))
+		config, filter = getConfigAndFilterFromFile(os.Getenv("CONFIG"))
 	} else {
 		config = getConfigFromEnv()
+		filter = runner.NewRegexTestCaseFilter(os.Getenv("FOCUSED_SUITE_NAME"), os.Getenv("SKIP_SUITE_NAME"))
 	}
 
-	runner.RunDisasterRecoveryAcceptanceTests(config, testCases)
+	runner.RunDisasterRecoveryAcceptanceTests(config, filter.Filter(testcases.OpenSourceTestCases()))
 })
 
-func getConfigFromFile(path string) runner.Config {
+func getConfigAndFilterFromFile(path string) (runner.Config, runner.TestCaseFilter) {
 	configFromFile, err := ioutil.ReadFile(path)
 	if err != nil {
 		panic(fmt.Sprint(fmt.Sprintf("Could not load config from file: %s\n", path)))
@@ -57,7 +54,13 @@ func getConfigFromFile(path string) runner.Config {
 		conf.Timeout = time.Minute * time.Duration(timeoutConfig.TimeoutInMinutes)
 	}
 
-	return conf
+	filter := runner.IntegrationConfigTestCaseFilter{}
+	err = json.Unmarshal(configFromFile, &filter)
+	if err != nil {
+		panic(fmt.Sprint("Could not unmarshal Filter"))
+	}
+
+	return conf, nil
 }
 
 type timeoutConfig struct {
