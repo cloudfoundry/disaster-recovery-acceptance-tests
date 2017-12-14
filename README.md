@@ -140,6 +140,7 @@ The methods that need to be implemented are `BeforeBackup(common.Config)`, `Afte
 ## Running DRATs in your CI
 
 We have shared a [task](https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/tree/master/ci/drats) to run DRATS with your CI. The task establishes an SSH tunnel using [`sshuttle`](http://sshuttle.readthedocs.io) so that it can run from outside the network. Note that this task needs a privileged container.
+You can also find your pipeline definition here: [pipeline](https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/tree/master/ci/pipeline.yml)
 
 ## Debugging your DRATS run
 

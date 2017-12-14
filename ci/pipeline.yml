@@ -1,0 +1,789 @@
+---
+resource_types:
+- name: pull-request
+  type: docker-image
+  source:
+    repository: jtarchie/pr
+    tag: v25
+
+resources:
+- name: cf-deployment-concourse-tasks
+  type: git
+  source:
+    branch: master
+    uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
+    tag_filter: v4.*
+- name: cf-deployment
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/cf-deployment.git
+    branch: master
+- name: drats-pr-ragdoll-bbl-state
+  type: git
+  source:
+    uri: git@github.com:pivotal-cf/bosh-backup-and-restore-meta.git
+    private_key: {{git-private-key}}
+    branch: master
+- name: drats-pr-ragdoll-vars-store
+  type: git
+  source:
+    uri: git@github.com:pivotal-cf/bosh-backup-and-restore-meta.git
+    private_key: {{git-private-key}}
+    branch: master
+
+- name: drats-persian-bbl-state
+  type: git
+  source:
+    uri: git@github.com:pivotal-cf/bosh-backup-and-restore-meta.git
+    private_key: {{git-private-key}}
+    branch: master
+- name: drats-persian-vars-store
+  type: git
+  source:
+    uri: git@github.com:pivotal-cf/bosh-backup-and-restore-meta.git
+    private_key: {{git-private-key}}
+    branch: master
+- name: drats-dragon-li-bbl-state
+  type: git
+  source:
+    uri: git@github.com:pivotal-cf/bosh-backup-and-restore-meta.git
+    private_key: {{git-private-key}}
+    branch: master
+- name: drats-dragon-li-vars-store
+  type: git
+  source:
+    uri: git@github.com:pivotal-cf/bosh-backup-and-restore-meta.git
+    private_key: {{git-private-key}}
+    branch: master
+
+- name: drats-papillon-bbl-state
+  type: git
+  source:
+    uri: git@github.com:pivotal-cf/bosh-backup-and-restore-meta.git
+    private_key: {{git-private-key}}
+    branch: master
+- name: drats-papillon-vars-store
+  type: git
+  source:
+    uri: git@github.com:pivotal-cf/bosh-backup-and-restore-meta.git
+    private_key: {{git-private-key}}
+    branch: master
+
+- name: drats-with-config-manx-bbl-state
+  type: git
+  source:
+    uri: git@github.com:pivotal-cf/bosh-backup-and-restore-meta.git
+    private_key: {{git-private-key}}
+    branch: master
+- name: drats-with-config-manx-vars-store
+  type: git
+  source:
+    uri: git@github.com:pivotal-cf/bosh-backup-and-restore-meta.git
+    private_key: {{git-private-key}}
+    branch: master
+
+- name: continuous-drats-bbl-state
+  type: git
+  source:
+    uri: git@github.com:pivotal-cf/bosh-backup-and-restore-meta.git
+    private_key: {{git-private-key}}
+    branch: master
+- name: continuous-drats-vars-store
+  type: git
+  source:
+    uri: git@github.com:pivotal-cf/bosh-backup-and-restore-meta.git
+    private_key: {{git-private-key}}
+    branch: master
+
+- name: continuous-counter
+  type: semver
+  source:
+    bucket: bosh-backup-and-restore-builds
+    region_name: eu-west-1
+    key: current-continuous-drats-version
+    access_key_id: {{aws-access-key-id}}
+    secret_access_key: {{aws-secret-access-key}}
+
+- name: continuous-counter-input
+  type: semver
+  source:
+    bucket: bosh-backup-and-restore-builds
+    region_name: eu-west-1
+    key: current-continuous-drats-version
+    access_key_id: {{aws-access-key-id}}
+    secret_access_key: {{aws-secret-access-key}}
+
+- name: disaster-recovery-acceptance-tests-prs
+  type: pull-request
+  source:
+    repo: cloudfoundry-incubator/disaster-recovery-acceptance-tests
+    access_token: {{github-access-token}}
+    branch: master
+- name: bbr-binary-release
+  type: github-release
+  source:
+      owner: cloudfoundry-incubator
+      repository: bosh-backup-and-restore
+- name: disaster-recovery-acceptance-tests
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests.git
+    branch: master
+
+jobs:
+
+### DEPLOY CF
+
+- name: deploy-cf-drats-pr-ragdoll
+  serial: true
+  serial_groups: [drats-pr-ragdoll]
+  plan:
+  - aggregate:
+    - get: cf-deployment-concourse-tasks
+    - get: cf-deployment
+      trigger: true
+    - get: drats-pr-ragdoll-bbl-state
+    - get: drats-pr-ragdoll-vars-store
+  - task: upload-stemcell
+    file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
+    input_mapping:
+      bbl-state: drats-pr-ragdoll-bbl-state
+      cf-deployment: cf-deployment
+    params:
+      INFRASTRUCTURE: google
+      BBL_STATE_DIR: drats-pr-ragdoll/
+  - task: deploy-cf
+    file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
+    input_mapping:
+      bbl-state: drats-pr-ragdoll-bbl-state
+      cf-deployment: cf-deployment
+      ops-files: cf-deployment
+      vars-store: drats-pr-ragdoll-vars-store
+      vars-files: drats-pr-ragdoll-vars-store
+    params:
+      BBL_IAAS: gcp
+      BBL_GCP_SERVICE_ACCOUNT_KEY: gcp_service_account_key.json
+      BBL_GCP_PROJECT_ID: cf-backup-and-restore
+      BBL_STATE_DIR: drats-pr-ragdoll/
+      SYSTEM_DOMAIN: drats-pr-ragdoll.cf-app.com
+      OPS_FILES: "operations/scale-to-one-az.yml operations/use-compiled-releases.yml operations/experimental/enable-backup-restore.yml operations/enable-nfs-volume-service.yml operations/experimental/enable-nfs-broker-backup.yml operations/experimental/enable-instance-identity-credentials.yml operations/experimental/secure-service-credentials.yml operations/experimental/disable-interpolate-service-bindings.yml operations/experimental/enable-backup-restore-credhub.yml operations/experimental/enable-traffic-to-internal-networks.yml operations/experimental/use-bosh-dns.yml operations/experimental/use-bosh-dns-for-containers.yml"
+      VARS_STORE_FILE: drats-pr-ragdoll/cf-deployment-variables.yml
+      GIT_COMMIT_EMAIL: cf-lazarus@pivotal.io
+      GIT_COMMIT_USERNAME: "Backup & Restore Concourse"
+    ensure:
+      put: drats-pr-ragdoll-vars-store
+      params:
+        repository: updated-vars-store
+        rebase: true
+
+- name: deploy-cf-drats-dragon-li
+  serial: true
+  serial_groups: [drats-dragon-li]
+  plan:
+  - aggregate:
+    - get: cf-deployment-concourse-tasks
+    - get: cf-deployment
+      trigger: true
+    - get: drats-dragon-li-bbl-state
+    - get: drats-dragon-li-vars-store
+  - task: upload-stemcell
+    file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
+    input_mapping:
+      bbl-state: drats-dragon-li-bbl-state
+      cf-deployment: cf-deployment
+    params:
+      INFRASTRUCTURE: google
+      BBL_STATE_DIR: drats-dragon-li/
+  - task: deploy-cf
+    file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
+    input_mapping:
+      bbl-state: drats-dragon-li-bbl-state
+      cf-deployment: cf-deployment
+      ops-files: cf-deployment
+      vars-store: drats-dragon-li-vars-store
+      vars-files: drats-dragon-li-vars-store
+    params:
+      BBL_IAAS: gcp
+      BBL_GCP_SERVICE_ACCOUNT_KEY: gcp_service_account_key.json
+      BBL_GCP_PROJECT_ID: cf-backup-and-restore
+      BBL_STATE_DIR: drats-dragon-li/
+      SYSTEM_DOMAIN: drats-dragon-li.cf-app.com
+      OPS_FILES: "operations/scale-to-one-az.yml operations/use-compiled-releases.yml operations/experimental/enable-backup-restore.yml operations/enable-nfs-volume-service.yml operations/experimental/enable-nfs-broker-backup.yml operations/experimental/enable-instance-identity-credentials.yml operations/experimental/secure-service-credentials.yml operations/experimental/disable-interpolate-service-bindings.yml operations/experimental/enable-backup-restore-credhub.yml operations/experimental/enable-traffic-to-internal-networks.yml operations/experimental/use-bosh-dns.yml operations/experimental/use-bosh-dns-for-containers.yml"
+      VARS_STORE_FILE: drats-dragon-li/cf-deployment-variables.yml
+      GIT_COMMIT_EMAIL: cf-lazarus@pivotal.io
+      GIT_COMMIT_USERNAME: "Backup & Restore Concourse"
+    ensure:
+      put: drats-dragon-li-vars-store
+      params:
+        repository: updated-vars-store
+        rebase: true
+
+- name: deploy-cf-drats-persian
+  serial: true
+  serial_groups: [drats-persian]
+  plan:
+  - aggregate:
+    - get: cf-deployment-concourse-tasks
+    - get: cf-deployment
+      trigger: true
+    - get: drats-persian-bbl-state
+    - get: drats-persian-vars-store
+  - task: upload-stemcell
+    file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
+    input_mapping:
+      bbl-state: drats-persian-bbl-state
+      cf-deployment: cf-deployment
+    params:
+      INFRASTRUCTURE: google
+      BBL_STATE_DIR: drats-persian/
+  - task: deploy-cf
+    file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
+    input_mapping:
+      bbl-state: drats-persian-bbl-state
+      cf-deployment: cf-deployment
+      ops-files: cf-deployment
+      vars-store: drats-persian-vars-store
+      vars-files: drats-persian-vars-store
+    params:
+      BBL_IAAS: gcp
+      BBL_GCP_SERVICE_ACCOUNT_KEY: gcp_service_account_key.json
+      BBL_GCP_PROJECT_ID: cf-backup-and-restore
+      BBL_STATE_DIR: drats-persian/
+      SYSTEM_DOMAIN: drats-persian.cf-app.com
+      OPS_FILES: "operations/scale-to-one-az.yml operations/use-compiled-releases.yml operations/experimental/enable-backup-restore.yml operations/enable-nfs-volume-service.yml operations/experimental/enable-nfs-broker-backup.yml operations/experimental/enable-instance-identity-credentials.yml operations/experimental/secure-service-credentials.yml  operations/experimental/disable-interpolate-service-bindings.yml operations/experimental/enable-backup-restore-credhub.yml operations/experimental/enable-traffic-to-internal-networks.yml operations/experimental/use-bosh-dns.yml operations/experimental/use-bosh-dns-for-containers.yml"
+
+      VARS_STORE_FILE: drats-persian/cf-deployment-variables.yml
+      GIT_COMMIT_EMAIL: cf-lazarus@pivotal.io
+      GIT_COMMIT_USERNAME: "Backup & Restore Concourse"
+    ensure:
+      put: drats-persian-vars-store
+      params:
+        repository: updated-vars-store
+        rebase: true
+
+- name: deploy-cf-continuous-drats
+  serial: true
+  serial_groups: [continuous-drats]
+  plan:
+  - aggregate:
+    - get: cf-deployment-concourse-tasks
+    - get: cf-deployment
+      trigger: true
+    - get: continuous-drats-bbl-state
+    - get: continuous-drats-vars-store
+  - task: upload-stemcell
+    file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
+    input_mapping:
+      bbl-state: continuous-drats-bbl-state
+      cf-deployment: cf-deployment
+    params:
+      INFRASTRUCTURE: google
+      BBL_STATE_DIR: continuous-drats/
+  - task: deploy-cf
+    file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
+    input_mapping:
+      bbl-state: continuous-drats-bbl-state
+      cf-deployment: cf-deployment
+      ops-files: cf-deployment
+      vars-store: continuous-drats-vars-store
+      vars-files: continuous-drats-vars-store
+    params:
+      BBL_IAAS: gcp
+      BBL_GCP_SERVICE_ACCOUNT_KEY: gcp_service_account_key.json
+      BBL_GCP_PROJECT_ID: cf-backup-and-restore
+      BBL_STATE_DIR: continuous-drats/
+      SYSTEM_DOMAIN: continuous-drats.cf-app.com
+      OPS_FILES: "operations/use-compiled-releases.yml operations/experimental/enable-backup-restore.yml operations/enable-nfs-volume-service.yml operations/experimental/enable-nfs-broker-backup.yml operations/experimental/enable-instance-identity-credentials.yml operations/experimental/secure-service-credentials.yml  operations/experimental/disable-interpolate-service-bindings.yml operations/experimental/enable-backup-restore-credhub.yml operations/experimental/enable-traffic-to-internal-networks.yml operations/experimental/use-bosh-dns.yml operations/experimental/use-bosh-dns-for-containers.yml"
+      VARS_STORE_FILE: continuous-drats/cf-deployment-variables.yml
+      GIT_COMMIT_EMAIL: cf-lazarus@pivotal.io
+      GIT_COMMIT_USERNAME: "Backup & Restore Concourse"
+    ensure:
+      put: continuous-drats-vars-store
+      params:
+        repository: updated-vars-store
+        rebase: true
+
+- name: deploy-cf-drats-papillon
+  serial: true
+  serial_groups: [drats-papillon]
+  plan:
+  - aggregate:
+    - get: cf-deployment-concourse-tasks
+    - get: cf-deployment
+      trigger: true
+    - get: drats-papillon-bbl-state
+    - get: drats-papillon-vars-store
+    - get: disaster-recovery-acceptance-tests
+  - task: upload-stemcell
+    file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
+    input_mapping:
+      bbl-state: drats-papillon-bbl-state
+      cf-deployment: cf-deployment
+    params:
+      INFRASTRUCTURE: google
+      BBL_STATE_DIR: drats-papillon/
+  - task: collect-ops-files
+    file: cf-deployment-concourse-tasks/collect-ops-files/task.yml
+    input_mapping:
+      base-ops-files: cf-deployment
+      new-ops-files: disaster-recovery-acceptance-tests
+    params:
+     BASE_OPS_FILE_DIR: operations
+     NEW_OPS_FILES: "ci/operations/scale-down-credhub-to-one.yml"
+  - task: deploy-cf
+    file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
+    input_mapping:
+      bbl-state: drats-papillon-bbl-state
+      cf-deployment: cf-deployment
+      ops-files: collected-ops-files
+      vars-store: drats-papillon-vars-store
+      vars-files: drats-papillon-vars-store
+    params:
+      BBL_IAAS: gcp
+      BBL_GCP_SERVICE_ACCOUNT_KEY: gcp_service_account_key.json
+      BBL_GCP_PROJECT_ID: cf-backup-and-restore
+      BBL_STATE_DIR: drats-papillon/
+      SYSTEM_DOMAIN: drats-papillon.cf-app.com
+      OPS_FILES: "operations/scale-to-one-az.yml operations/use-compiled-releases.yml operations/experimental/enable-backup-restore.yml operations/enable-nfs-volume-service.yml operations/experimental/enable-nfs-broker-backup.yml operations/experimental/enable-instance-identity-credentials.yml operations/experimental/secure-service-credentials.yml  operations/experimental/disable-interpolate-service-bindings.yml operations/experimental/enable-backup-restore-credhub.yml operations/experimental/enable-traffic-to-internal-networks.yml operations/experimental/use-bosh-dns.yml operations/experimental/use-bosh-dns-for-containers.yml operations/scale-down-credhub-to-one.yml"
+      VARS_STORE_FILE: drats-papillon/cf-deployment-variables.yml
+      GIT_COMMIT_EMAIL: cf-lazarus@pivotal.io
+      GIT_COMMIT_USERNAME: "Backup & Restore Concourse"
+    ensure:
+      put: drats-papillon-vars-store
+      params:
+        repository: updated-vars-store
+        rebase: true
+
+- name: deploy-cf-drats-with-config-manx
+  serial: true
+  serial_groups: [drats-with-config-manx]
+  plan:
+  - aggregate:
+    - get: cf-deployment-concourse-tasks
+    - get: cf-deployment
+      trigger: true
+    - get: drats-with-config-manx-bbl-state
+    - get: drats-with-config-manx-vars-store
+  - task: upload-stemcell
+    file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
+    input_mapping:
+      bbl-state: drats-with-config-manx-bbl-state
+      cf-deployment: cf-deployment
+    params:
+      INFRASTRUCTURE: google
+      BBL_STATE_DIR: drats-with-config-manx/
+  - task: deploy-cf
+    file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
+    input_mapping:
+      bbl-state: drats-with-config-manx-bbl-state
+      cf-deployment: cf-deployment
+      ops-files: cf-deployment
+      vars-store: drats-with-config-manx-vars-store
+      vars-files: drats-with-config-manx-vars-store
+    params:
+      BBL_IAAS: gcp
+      BBL_GCP_SERVICE_ACCOUNT_KEY: gcp_service_account_key.json
+      BBL_GCP_PROJECT_ID: cf-backup-and-restore
+      BBL_STATE_DIR: drats-with-config-manx/
+      SYSTEM_DOMAIN: drats-with-config-manx.cf-app.com
+      OPS_FILES: "operations/scale-to-one-az.yml operations/use-compiled-releases.yml operations/experimental/enable-backup-restore.yml operations/enable-nfs-volume-service.yml operations/experimental/enable-nfs-broker-backup.yml operations/experimental/enable-instance-identity-credentials.yml operations/experimental/secure-service-credentials.yml  operations/experimental/disable-interpolate-service-bindings.yml operations/experimental/enable-backup-restore-credhub.yml operations/experimental/enable-traffic-to-internal-networks.yml operations/experimental/use-bosh-dns.yml operations/experimental/use-bosh-dns-for-containers.yml"
+      VARS_STORE_FILE: drats-with-config-manx/cf-deployment-variables.yml
+      GIT_COMMIT_EMAIL: cf-lazarus@pivotal.io
+      GIT_COMMIT_USERNAME: "Backup & Restore Concourse"
+    ensure:
+      put: drats-with-config-manx-vars-store
+      params:
+        repository: updated-vars-store
+        rebase: true
+
+### RUN TESTS
+
+- name: run-drats-prs
+  serial: true
+  serial_groups: [drats-pr-ragdoll]
+  plan:
+  - get: cf-deployment
+    passed: [deploy-cf-drats-pr-ragdoll]
+    trigger: true
+  - get: disaster-recovery-acceptance-tests-prs
+    trigger: true
+    version: every
+  - get: bbr-binary-release
+    version: { tag: "v1.1.0" }
+    trigger: true
+  - put: disaster-recovery-acceptance-tests-prs
+    params:
+      path: disaster-recovery-acceptance-tests-prs
+      status: pending
+      context: drats
+  - task: unit-tests
+    file: disaster-recovery-acceptance-tests-prs/ci/unit-tests/task.yml
+    input_mapping:
+      disaster-recovery-acceptance-tests: disaster-recovery-acceptance-tests-prs
+    params:
+      GITHUB_SSH_KEY: {{github-ssh-key}}
+    on_failure:
+      put: disaster-recovery-acceptance-tests-prs
+      params:
+        path: disaster-recovery-acceptance-tests-prs
+        status: failure
+        context: drats
+  - task: acceptance-tests
+    file: disaster-recovery-acceptance-tests-prs/ci/drats/task.yml
+    privileged: true
+    input_mapping:
+      disaster-recovery-acceptance-tests: disaster-recovery-acceptance-tests-prs
+    params:
+      CF_DEPLOYMENT_NAME: cf
+      CF_API_URL: https://api.drats-pr-ragdoll.cf-app.com
+      CF_ADMIN_USERNAME: admin
+      CF_ADMIN_PASSWORD: {{pr-ragdoll-cf-admin-password}}
+      BOSH_CA_CERT: {{pr-ragdoll-bosh-cert}}
+      BOSH_CLIENT: admin
+      BOSH_CLIENT_SECRET: {{pr-ragdoll-bosh-client-secret}}
+      BOSH_ENVIRONMENT: {{pr-ragdoll-bosh-url}}
+      BOSH_GW_USER: jumpbox
+      BOSH_GW_HOST: {{pr-ragdoll-ssh-gateway-host}}
+      BOSH_GW_PRIVATE_KEY: {{pr-ragdoll-ssh-gateway-key}}
+      SSH_DESTINATION_CIDR: "10.0.0.0/8"
+      DEFAULT_TIMEOUT_MINS: 30
+      NFS_SERVICE_NAME: "nfs"
+      NFS_PLAN_NAME: "Existing"
+      NFS_BROKER_USER: "nfs-broker"
+      NFS_BROKER_URL: http://nfs-broker.drats-pr-ragdoll.cf-app.com
+      NFS_BROKER_PASSWORD: {{pr-ragdoll-nfs-broker-password}}
+    on_failure:
+      put: disaster-recovery-acceptance-tests-prs
+      params:
+        path: disaster-recovery-acceptance-tests-prs
+        status: failure
+        context: drats
+    on_success:
+      put: disaster-recovery-acceptance-tests-prs
+      params:
+        path: disaster-recovery-acceptance-tests-prs
+        status: success
+        context: drats
+- name: run-drats-prs-with-integration-config
+  serial: true
+  serial_groups: [drats-dragon-li]
+  plan:
+  - get: cf-deployment
+    passed: [deploy-cf-drats-dragon-li]
+    trigger: true
+  - get: drats-dragon-li-vars-store
+  - get: disaster-recovery-acceptance-tests-prs
+    trigger: true
+    version: every
+  - get: bbr-binary-release
+    version: { tag: "v1.1.0" }
+    trigger: true
+  - put: disaster-recovery-acceptance-tests-prs
+    params:
+      path: disaster-recovery-acceptance-tests-prs
+      status: pending
+      context: drats-with-config
+  - task: unit-tests
+    file: disaster-recovery-acceptance-tests-prs/ci/unit-tests/task.yml
+    input_mapping:
+      disaster-recovery-acceptance-tests: disaster-recovery-acceptance-tests-prs
+    params:
+      GITHUB_SSH_KEY: {{github-ssh-key}}
+    on_failure:
+      put: disaster-recovery-acceptance-tests-prs
+      params:
+        path: disaster-recovery-acceptance-tests-prs
+        status: failure
+        context: drats-with-config
+  - task: create-integration-config
+    file: disaster-recovery-acceptance-tests-prs/ci/update-integration-config/task.yml
+    input_mapping:
+      disaster-recovery-acceptance-tests: disaster-recovery-acceptance-tests-prs
+      integration-configs: disaster-recovery-acceptance-tests-prs
+      vars-store: drats-dragon-li-vars-store
+      bbl-state-store: drats-dragon-li-vars-store
+    params:
+      VARS_STORE_FILE_PATH: drats-dragon-li/cf-deployment-variables.yml
+      BBL_STATE_DIR_PATH: drats-dragon-li
+      SYSTEM_DOMAIN: drats-dragon-li.cf-app.com
+    on_failure:
+      put: disaster-recovery-acceptance-tests-prs
+      params:
+        path: disaster-recovery-acceptance-tests-prs
+        status: failure
+        context: drats-with-config
+  - task: acceptance-tests
+    file: disaster-recovery-acceptance-tests-prs/ci/drats-with-integration-config/task.yml
+    privileged: true
+    input_mapping:
+      disaster-recovery-acceptance-tests: disaster-recovery-acceptance-tests-prs
+      drats-integration-config: updated-integration-configs
+    params:
+      CONFIG_FILE_PATH: ci/integration_config.json
+    on_failure:
+      put: disaster-recovery-acceptance-tests-prs
+      params:
+        path: disaster-recovery-acceptance-tests-prs
+        status: failure
+        context: drats-with-config
+    on_success:
+      put: disaster-recovery-acceptance-tests-prs
+      params:
+        path: disaster-recovery-acceptance-tests-prs
+        status: success
+        context: drats-with-config
+
+- name: run-drats
+  serial: true
+  serial_groups: [drats-persian]
+  plan:
+  - get: cf-deployment
+    passed: [deploy-cf-drats-persian]
+    trigger: true
+  - get: disaster-recovery-acceptance-tests
+    trigger: true
+  - get: bbr-binary-release
+    version: { tag: "v1.1.0" }
+    trigger: true
+  - task: unit-tests
+    file: disaster-recovery-acceptance-tests/ci/unit-tests/task.yml
+    params:
+      GITHUB_SSH_KEY: {{github-ssh-key}}
+  - task: acceptance-tests
+    file: disaster-recovery-acceptance-tests/ci/drats/task.yml
+    privileged: true
+    params:
+      CF_DEPLOYMENT_NAME: cf
+      CF_API_URL: https://api.drats-persian.cf-app.com
+      CF_ADMIN_USERNAME: admin
+      CF_ADMIN_PASSWORD: {{persian-cf-admin-password}}
+      BOSH_CA_CERT: {{persian-bosh-cert}}
+      BOSH_CLIENT: admin
+      BOSH_CLIENT_SECRET: {{persian-bosh-client-secret}}
+      BOSH_ENVIRONMENT: {{persian-bosh-url}}
+      BOSH_GW_USER: jumpbox
+      BOSH_GW_HOST: {{persian-ssh-gateway-host}}
+      BOSH_GW_PRIVATE_KEY: {{persian-ssh-gateway-key}}
+      SSH_DESTINATION_CIDR: "10.0.0.0/8"
+      DEFAULT_TIMEOUT_MINS: 30
+      NFS_SERVICE_NAME: "nfs"
+      NFS_PLAN_NAME: "Existing"
+      NFS_BROKER_USER: "nfs-broker"
+      NFS_BROKER_URL: http://nfs-broker.drats-persian.cf-app.com
+      NFS_BROKER_PASSWORD: {{persian-nfs-broker-password}}
+- name: run-drats-with-integration-config
+  serial: true
+  serial_groups: [drats-with-config-manx]
+  plan:
+  - get: cf-deployment
+    passed: [deploy-cf-drats-with-config-manx]
+    trigger: true
+  - get: drats-with-config-manx-vars-store
+  - get: disaster-recovery-acceptance-tests
+    trigger: true
+  - get: bbr-binary-release
+    version: { tag: "v1.1.0" }
+    trigger: true
+  - task: unit-tests
+    file: disaster-recovery-acceptance-tests/ci/unit-tests/task.yml
+    params:
+      GITHUB_SSH_KEY: {{github-ssh-key}}
+  - task: create-integration-config
+    file: disaster-recovery-acceptance-tests/ci/update-integration-config/task.yml
+    input_mapping:
+      integration-configs: disaster-recovery-acceptance-tests
+      vars-store: drats-with-config-manx-vars-store
+      bbl-state-store: drats-with-config-manx-vars-store
+    params:
+      VARS_STORE_FILE_PATH: drats-with-config-manx/cf-deployment-variables.yml
+      BBL_STATE_DIR_PATH: drats-with-config-manx
+      SYSTEM_DOMAIN: drats-with-config-manx.cf-app.com
+  - task: acceptance-tests
+    file: disaster-recovery-acceptance-tests/ci/drats-with-integration-config/task.yml
+    privileged: true
+    input_mapping:
+      drats-integration-config: updated-integration-configs
+    params:
+      CONFIG_FILE_PATH: ci/integration_config.json
+
+- name: run-drats-continuously
+  serial: true
+  serial_groups: [continuous-drats]
+  plan:
+  - aggregate:
+    - get: continuous-counter-input
+      trigger: true
+    - get: cf-deployment
+      passed: [deploy-cf-continuous-drats]
+      trigger: true
+    - get: disaster-recovery-acceptance-tests
+      trigger: true
+    - get: bbr-binary-release
+      trigger: true
+  - task: unit-tests
+    file: disaster-recovery-acceptance-tests/ci/unit-tests/task.yml
+    params:
+      GITHUB_SSH_KEY: {{github-ssh-key}}
+  - task: acceptance-tests
+    file: disaster-recovery-acceptance-tests/ci/drats/task.yml
+    privileged: true
+    params:
+      CF_DEPLOYMENT_NAME: cf
+      CF_API_URL: https://api.continuous-drats.cf-app.com
+      CF_ADMIN_USERNAME: admin
+      CF_ADMIN_PASSWORD: {{continuous-drats-cf-admin-password}}
+      BOSH_CA_CERT: {{continuous-drats-bosh-cert}}
+      BOSH_CLIENT: admin
+      BOSH_CLIENT_SECRET: {{continuous-drats-bosh-client-secret}}
+      BOSH_ENVIRONMENT: {{continuous-drats-bosh-url}}
+      BOSH_GW_USER: jumpbox
+      BOSH_GW_HOST: {{continuous-drats-ssh-gateway-host}}
+      BOSH_GW_PRIVATE_KEY: {{continuous-drats-ssh-gateway-key}}
+      SSH_DESTINATION_CIDR: "10.0.0.0/8"
+      DEFAULT_TIMEOUT_MINS: 60
+      NFS_SERVICE_NAME: "nfs"
+      NFS_PLAN_NAME: "Existing"
+      NFS_BROKER_USER: "nfs-broker"
+      NFS_BROKER_URL: http://nfs-broker.continuous-drats.cf-app.com
+      NFS_BROKER_PASSWORD: {{continuous-drats-nfs-broker-password}}
+  - put: continuous-counter
+    params: {bump: patch}
+
+
+- name: run-drats-with-destroy
+  serial: true
+  serial_groups: [drats-papillon]
+  plan:
+  - get: cf-deployment
+    passed: [deploy-cf-drats-papillon]
+    trigger: true
+  - get: disaster-recovery-acceptance-tests
+    trigger: true
+  - get: bbr-binary-release
+    version: { tag: "v1.1.0" }
+    trigger: true
+  - task: unit-tests
+    file: disaster-recovery-acceptance-tests/ci/unit-tests/task.yml
+    params:
+      GITHUB_SSH_KEY: {{github-ssh-key}}
+  - task: acceptance-tests
+    file: disaster-recovery-acceptance-tests/ci/drats/task.yml
+    privileged: true
+    params:
+      CF_DEPLOYMENT_NAME: cf
+      CF_API_URL: https://api.drats-papillon.cf-app.com
+      CF_ADMIN_USERNAME: admin
+      CF_ADMIN_PASSWORD: {{papillon-cf-admin-password}}
+      BOSH_CA_CERT: {{papillon-bosh-cert}}
+      BOSH_CLIENT: admin
+      BOSH_CLIENT_SECRET: {{papillon-bosh-client-secret}}
+      BOSH_ENVIRONMENT: {{papillon-bosh-url}}
+      BOSH_GW_USER: jumpbox
+      BOSH_GW_HOST: {{papillon-ssh-gateway-host}}
+      BOSH_GW_PRIVATE_KEY: {{papillon-ssh-gateway-key}}
+      SSH_DESTINATION_CIDR: "10.0.0.0/8"
+      DEFAULT_TIMEOUT_MINS: 120
+      NFS_SERVICE_NAME: "nfs"
+      NFS_PLAN_NAME: "Existing"
+      NFS_BROKER_USER: "nfs-broker"
+      NFS_BROKER_URL: http://nfs-broker.drats-papillon.cf-app.com
+      NFS_BROKER_PASSWORD: {{papillon-nfs-broker-password}}
+      DELETE_AND_REDEPLOY_CF: true
+
+
+## Delete cf deployments
+- name: delete-cf-deployment-drats-pr-ragdoll
+  serial: true
+  serial_groups: [drats-pr-ragdoll]
+  plan:
+  - aggregate:
+    - get: cf-deployment-concourse-tasks
+    - get: drats-pr-ragdoll-bbl-state
+  - task: bosh-delete-deployment
+    file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
+    input_mapping:
+      bbl-state: drats-pr-ragdoll-bbl-state
+    params:
+      BBL_GCP_SERVICE_ACCOUNT_KEY: gcp_service_account_key.json
+      BBL_GCP_PROJECT_ID: cf-backup-and-restore
+      BBL_STATE_DIR: drats-pr-ragdoll/
+
+- name: delete-cf-deployment-drats-persian
+  serial: true
+  serial_groups: [drats-persian]
+  plan:
+  - aggregate:
+    - get: cf-deployment-concourse-tasks
+    - get: drats-persian-bbl-state
+  - task: bosh-delete-deployment
+    file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
+    input_mapping:
+      bbl-state: drats-persian-bbl-state
+    params:
+      BBL_GCP_SERVICE_ACCOUNT_KEY: gcp_service_account_key.json
+      BBL_GCP_PROJECT_ID: cf-backup-and-restore
+      BBL_STATE_DIR: drats-persian/
+
+- name: delete-cf-deployment-continuous-drats
+  serial: true
+  serial_groups: [continuous-drats]
+  plan:
+  - aggregate:
+    - get: cf-deployment-concourse-tasks
+    - get: continuous-drats-bbl-state
+  - task: bosh-delete-deployment
+    file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
+    input_mapping:
+      bbl-state: continuous-drats-bbl-state
+    params:
+      BBL_GCP_SERVICE_ACCOUNT_KEY: gcp_service_account_key.json
+      BBL_GCP_PROJECT_ID: cf-backup-and-restore
+      BBL_STATE_DIR: continuous-drats/
+
+- name: delete-cf-deployment-drats-papillon
+  serial: true
+  serial_groups: [drats-papillon]
+  plan:
+  - aggregate:
+    - get: cf-deployment-concourse-tasks
+    - get: drats-papillon-bbl-state
+  - task: bosh-delete-deployment
+    file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
+    input_mapping:
+      bbl-state: drats-papillon-bbl-state
+    params:
+      BBL_GCP_SERVICE_ACCOUNT_KEY: gcp_service_account_key.json
+      BBL_GCP_PROJECT_ID: cf-backup-and-restore
+      BBL_STATE_DIR: drats-papillon/
+
+- name: delete-cf-deployment-drats-dragon-li
+  serial: true
+  serial_groups: [drats-dragon-li]
+  plan:
+  - aggregate:
+    - get: cf-deployment-concourse-tasks
+    - get: drats-dragon-li-bbl-state
+  - task: bosh-delete-deployment
+    file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
+    input_mapping:
+      bbl-state: drats-dragon-li-bbl-state
+    params:
+      BBL_GCP_SERVICE_ACCOUNT_KEY: gcp_service_account_key.json
+      BBL_GCP_PROJECT_ID: cf-backup-and-restore
+      BBL_STATE_DIR: drats-dragon-li/
+
+- name: delete-cf-deployment-drats-with-config-manx
+  serial: true
+  serial_groups: [drats-with-config-manx]
+  plan:
+  - aggregate:
+    - get: cf-deployment-concourse-tasks
+    - get: drats-with-config-manx-bbl-state
+  - task: bosh-delete-deployment
+    file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
+    input_mapping:
+      bbl-state: drats-with-config-manx-bbl-state
+    params:
+      BBL_GCP_SERVICE_ACCOUNT_KEY: gcp_service_account_key.json
+      BBL_GCP_PROJECT_ID: cf-backup-and-restore
+      BBL_STATE_DIR: drats-with-config-manx/
