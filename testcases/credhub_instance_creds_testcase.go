@@ -5,6 +5,8 @@ import (
 
 	"strings"
 
+	"io/ioutil"
+
 	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/runner"
 	. "github.com/onsi/gomega"
 )
@@ -64,9 +66,11 @@ func (tc *CfCredhubSSITestCase) BeforeBackup(config Config) {
 	RunCommandSuccessfully("cf start " + tc.appName)
 
 	appUrl := GetAppUrl(tc.appName)
-	appResponse := RunCommandSuccessfully("curl", "-k", appUrl+"/test").Out.Contents()
-	Expect(appResponse).To(ContainSubstring("pinkyPie"))
-	Expect(appResponse).To(ContainSubstring("rainbowDash"))
+	appResponse := GetWithRetries(appUrl+"/test", 5)
+	appResponseBody, err := ioutil.ReadAll(appResponse.Body)
+	Expect(err).NotTo(HaveOccurred())
+	Expect(appResponseBody).To(ContainSubstring("pinkyPie"))
+	Expect(appResponseBody).To(ContainSubstring("rainbowDash"))
 
 	RunCommandSuccessfully("cf push " + tc.secondAppName + " -p " + testAppPath + " -n " + tc.secondAppName)
 }
@@ -78,21 +82,27 @@ func (tc *CfCredhubSSITestCase) AfterBackup(config Config) {
 	RunCommandSuccessfully("cf restart " + tc.secondAppName)
 
 	secondAppUrl := GetAppUrl(tc.secondAppName)
-	appResponse := RunCommandSuccessfully("curl", "-k", secondAppUrl+"/test").Out.Contents()
-	Expect(appResponse).To(ContainSubstring("pinkyPie"))
-	Expect(appResponse).To(ContainSubstring("rainbowDash"))
+	secondAppResponse := GetWithRetries(secondAppUrl+"/test", 5)
+	secondAppResponseBody, err := ioutil.ReadAll(secondAppResponse.Body)
+	Expect(err).NotTo(HaveOccurred())
+	Expect(secondAppResponseBody).To(ContainSubstring("pinkyPie"))
+	Expect(secondAppResponseBody).To(ContainSubstring("rainbowDash"))
 }
 
 func (tc *CfCredhubSSITestCase) AfterRestore(config Config) {
 	appUrl := GetAppUrl(tc.appName)
-	appResponse := RunCommandSuccessfully("curl", "-k", appUrl+"/test").Out.Contents()
-	Expect(appResponse).To(ContainSubstring("pinkyPie"))
-	Expect(appResponse).To(ContainSubstring("rainbowDash"))
+	appResponse := GetWithRetries(appUrl+"/test", 5)
+	appResponseBody, err := ioutil.ReadAll(appResponse.Body)
+	Expect(err).NotTo(HaveOccurred())
+	Expect(appResponseBody).To(ContainSubstring("pinkyPie"))
+	Expect(appResponseBody).To(ContainSubstring("rainbowDash"))
 
 	secondAppUrl := GetAppUrl(tc.secondAppName)
-	secondAppResponse := RunCommandSuccessfully("curl", "-k", secondAppUrl+"/test").Out.Contents()
-	Expect(secondAppResponse).NotTo(ContainSubstring("pinkyPie"))
-	Expect(secondAppResponse).NotTo(ContainSubstring("rainbowDash"))
+	secondAppResponse := Get(secondAppUrl + "/test")
+	secondAppResponseBody, err := ioutil.ReadAll(secondAppResponse.Body)
+	Expect(err).NotTo(HaveOccurred())
+	Expect(secondAppResponseBody).NotTo(ContainSubstring("pinkyPie"))
+	Expect(secondAppResponseBody).NotTo(ContainSubstring("rainbowDash"))
 }
 
 func (tc *CfCredhubSSITestCase) Cleanup(config Config) {

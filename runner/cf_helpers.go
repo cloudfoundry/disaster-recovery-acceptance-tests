@@ -29,12 +29,26 @@ func GetAppUrl(appName string) string {
 	Expect(appUrl).NotTo(BeEmpty())
 	return appUrl
 }
+
 func Get(url string) *http.Response {
 	client := &http.Client{Transport: &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}}
 	response, err := client.Get("https://" + url)
 	Expect(err).NotTo(HaveOccurred())
+	return response
+}
+
+func GetWithRetries(url string, retries int) *http.Response {
+	var response *http.Response
+	for i := 0; i < retries; i++ {
+		response = Get(url)
+		if response.StatusCode == http.StatusOK {
+			return response
+		}
+		time.Sleep(10 * time.Second)
+	}
+
 	return response
 }
 
