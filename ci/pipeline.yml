@@ -18,82 +18,6 @@ resources:
   source:
     uri: https://github.com/cloudfoundry/cf-deployment.git
     branch: master
-- name: drats-pr-ragdoll-bbl-state
-  type: git
-  source:
-    uri: git@github.com:pivotal-cf/bosh-backup-and-restore-meta.git
-    private_key: {{git-private-key}}
-    branch: master
-- name: drats-pr-ragdoll-vars-store
-  type: git
-  source:
-    uri: git@github.com:pivotal-cf/bosh-backup-and-restore-meta.git
-    private_key: {{git-private-key}}
-    branch: master
-
-- name: drats-persian-bbl-state
-  type: git
-  source:
-    uri: git@github.com:pivotal-cf/bosh-backup-and-restore-meta.git
-    private_key: {{git-private-key}}
-    branch: master
-- name: drats-persian-vars-store
-  type: git
-  source:
-    uri: git@github.com:pivotal-cf/bosh-backup-and-restore-meta.git
-    private_key: {{git-private-key}}
-    branch: master
-- name: drats-dragon-li-bbl-state
-  type: git
-  source:
-    uri: git@github.com:pivotal-cf/bosh-backup-and-restore-meta.git
-    private_key: {{git-private-key}}
-    branch: master
-- name: drats-dragon-li-vars-store
-  type: git
-  source:
-    uri: git@github.com:pivotal-cf/bosh-backup-and-restore-meta.git
-    private_key: {{git-private-key}}
-    branch: master
-
-- name: drats-papillon-bbl-state
-  type: git
-  source:
-    uri: git@github.com:pivotal-cf/bosh-backup-and-restore-meta.git
-    private_key: {{git-private-key}}
-    branch: master
-- name: drats-papillon-vars-store
-  type: git
-  source:
-    uri: git@github.com:pivotal-cf/bosh-backup-and-restore-meta.git
-    private_key: {{git-private-key}}
-    branch: master
-
-- name: drats-with-config-manx-bbl-state
-  type: git
-  source:
-    uri: git@github.com:pivotal-cf/bosh-backup-and-restore-meta.git
-    private_key: {{git-private-key}}
-    branch: master
-- name: drats-with-config-manx-vars-store
-  type: git
-  source:
-    uri: git@github.com:pivotal-cf/bosh-backup-and-restore-meta.git
-    private_key: {{git-private-key}}
-    branch: master
-
-- name: continuous-drats-bbl-state
-  type: git
-  source:
-    uri: git@github.com:pivotal-cf/bosh-backup-and-restore-meta.git
-    private_key: {{git-private-key}}
-    branch: master
-- name: continuous-drats-vars-store
-  type: git
-  source:
-    uri: git@github.com:pivotal-cf/bosh-backup-and-restore-meta.git
-    private_key: {{git-private-key}}
-    branch: master
 
 - name: bosh-backup-and-restore-meta
   type: git
@@ -149,12 +73,11 @@ jobs:
     - get: cf-deployment-concourse-tasks
     - get: cf-deployment
       trigger: true
-    - get: drats-pr-ragdoll-bbl-state
-    - get: drats-pr-ragdoll-vars-store
+    - get: bosh-backup-and-restore-meta
   - task: upload-stemcell
     file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
     input_mapping:
-      bbl-state: drats-pr-ragdoll-bbl-state
+      bbl-state: bosh-backup-and-restore-meta
       cf-deployment: cf-deployment
     params:
       INFRASTRUCTURE: google
@@ -162,11 +85,11 @@ jobs:
   - task: deploy-cf
     file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
     input_mapping:
-      bbl-state: drats-pr-ragdoll-bbl-state
+      bbl-state: bosh-backup-and-restore-meta
       cf-deployment: cf-deployment
       ops-files: cf-deployment
-      vars-store: drats-pr-ragdoll-vars-store
-      vars-files: drats-pr-ragdoll-vars-store
+      vars-store: bosh-backup-and-restore-meta
+      vars-files: bosh-backup-and-restore-meta
     params:
       BBL_IAAS: gcp
       BBL_GCP_SERVICE_ACCOUNT_KEY: gcp_service_account_key.json
@@ -178,7 +101,7 @@ jobs:
       GIT_COMMIT_EMAIL: cf-lazarus@pivotal.io
       GIT_COMMIT_USERNAME: "Backup & Restore Concourse"
     ensure:
-      put: drats-pr-ragdoll-vars-store
+      put: bosh-backup-and-restore-meta
       params:
         repository: updated-vars-store
         rebase: true
@@ -191,12 +114,11 @@ jobs:
     - get: cf-deployment-concourse-tasks
     - get: cf-deployment
       trigger: true
-    - get: drats-dragon-li-bbl-state
-    - get: drats-dragon-li-vars-store
+    - get: bosh-backup-and-restore-meta
   - task: upload-stemcell
     file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
     input_mapping:
-      bbl-state: drats-dragon-li-bbl-state
+      bbl-state: bosh-backup-and-restore-meta
       cf-deployment: cf-deployment
     params:
       INFRASTRUCTURE: google
@@ -204,11 +126,11 @@ jobs:
   - task: deploy-cf
     file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
     input_mapping:
-      bbl-state: drats-dragon-li-bbl-state
+      bbl-state: bosh-backup-and-restore-meta
       cf-deployment: cf-deployment
       ops-files: cf-deployment
-      vars-store: drats-dragon-li-vars-store
-      vars-files: drats-dragon-li-vars-store
+      vars-store: bosh-backup-and-restore-meta
+      vars-files: bosh-backup-and-restore-meta
     params:
       BBL_IAAS: gcp
       BBL_GCP_SERVICE_ACCOUNT_KEY: gcp_service_account_key.json
@@ -220,7 +142,7 @@ jobs:
       GIT_COMMIT_EMAIL: cf-lazarus@pivotal.io
       GIT_COMMIT_USERNAME: "Backup & Restore Concourse"
     ensure:
-      put: drats-dragon-li-vars-store
+      put: bosh-backup-and-restore-meta
       params:
         repository: updated-vars-store
         rebase: true
@@ -233,12 +155,11 @@ jobs:
     - get: cf-deployment-concourse-tasks
     - get: cf-deployment
       trigger: true
-    - get: drats-persian-bbl-state
-    - get: drats-persian-vars-store
+    - get: bosh-backup-and-restore-meta
   - task: upload-stemcell
     file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
     input_mapping:
-      bbl-state: drats-persian-bbl-state
+      bbl-state: bosh-backup-and-restore-meta
       cf-deployment: cf-deployment
     params:
       INFRASTRUCTURE: google
@@ -246,11 +167,11 @@ jobs:
   - task: deploy-cf
     file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
     input_mapping:
-      bbl-state: drats-persian-bbl-state
+      bbl-state: bosh-backup-and-restore-meta
       cf-deployment: cf-deployment
       ops-files: cf-deployment
-      vars-store: drats-persian-vars-store
-      vars-files: drats-persian-vars-store
+      vars-store: bosh-backup-and-restore-meta
+      vars-files: bosh-backup-and-restore-meta
     params:
       BBL_IAAS: gcp
       BBL_GCP_SERVICE_ACCOUNT_KEY: gcp_service_account_key.json
@@ -263,7 +184,7 @@ jobs:
       GIT_COMMIT_EMAIL: cf-lazarus@pivotal.io
       GIT_COMMIT_USERNAME: "Backup & Restore Concourse"
     ensure:
-      put: drats-persian-vars-store
+      put: bosh-backup-and-restore-meta
       params:
         repository: updated-vars-store
         rebase: true
@@ -276,12 +197,11 @@ jobs:
     - get: cf-deployment-concourse-tasks
     - get: cf-deployment
       trigger: true
-    - get: continuous-drats-bbl-state
-    - get: continuous-drats-vars-store
+    - get: bosh-backup-and-restore-meta
   - task: upload-stemcell
     file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
     input_mapping:
-      bbl-state: continuous-drats-bbl-state
+      bbl-state: bosh-backup-and-restore-meta
       cf-deployment: cf-deployment
     params:
       INFRASTRUCTURE: google
@@ -289,11 +209,11 @@ jobs:
   - task: deploy-cf
     file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
     input_mapping:
-      bbl-state: continuous-drats-bbl-state
+      bbl-state: bosh-backup-and-restore-meta
       cf-deployment: cf-deployment
       ops-files: cf-deployment
-      vars-store: continuous-drats-vars-store
-      vars-files: continuous-drats-vars-store
+      vars-store: bosh-backup-and-restore-meta
+      vars-files: bosh-backup-and-restore-meta
     params:
       BBL_IAAS: gcp
       BBL_GCP_SERVICE_ACCOUNT_KEY: gcp_service_account_key.json
@@ -305,7 +225,7 @@ jobs:
       GIT_COMMIT_EMAIL: cf-lazarus@pivotal.io
       GIT_COMMIT_USERNAME: "Backup & Restore Concourse"
     ensure:
-      put: continuous-drats-vars-store
+      put: bosh-backup-and-restore-meta
       params:
         repository: updated-vars-store
         rebase: true
@@ -318,13 +238,12 @@ jobs:
     - get: cf-deployment-concourse-tasks
     - get: cf-deployment
       trigger: true
-    - get: drats-papillon-bbl-state
-    - get: drats-papillon-vars-store
+    - get: bosh-backup-and-restore-meta
     - get: disaster-recovery-acceptance-tests
   - task: upload-stemcell
     file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
     input_mapping:
-      bbl-state: drats-papillon-bbl-state
+      bbl-state: bosh-backup-and-restore-meta
       cf-deployment: cf-deployment
     params:
       INFRASTRUCTURE: google
@@ -340,11 +259,11 @@ jobs:
   - task: deploy-cf
     file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
     input_mapping:
-      bbl-state: drats-papillon-bbl-state
+      bbl-state: bosh-backup-and-restore-meta
       cf-deployment: cf-deployment
       ops-files: collected-ops-files
-      vars-store: drats-papillon-vars-store
-      vars-files: drats-papillon-vars-store
+      vars-store: bosh-backup-and-restore-meta
+      vars-files: bosh-backup-and-restore-meta
     params:
       BBL_IAAS: gcp
       BBL_GCP_SERVICE_ACCOUNT_KEY: gcp_service_account_key.json
@@ -356,7 +275,7 @@ jobs:
       GIT_COMMIT_EMAIL: cf-lazarus@pivotal.io
       GIT_COMMIT_USERNAME: "Backup & Restore Concourse"
     ensure:
-      put: drats-papillon-vars-store
+      put: bosh-backup-and-restore-meta
       params:
         repository: updated-vars-store
         rebase: true
@@ -369,12 +288,11 @@ jobs:
     - get: cf-deployment-concourse-tasks
     - get: cf-deployment
       trigger: true
-    - get: drats-with-config-manx-bbl-state
-    - get: drats-with-config-manx-vars-store
+    - get: bosh-backup-and-restore-meta
   - task: upload-stemcell
     file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
     input_mapping:
-      bbl-state: drats-with-config-manx-bbl-state
+      bbl-state: bosh-backup-and-restore-meta
       cf-deployment: cf-deployment
     params:
       INFRASTRUCTURE: google
@@ -382,11 +300,11 @@ jobs:
   - task: deploy-cf
     file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
     input_mapping:
-      bbl-state: drats-with-config-manx-bbl-state
+      bbl-state: bosh-backup-and-restore-meta
       cf-deployment: cf-deployment
       ops-files: cf-deployment
-      vars-store: drats-with-config-manx-vars-store
-      vars-files: drats-with-config-manx-vars-store
+      vars-store: bosh-backup-and-restore-meta
+      vars-files: bosh-backup-and-restore-meta
     params:
       BBL_IAAS: gcp
       BBL_GCP_SERVICE_ACCOUNT_KEY: gcp_service_account_key.json
@@ -398,7 +316,7 @@ jobs:
       GIT_COMMIT_EMAIL: cf-lazarus@pivotal.io
       GIT_COMMIT_USERNAME: "Backup & Restore Concourse"
     ensure:
-      put: drats-with-config-manx-vars-store
+      put: bosh-backup-and-restore-meta
       params:
         repository: updated-vars-store
         rebase: true
@@ -478,7 +396,7 @@ jobs:
   - get: cf-deployment
     passed: [deploy-cf-drats-dragon-li]
     trigger: true
-  - get: drats-dragon-li-vars-store
+  - get: bosh-backup-and-restore-meta
   - get: disaster-recovery-acceptance-tests-prs
     trigger: true
     version: every
@@ -507,8 +425,8 @@ jobs:
     input_mapping:
       disaster-recovery-acceptance-tests: disaster-recovery-acceptance-tests-prs
       integration-configs: disaster-recovery-acceptance-tests-prs
-      vars-store: drats-dragon-li-vars-store
-      bbl-state-store: drats-dragon-li-vars-store
+      vars-store: bosh-backup-and-restore-meta
+      bbl-state-store: bosh-backup-and-restore-meta
     params:
       VARS_STORE_FILE_PATH: drats-dragon-li/cf-deployment-variables.yml
       BBL_STATE_DIR_PATH: drats-dragon-li
@@ -585,7 +503,7 @@ jobs:
   - get: cf-deployment
     passed: [deploy-cf-drats-with-config-manx]
     trigger: true
-  - get: drats-with-config-manx-vars-store
+  - get: bosh-backup-and-restore-meta
   - get: disaster-recovery-acceptance-tests
     trigger: true
   - get: bbr-binary-release
@@ -599,8 +517,8 @@ jobs:
     file: disaster-recovery-acceptance-tests/ci/update-integration-config/task.yml
     input_mapping:
       integration-configs: disaster-recovery-acceptance-tests
-      vars-store: drats-with-config-manx-vars-store
-      bbl-state-store: drats-with-config-manx-vars-store
+      vars-store: bosh-backup-and-restore-meta
+      bbl-state-store: bosh-backup-and-restore-meta
     params:
       VARS_STORE_FILE_PATH: drats-with-config-manx/cf-deployment-variables.yml
       BBL_STATE_DIR_PATH: drats-with-config-manx
@@ -736,11 +654,11 @@ jobs:
   plan:
   - aggregate:
     - get: cf-deployment-concourse-tasks
-    - get: drats-pr-ragdoll-bbl-state
+    - get: bosh-backup-and-restore-meta
   - task: bosh-delete-deployment
     file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
     input_mapping:
-      bbl-state: drats-pr-ragdoll-bbl-state
+      bbl-state: bosh-backup-and-restore-meta
     params:
       BBL_GCP_SERVICE_ACCOUNT_KEY: gcp_service_account_key.json
       BBL_GCP_PROJECT_ID: cf-backup-and-restore
@@ -752,11 +670,11 @@ jobs:
   plan:
   - aggregate:
     - get: cf-deployment-concourse-tasks
-    - get: drats-persian-bbl-state
+    - get: bosh-backup-and-restore-meta
   - task: bosh-delete-deployment
     file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
     input_mapping:
-      bbl-state: drats-persian-bbl-state
+      bbl-state: bosh-backup-and-restore-meta
     params:
       BBL_GCP_SERVICE_ACCOUNT_KEY: gcp_service_account_key.json
       BBL_GCP_PROJECT_ID: cf-backup-and-restore
@@ -768,11 +686,11 @@ jobs:
   plan:
   - aggregate:
     - get: cf-deployment-concourse-tasks
-    - get: continuous-drats-bbl-state
+    - get: bosh-backup-and-restore-meta
   - task: bosh-delete-deployment
     file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
     input_mapping:
-      bbl-state: continuous-drats-bbl-state
+      bbl-state: bosh-backup-and-restore-meta
     params:
       BBL_GCP_SERVICE_ACCOUNT_KEY: gcp_service_account_key.json
       BBL_GCP_PROJECT_ID: cf-backup-and-restore
@@ -784,11 +702,11 @@ jobs:
   plan:
   - aggregate:
     - get: cf-deployment-concourse-tasks
-    - get: drats-papillon-bbl-state
+    - get: bosh-backup-and-restore-meta
   - task: bosh-delete-deployment
     file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
     input_mapping:
-      bbl-state: drats-papillon-bbl-state
+      bbl-state: bosh-backup-and-restore-meta
     params:
       BBL_GCP_SERVICE_ACCOUNT_KEY: gcp_service_account_key.json
       BBL_GCP_PROJECT_ID: cf-backup-and-restore
@@ -800,11 +718,11 @@ jobs:
   plan:
   - aggregate:
     - get: cf-deployment-concourse-tasks
-    - get: drats-dragon-li-bbl-state
+    - get: bosh-backup-and-restore-meta
   - task: bosh-delete-deployment
     file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
     input_mapping:
-      bbl-state: drats-dragon-li-bbl-state
+      bbl-state: bosh-backup-and-restore-meta
     params:
       BBL_GCP_SERVICE_ACCOUNT_KEY: gcp_service_account_key.json
       BBL_GCP_PROJECT_ID: cf-backup-and-restore
@@ -816,11 +734,11 @@ jobs:
   plan:
   - aggregate:
     - get: cf-deployment-concourse-tasks
-    - get: drats-with-config-manx-bbl-state
+    - get: bosh-backup-and-restore-meta
   - task: bosh-delete-deployment
     file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
     input_mapping:
-      bbl-state: drats-with-config-manx-bbl-state
+      bbl-state: bosh-backup-and-restore-meta
     params:
       BBL_GCP_SERVICE_ACCOUNT_KEY: gcp_service_account_key.json
       BBL_GCP_PROJECT_ID: cf-backup-and-restore
