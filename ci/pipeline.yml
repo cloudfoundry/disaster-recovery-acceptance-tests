@@ -615,38 +615,6 @@ jobs:
       NFS_BROKER_PASSWORD: {{papillon-nfs-broker-password}}
       DELETE_AND_REDEPLOY_CF: true
 
-- name: run-drats-with-integration-config-1-11-pcf
-  serial: true
-  plan:
-  - get: bosh-backup-and-restore-meta
-  - get: disaster-recovery-acceptance-tests
-    trigger: true
-  - get: bbr-binary-release
-    trigger: true
-  - task: acceptance-tests
-    file: disaster-recovery-acceptance-tests/ci/drats-with-integration-config/task.yml
-    privileged: true
-    input_mapping:
-      drats-integration-config: bosh-backup-and-restore-meta
-    params:
-      CONFIG_FILE_PATH: ci/drats/integration-config-scottsvalley.json
-
-- name: run-drats-with-integration-config-1-12-pcf
-  serial: true
-  plan:
-  - get: bosh-backup-and-restore-meta
-  - get: disaster-recovery-acceptance-tests
-    trigger: true
-  - get: bbr-binary-release
-    trigger: true
-  - task: acceptance-tests
-    file: disaster-recovery-acceptance-tests/ci/drats-with-integration-config/task.yml
-    privileged: true
-    input_mapping:
-      drats-integration-config: bosh-backup-and-restore-meta
-    params:
-      CONFIG_FILE_PATH: ci/drats/integration-config-huntingtonbeach.json
-
 ## Delete cf deployments
 - name: delete-cf-deployment-drats-pr-ragdoll
   serial: true
