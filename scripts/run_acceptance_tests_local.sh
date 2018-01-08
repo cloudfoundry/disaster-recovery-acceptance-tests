@@ -46,7 +46,7 @@ if [ -n "${BOSH_CA_CERT}" ]; then
   echo "${BOSH_CA_CERT}" > "${BOSH_CERT_PATH}"
 fi
 
-export BBR_BUILD_PATH=$(which bbr)
+export BBR_BUILD_PATH="${BBR_BUILD_PATH:-$(which bbr)}"
 export BOSH_URL="${BOSH_ENVIRONMENT}"
 
 echo "Running DRATs..."
