@@ -90,7 +90,7 @@ func forDeployment(deploymentName string) string {
 func MustHaveEnv(keyname string) string {
 	val := os.Getenv(keyname)
 	if val == "" {
-		panic(fmt.Sprintln("Env var %s not set", keyname))
+		panic(fmt.Sprintf("Env var %s not set", keyname))
 	}
 	return val
 }
