@@ -248,20 +248,12 @@ jobs:
     params:
       INFRASTRUCTURE: google
       BBL_STATE_DIR: drats-papillon/
-  - task: collect-ops-files
-    file: cf-deployment-concourse-tasks/collect-ops-files/task.yml
-    input_mapping:
-      base-ops-files: cf-deployment
-      new-ops-files: disaster-recovery-acceptance-tests
-    params:
-     BASE_OPS_FILE_DIR: operations
-     NEW_OPS_FILES: "ci/operations/scale-down-credhub-to-one.yml"
   - task: deploy-cf
     file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
     input_mapping:
       bbl-state: bosh-backup-and-restore-meta
       cf-deployment: cf-deployment
-      ops-files: collected-ops-files
+      ops-files: cf-deployment
       vars-store: bosh-backup-and-restore-meta
       vars-files: bosh-backup-and-restore-meta
     params:
@@ -270,7 +262,7 @@ jobs:
       BBL_GCP_PROJECT_ID: cf-backup-and-restore
       BBL_STATE_DIR: drats-papillon/
       SYSTEM_DOMAIN: drats-papillon.cf-app.com
-      OPS_FILES: "operations/scale-to-one-az.yml operations/use-compiled-releases.yml operations/experimental/enable-backup-restore.yml operations/enable-nfs-volume-service.yml operations/experimental/enable-nfs-broker-backup.yml operations/experimental/enable-instance-identity-credentials.yml operations/experimental/secure-service-credentials.yml  operations/experimental/disable-interpolate-service-bindings.yml operations/experimental/enable-backup-restore-credhub.yml operations/experimental/enable-traffic-to-internal-networks.yml operations/experimental/use-bosh-dns.yml operations/experimental/use-bosh-dns-for-containers.yml operations/scale-down-credhub-to-one.yml"
+      OPS_FILES: "operations/scale-to-one-az.yml operations/use-compiled-releases.yml operations/experimental/enable-backup-restore.yml operations/enable-nfs-volume-service.yml operations/experimental/enable-nfs-broker-backup.yml operations/experimental/enable-instance-identity-credentials.yml operations/experimental/secure-service-credentials.yml  operations/experimental/disable-interpolate-service-bindings.yml operations/experimental/enable-backup-restore-credhub.yml operations/experimental/enable-traffic-to-internal-networks.yml operations/experimental/use-bosh-dns.yml operations/experimental/use-bosh-dns-for-containers.yml"
       VARS_STORE_FILE: drats-papillon/cf-deployment-variables.yml
       GIT_COMMIT_EMAIL: cf-lazarus@pivotal.io
       GIT_COMMIT_USERNAME: "Backup & Restore Concourse"
