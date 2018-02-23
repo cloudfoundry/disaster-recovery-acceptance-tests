@@ -17,7 +17,7 @@ import (
 func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 	var uniqueTestID string
 	var testContext *TestContext
-	var backupRunning bool
+	var backupRunning, restoreRunning bool
 	var cfHomeTmpDir string
 	var err error
 
@@ -110,6 +110,7 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 			)
 		}
 
+		restoreRunning = true
 		By("restoring to " + config.CloudFoundryConfig.Name)
 		RunCommandSuccessfullyWithFailureMessage(
 			"bbr deployment restore",
@@ -126,6 +127,7 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 				testContext.WorkspaceDir,
 				config.CloudFoundryConfig.Name,
 			))
+		restoreRunning = false
 
 		By("checking state in restored environment")
 		for _, testCase := range testCases {
@@ -151,6 +153,25 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 					config.CloudFoundryConfig.Name,
 				))
 			Expect(backupCleanupSession).To(gexec.Exit(0))
+		}
+	})
+
+	AfterEach(func() {
+		if restoreRunning {
+			By("running bbr restore-cleanup")
+			restoreCleanupSession := RunCommandWithFailureMessage(
+				"bbr deployment restore-cleanup",
+				fmt.Sprintf(
+					"cd %s && %s deployment --target %s --ca-cert %s --username %s --password %s --deployment %s restore-cleanup",
+					testContext.WorkspaceDir,
+					testContext.BinaryPath,
+					config.BoshConfig.BoshURL,
+					testContext.CertificatePath,
+					config.BoshConfig.BoshClient,
+					config.BoshConfig.BoshClientSecret,
+					config.CloudFoundryConfig.Name,
+				))
+			Expect(restoreCleanupSession).To(gexec.Exit(0))
 		}
 	})
 
