@@ -136,11 +136,9 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 	})
 
 	AfterEach(func() {
-		var backupCleanupSession, artifactCleanupSession *gexec.Session
-		var removeHomeDirErr error
 		if backupRunning {
 			By("running bbr backup-cleanup")
-			backupCleanupSession = RunCommandWithFailureMessage(
+			backupCleanupSession := RunCommandWithFailureMessage(
 				"bbr deployment backup-cleanup",
 				fmt.Sprintf(
 					"cd %s && %s deployment --target %s --ca-cert %s --username %s --password %s --deployment %s backup-cleanup",
@@ -152,34 +150,40 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 					config.BoshConfig.BoshClientSecret,
 					config.CloudFoundryConfig.Name,
 				))
+			Expect(backupCleanupSession).To(gexec.Exit(0))
 		}
+	})
+
+	AfterEach(func() {
 		By("cleaning up the artifact")
-		artifactCleanupSession = RunCommand(fmt.Sprintf("cd %s && rm -fr %s",
+		artifactCleanupSession := RunCommand(fmt.Sprintf("cd %s && rm -fr %s",
 			testContext.WorkspaceDir,
 			config.CloudFoundryConfig.Name,
 		))
+		Expect(artifactCleanupSession).To(gexec.Exit(0))
+	})
 
-		for _, testCase := range testCases {
-			By("running the Cleanup step for " + testCase.Name())
-			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir, testCase))
-			testCase.Cleanup(config)
-		}
+	for _, testCase := range testCases {
+		func(testCase TestCase) {
+			AfterEach(func() {
+				By("running the Cleanup step for " + testCase.Name())
+				os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir, testCase))
+				testCase.Cleanup(config)
+			})
+		}(testCase)
+	}
 
+	AfterEach(func() {
 		By("removing individual test-case cf-home directory")
 		for _, testCase := range testCases {
-			removeHomeDirErr = os.RemoveAll(cfHomeDir(cfHomeTmpDir, testCase))
+			removeHomeDirErr := os.RemoveAll(cfHomeDir(cfHomeTmpDir, testCase))
+			Expect(removeHomeDirErr).ToNot(HaveOccurred())
 		}
+	})
 
+	AfterEach(func() {
 		By("cleaning up the test context")
 		testContext.Cleanup()
-
-		if backupRunning {
-			Expect(backupCleanupSession).To(gexec.Exit(0))
-		}
-
-		Expect(artifactCleanupSession).To(gexec.Exit(0))
-		Expect(removeHomeDirErr).ToNot(HaveOccurred())
-
 	})
 }
 
