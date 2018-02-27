@@ -50,11 +50,14 @@ resources:
     repo: cloudfoundry-incubator/disaster-recovery-acceptance-tests
     access_token: {{github-access-token}}
     branch: master
+
 - name: bbr-binary-release
   type: github-release
   source:
       owner: cloudfoundry-incubator
       repository: bosh-backup-and-restore
+  check_every: 1m2s
+
 - name: disaster-recovery-acceptance-tests
   type: git
   source:
