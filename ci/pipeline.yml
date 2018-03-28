@@ -329,7 +329,6 @@ jobs:
     trigger: true
     version: every
   - get: bbr-binary-release
-    version: { tag: "v1.1.0" }
     trigger: true
   - put: disaster-recovery-acceptance-tests-prs
     params:
@@ -396,7 +395,6 @@ jobs:
     trigger: true
     version: every
   - get: bbr-binary-release
-    version: { tag: "v1.1.0" }
     trigger: true
   - put: disaster-recovery-acceptance-tests-prs
     params:
@@ -463,7 +461,6 @@ jobs:
   - get: disaster-recovery-acceptance-tests
     trigger: true
   - get: bbr-binary-release
-    version: { tag: "v1.1.0" }
     trigger: true
   - task: unit-tests
     file: disaster-recovery-acceptance-tests/ci/unit-tests/task.yml
@@ -502,7 +499,6 @@ jobs:
   - get: disaster-recovery-acceptance-tests
     trigger: true
   - get: bbr-binary-release
-    version: { tag: "v1.1.0" }
     trigger: true
   - task: unit-tests
     file: disaster-recovery-acceptance-tests/ci/unit-tests/task.yml
@@ -580,7 +576,6 @@ jobs:
   - get: disaster-recovery-acceptance-tests
     trigger: true
   - get: bbr-binary-release
-    version: { tag: "v1.1.0" }
     trigger: true
   - task: unit-tests
     file: disaster-recovery-acceptance-tests/ci/unit-tests/task.yml
