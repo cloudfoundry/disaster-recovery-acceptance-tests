@@ -181,8 +181,7 @@ jobs:
       BBL_GCP_PROJECT_ID: cf-backup-and-restore
       BBL_STATE_DIR: drats-persian/
       SYSTEM_DOMAIN: drats-persian.cf-app.com
-      OPS_FILES: "operations/scale-to-one-az.yml operations/use-compiled-releases.yml operations/experimental/enable-backup-restore.yml operations/enable-nfs-volume-service.yml operations/experimental/enable-nfs-broker-backup.yml operations/experimental/enable-instance-identity-credentials.yml operations/experimental/secure-service-credentials.yml  operations/experimental/disable-interpolate-service-bindings.yml operations/experimental/enable-backup-restore-credhub.yml operations/experimental/enable-traffic-to-internal-networks.yml operations/experimental/use-bosh-dns.yml operations/experimental/use-bosh-dns-for-containers.yml"
-
+      OPS_FILES: "operations/scale-to-one-az.yml operations/use-compiled-releases.yml operations/experimental/enable-backup-restore.yml"
       VARS_STORE_FILE: drats-persian/cf-deployment-variables.yml
       GIT_COMMIT_EMAIL: cf-lazarus@pivotal.io
       GIT_COMMIT_USERNAME: "Backup & Restore Concourse"
@@ -264,7 +263,7 @@ jobs:
       BBL_GCP_PROJECT_ID: cf-backup-and-restore
       BBL_STATE_DIR: continuous-drats/
       SYSTEM_DOMAIN: continuous-drats.cf-app.com
-      OPS_FILES: "operations/use-compiled-releases.yml operations/experimental/enable-backup-restore.yml operations/enable-nfs-volume-service.yml operations/experimental/enable-nfs-broker-backup.yml operations/experimental/enable-instance-identity-credentials.yml operations/experimental/secure-service-credentials.yml  operations/experimental/disable-interpolate-service-bindings.yml operations/experimental/enable-backup-restore-credhub.yml operations/experimental/enable-traffic-to-internal-networks.yml operations/experimental/use-bosh-dns.yml operations/experimental/use-bosh-dns-for-containers.yml"
+      OPS_FILES: "operations/scale-to-one-az.yml operations/use-compiled-releases.yml operations/experimental/enable-backup-restore.yml"
       VARS_STORE_FILE: continuous-drats/cf-deployment-variables.yml
       GIT_COMMIT_EMAIL: cf-lazarus@pivotal.io
       GIT_COMMIT_USERNAME: "Backup & Restore Concourse"
@@ -306,7 +305,7 @@ jobs:
       BBL_GCP_PROJECT_ID: cf-backup-and-restore
       BBL_STATE_DIR: drats-papillon/
       SYSTEM_DOMAIN: drats-papillon.cf-app.com
-      OPS_FILES: "operations/scale-to-one-az.yml operations/use-compiled-releases.yml operations/experimental/enable-backup-restore.yml operations/enable-nfs-volume-service.yml operations/experimental/enable-nfs-broker-backup.yml operations/experimental/enable-instance-identity-credentials.yml operations/experimental/secure-service-credentials.yml  operations/experimental/disable-interpolate-service-bindings.yml operations/experimental/enable-backup-restore-credhub.yml operations/experimental/enable-traffic-to-internal-networks.yml operations/experimental/use-bosh-dns.yml operations/experimental/use-bosh-dns-for-containers.yml"
+      OPS_FILES: "operations/scale-to-one-az.yml operations/use-compiled-releases.yml operations/experimental/enable-backup-restore.yml"
       VARS_STORE_FILE: drats-papillon/cf-deployment-variables.yml
       GIT_COMMIT_EMAIL: cf-lazarus@pivotal.io
       GIT_COMMIT_USERNAME: "Backup & Restore Concourse"
@@ -347,7 +346,7 @@ jobs:
       BBL_GCP_PROJECT_ID: cf-backup-and-restore
       BBL_STATE_DIR: drats-with-config-manx/
       SYSTEM_DOMAIN: drats-with-config-manx.cf-app.com
-      OPS_FILES: "operations/scale-to-one-az.yml operations/use-compiled-releases.yml operations/experimental/enable-backup-restore.yml operations/enable-nfs-volume-service.yml operations/experimental/enable-nfs-broker-backup.yml operations/experimental/enable-instance-identity-credentials.yml operations/experimental/secure-service-credentials.yml  operations/experimental/disable-interpolate-service-bindings.yml operations/experimental/enable-backup-restore-credhub.yml operations/experimental/enable-traffic-to-internal-networks.yml operations/experimental/use-bosh-dns.yml operations/experimental/use-bosh-dns-for-containers.yml"
+      OPS_FILES: "operations/scale-to-one-az.yml operations/use-compiled-releases.yml operations/experimental/enable-backup-restore.yml"
       VARS_STORE_FILE: drats-with-config-manx/cf-deployment-variables.yml
       GIT_COMMIT_EMAIL: cf-lazarus@pivotal.io
       GIT_COMMIT_USERNAME: "Backup & Restore Concourse"
@@ -424,6 +423,7 @@ jobs:
         path: disaster-recovery-acceptance-tests-prs
         status: success
         context: drats
+
 - name: run-drats-prs-with-integration-config
   serial: true
   serial_groups: [drats-dragon-li]
@@ -524,11 +524,7 @@ jobs:
       BOSH_GW_PRIVATE_KEY: {{persian-ssh-gateway-key}}
       SSH_DESTINATION_CIDR: "10.0.0.0/8"
       DEFAULT_TIMEOUT_MINS: 30
-      NFS_SERVICE_NAME: "nfs"
-      NFS_PLAN_NAME: "Existing"
-      NFS_BROKER_USER: "nfs-broker"
-      NFS_BROKER_URL: http://nfs-broker.drats-persian.cf-app.com
-      NFS_BROKER_PASSWORD: {{persian-nfs-broker-password}}
+      SKIP_SUITE_NAME: "cf-nfsbroker"
 
 - name: run-drats-opt-components
   serial: true
@@ -601,6 +597,7 @@ jobs:
       drats-integration-config: updated-integration-configs
     params:
       CONFIG_FILE_PATH: ci/integration_config.json
+      SKIP_SUITE_NAME: "cf-nfsbroker"
 
 - name: run-drats-continuously
   serial: true
@@ -637,14 +634,9 @@ jobs:
       BOSH_GW_PRIVATE_KEY: {{continuous-drats-ssh-gateway-key}}
       SSH_DESTINATION_CIDR: "10.0.0.0/8"
       DEFAULT_TIMEOUT_MINS: 60
-      NFS_SERVICE_NAME: "nfs"
-      NFS_PLAN_NAME: "Existing"
-      NFS_BROKER_USER: "nfs-broker"
-      NFS_BROKER_URL: http://nfs-broker.continuous-drats.cf-app.com
-      NFS_BROKER_PASSWORD: {{continuous-drats-nfs-broker-password}}
+      SKIP_SUITE_NAME: "cf-nfsbroker"
   - put: continuous-counter
     params: {bump: patch}
-
 
 - name: run-drats-with-destroy
   serial: true
@@ -678,11 +670,7 @@ jobs:
       BOSH_GW_PRIVATE_KEY: {{papillon-ssh-gateway-key}}
       SSH_DESTINATION_CIDR: "10.0.0.0/8"
       DEFAULT_TIMEOUT_MINS: 120
-      NFS_SERVICE_NAME: "nfs"
-      NFS_PLAN_NAME: "Existing"
-      NFS_BROKER_USER: "nfs-broker"
-      NFS_BROKER_URL: http://nfs-broker.drats-papillon.cf-app.com
-      NFS_BROKER_PASSWORD: {{papillon-nfs-broker-password}}
+      SKIP_SUITE_NAME: "cf-nfsbroker"
       DELETE_AND_REDEPLOY_CF: true
 
 ## Delete cf deployments
