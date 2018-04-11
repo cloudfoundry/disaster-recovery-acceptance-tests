@@ -108,6 +108,12 @@ jobs:
       params:
         repository: updated-vars-store
         rebase: true
+  - task: bosh-cleanup
+    file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
+    input_mapping:
+      bbl-state: bosh-backup-and-restore-meta
+    params:
+      BBL_STATE_DIR: drats-pr-ragdoll/
 
 - name: deploy-cf-drats-dragon-li
   serial: true
@@ -149,6 +155,12 @@ jobs:
       params:
         repository: updated-vars-store
         rebase: true
+  - task: bosh-cleanup
+    file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
+    input_mapping:
+      bbl-state: bosh-backup-and-restore-meta
+    params:
+      BBL_STATE_DIR: drats-dragon-li/
 
 - name: deploy-cf-drats-persian
   serial: true
@@ -190,6 +202,12 @@ jobs:
       params:
         repository: updated-vars-store
         rebase: true
+  - task: bosh-cleanup
+    file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
+    input_mapping:
+      bbl-state: bosh-backup-and-restore-meta
+    params:
+      BBL_STATE_DIR: drats-persian/
 
 - name: deploy-cf-drats-opt-components-norwegianforest
   serial: true
@@ -231,6 +249,12 @@ jobs:
       params:
         repository: updated-vars-store
         rebase: true
+  - task: bosh-cleanup
+    file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
+    input_mapping:
+      bbl-state: bosh-backup-and-restore-meta
+    params:
+      BBL_STATE_DIR: drats-opt-components-norwegianforest/
 
 - name: deploy-cf-continuous-drats
   serial: true
@@ -272,6 +296,12 @@ jobs:
       params:
         repository: updated-vars-store
         rebase: true
+  - task: bosh-cleanup
+    file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
+    input_mapping:
+      bbl-state: bosh-backup-and-restore-meta
+    params:
+      BBL_STATE_DIR: continuous-drats/
 
 - name: deploy-cf-drats-papillon
   serial: true
@@ -314,6 +344,12 @@ jobs:
       params:
         repository: updated-vars-store
         rebase: true
+  - task: bosh-cleanup
+    file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
+    input_mapping:
+      bbl-state: bosh-backup-and-restore-meta
+    params:
+      BBL_STATE_DIR: drats-papillon/
 
 - name: deploy-cf-drats-with-config-manx
   serial: true
@@ -355,6 +391,12 @@ jobs:
       params:
         repository: updated-vars-store
         rebase: true
+  - task: bosh-cleanup
+    file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
+    input_mapping:
+      bbl-state: bosh-backup-and-restore-meta
+    params:
+      BBL_STATE_DIR: drats-with-config-manx/
 
 ### RUN TESTS
 
