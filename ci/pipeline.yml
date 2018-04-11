@@ -63,6 +63,8 @@ resources:
   source:
     uri: https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests.git
     branch: master
+    ignore_paths:
+    - ci/**
 
 jobs:
 
@@ -76,10 +78,10 @@ jobs:
     - get: disaster-recovery-acceptance-tests-prs
       trigger: true
       version: every
-    - get: cf-deployment-concourse-tasks
     - get: cf-deployment
       trigger: true
     - get: bosh-backup-and-restore-meta
+    - get: cf-deployment-concourse-tasks
   - task: upload-stemcell
     file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
     input_mapping:
@@ -126,9 +128,9 @@ jobs:
     - get: disaster-recovery-acceptance-tests-prs
       trigger: true
       version: every
-    - get: cf-deployment-concourse-tasks
     - get: cf-deployment
       trigger: true
+    - get: cf-deployment-concourse-tasks
     - get: bosh-backup-and-restore-meta
   - task: upload-stemcell
     file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
@@ -173,9 +175,13 @@ jobs:
   serial_groups: [drats-persian]
   plan:
   - aggregate:
-    - get: cf-deployment-concourse-tasks
+    - get: disaster-recovery-acceptance-tests
+      trigger: true
     - get: cf-deployment
       trigger: true
+    - get: bbr-binary-release
+      trigger: true
+    - get: cf-deployment-concourse-tasks
     - get: bosh-backup-and-restore-meta
   - task: upload-stemcell
     file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
@@ -220,9 +226,13 @@ jobs:
   serial_groups: [drats-opt-components-norwegianforest]
   plan:
   - aggregate:
-    - get: cf-deployment-concourse-tasks
+    - get: disaster-recovery-acceptance-tests
+      trigger: true
     - get: cf-deployment
       trigger: true
+    - get: bbr-binary-release
+      trigger: true
+    - get: cf-deployment-concourse-tasks
     - get: bosh-backup-and-restore-meta
   - task: upload-stemcell
     file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
@@ -270,6 +280,7 @@ jobs:
     - get: cf-deployment-concourse-tasks
     - get: cf-deployment
       trigger: true
+    - get: bbr-binary-release
     - get: bosh-backup-and-restore-meta
   - task: upload-stemcell
     file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
@@ -314,11 +325,14 @@ jobs:
   serial_groups: [drats-papillon]
   plan:
   - aggregate:
-    - get: cf-deployment-concourse-tasks
+    - get: disaster-recovery-acceptance-tests
+      trigger: true
     - get: cf-deployment
       trigger: true
+    - get: bbr-binary-release
+      trigger: true
+    - get: cf-deployment-concourse-tasks
     - get: bosh-backup-and-restore-meta
-    - get: disaster-recovery-acceptance-tests
   - task: upload-stemcell
     file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
     input_mapping:
@@ -362,8 +376,12 @@ jobs:
   serial_groups: [drats-with-config-manx]
   plan:
   - aggregate:
+    - get: disaster-recovery-acceptance-tests
+      trigger: true
     - get: cf-deployment-concourse-tasks
     - get: cf-deployment
+      trigger: true
+    - get: bbr-binary-release
       trigger: true
     - get: bosh-backup-and-restore-meta
   - task: upload-stemcell
@@ -418,7 +436,6 @@ jobs:
     passed: [deploy-cf-drats-pr-ragdoll]
     version: every
   - get: bbr-binary-release
-    trigger: true
   - put: disaster-recovery-acceptance-tests-prs
     params:
       path: disaster-recovery-acceptance-tests-prs
@@ -475,13 +492,13 @@ jobs:
   plan:
   - get: cf-deployment
     trigger: true
-  - get: bosh-backup-and-restore-meta
+    passed: [deploy-cf-drats-opts-components-dragon-li]
   - get: disaster-recovery-acceptance-tests-prs
     passed: [deploy-cf-drats-opts-components-dragon-li]
     trigger: true
     version: every
+  - get: bosh-backup-and-restore-meta
   - get: bbr-binary-release
-    trigger: true
   - put: disaster-recovery-acceptance-tests-prs
     params:
       path: disaster-recovery-acceptance-tests-prs
@@ -546,8 +563,10 @@ jobs:
     trigger: true
   - get: disaster-recovery-acceptance-tests
     trigger: true
+    passed: [deploy-cf-drats-persian]
   - get: bbr-binary-release
     trigger: true
+    passed: [deploy-cf-drats-persian]
   - task: unit-tests
     file: disaster-recovery-acceptance-tests/ci/unit-tests/task.yml
     params:
@@ -571,7 +590,6 @@ jobs:
       DEFAULT_TIMEOUT_MINS: 30
       FOCUSED_SUITE_NAME: cf-app|cf-networking|cf-uaa|cf-routing|app-uptime
 
-
 - name: run-drats-opt-components
   serial: true
   serial_groups: [drats-opt-components-norwegianforest]
@@ -581,8 +599,10 @@ jobs:
     trigger: true
   - get: disaster-recovery-acceptance-tests
     trigger: true
+    passed: [deploy-cf-drats-opt-components-norwegianforest]
   - get: bbr-binary-release
     trigger: true
+    passed: [deploy-cf-drats-opt-components-norwegianforest]
   - task: unit-tests
     file: disaster-recovery-acceptance-tests/ci/unit-tests/task.yml
     params:
@@ -620,8 +640,10 @@ jobs:
   - get: bosh-backup-and-restore-meta
   - get: disaster-recovery-acceptance-tests
     trigger: true
+    passed: [deploy-cf-drats-with-config-manx]
   - get: bbr-binary-release
     trigger: true
+    passed: [deploy-cf-drats-with-config-manx]
   - task: unit-tests
     file: disaster-recovery-acceptance-tests/ci/unit-tests/task.yml
     params:
@@ -693,8 +715,10 @@ jobs:
     trigger: true
   - get: disaster-recovery-acceptance-tests
     trigger: true
+    passed: [deploy-cf-drats-papillon]
   - get: bbr-binary-release
     trigger: true
+    passed: [deploy-cf-drats-papillon]
   - task: unit-tests
     file: disaster-recovery-acceptance-tests/ci/unit-tests/task.yml
     params:
@@ -725,6 +749,9 @@ jobs:
   serial_groups: [drats-pr-ragdoll]
   plan:
   - aggregate:
+    - get: cf-deployment
+      passed: [run-drats-prs]
+      trigger: true
     - get: disaster-recovery-acceptance-tests-prs
       trigger: true
       passed: [run-drats-prs]
@@ -747,6 +774,12 @@ jobs:
     - get: cf-deployment
       passed: [run-drats]
       trigger: true
+    - get: disaster-recovery-acceptance-tests
+      passed: [run-drats]
+      trigger: true
+    - get: bbr-binary-release
+      passed: [run-drats]
+      trigger: true
     - get: cf-deployment-concourse-tasks
     - get: bosh-backup-and-restore-meta
   - task: bosh-delete-deployment
@@ -764,6 +797,12 @@ jobs:
   plan:
   - aggregate:
     - get: cf-deployment
+      passed: [run-drats-opt-components]
+      trigger: true
+    - get: disaster-recovery-acceptance-tests
+      passed: [run-drats-opt-components]
+      trigger: true
+    - get: bbr-binary-release
       passed: [run-drats-opt-components]
       trigger: true
     - get: cf-deployment-concourse-tasks
@@ -801,6 +840,12 @@ jobs:
     - get: cf-deployment
       passed: [run-drats-with-destroy]
       trigger: true
+    - get: disaster-recovery-acceptance-tests
+      passed: [run-drats-with-destroy]
+      trigger: true
+    - get: bbr-binary-release
+      passed: [run-drats-with-destroy]
+      trigger: true
     - get: cf-deployment-concourse-tasks
     - get: bosh-backup-and-restore-meta
   - task: bosh-delete-deployment
@@ -818,6 +863,9 @@ jobs:
   plan:
   - aggregate:
     - get: disaster-recovery-acceptance-tests-prs
+      trigger: true
+      passed: [run-drats-prs-opt-components-with-integration-config]
+    - get: cf-deployment
       trigger: true
       passed: [run-drats-prs-opt-components-with-integration-config]
     - get: cf-deployment-concourse-tasks
