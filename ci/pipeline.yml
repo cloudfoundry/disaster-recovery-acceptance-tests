@@ -73,6 +73,9 @@ jobs:
   serial_groups: [drats-pr-ragdoll]
   plan:
   - aggregate:
+    - get: disaster-recovery-acceptance-tests-prs
+      trigger: true
+      version: every
     - get: cf-deployment-concourse-tasks
     - get: cf-deployment
       trigger: true
@@ -115,11 +118,14 @@ jobs:
     params:
       BBL_STATE_DIR: drats-pr-ragdoll/
 
-- name: deploy-cf-drats-dragon-li
+- name: deploy-cf-drats-opts-components-dragon-li
   serial: true
   serial_groups: [drats-dragon-li]
   plan:
   - aggregate:
+    - get: disaster-recovery-acceptance-tests-prs
+      trigger: true
+      version: every
     - get: cf-deployment-concourse-tasks
     - get: cf-deployment
       trigger: true
@@ -409,6 +415,7 @@ jobs:
     trigger: true
   - get: disaster-recovery-acceptance-tests-prs
     trigger: true
+    passed: [deploy-cf-drats-pr-ragdoll]
     version: every
   - get: bbr-binary-release
     trigger: true
@@ -466,15 +473,15 @@ jobs:
         status: success
         context: drats
 
-- name: run-drats-prs-with-integration-config
+- name: run-drats-prs-opt-components-with-integration-config
   serial: true
   serial_groups: [drats-dragon-li]
   plan:
   - get: cf-deployment
-    passed: [deploy-cf-drats-dragon-li]
     trigger: true
   - get: bosh-backup-and-restore-meta
   - get: disaster-recovery-acceptance-tests-prs
+    passed: [deploy-cf-drats-opts-components-dragon-li]
     trigger: true
     version: every
   - get: bbr-binary-release
@@ -721,6 +728,9 @@ jobs:
   serial_groups: [drats-pr-ragdoll]
   plan:
   - aggregate:
+    - get: disaster-recovery-acceptance-tests-prs
+      trigger: true
+      passed: [run-drats-prs]
     - get: cf-deployment-concourse-tasks
     - get: bosh-backup-and-restore-meta
   - task: bosh-delete-deployment
@@ -737,6 +747,9 @@ jobs:
   serial_groups: [drats-persian]
   plan:
   - aggregate:
+    - get: cf-deployment
+      passed: [run-drats]
+      trigger: true
     - get: cf-deployment-concourse-tasks
     - get: bosh-backup-and-restore-meta
   - task: bosh-delete-deployment
@@ -753,6 +766,9 @@ jobs:
   serial_groups: [drats-opt-components-norwegianforest]
   plan:
   - aggregate:
+    - get: cf-deployment
+      passed: [run-drats-opt-components]
+      trigger: true
     - get: cf-deployment-concourse-tasks
     - get: bosh-backup-and-restore-meta
   - task: bosh-delete-deployment
@@ -785,6 +801,9 @@ jobs:
   serial_groups: [drats-papillon]
   plan:
   - aggregate:
+    - get: cf-deployment
+      passed: [run-drats-with-destroy]
+      trigger: true
     - get: cf-deployment-concourse-tasks
     - get: bosh-backup-and-restore-meta
   - task: bosh-delete-deployment
@@ -801,6 +820,9 @@ jobs:
   serial_groups: [drats-dragon-li]
   plan:
   - aggregate:
+    - get: disaster-recovery-acceptance-tests-prs
+      trigger: true
+      passed: [run-drats-prs-opt-components-with-integration-config]
     - get: cf-deployment-concourse-tasks
     - get: bosh-backup-and-restore-meta
   - task: bosh-delete-deployment
@@ -817,6 +839,9 @@ jobs:
   serial_groups: [drats-with-config-manx]
   plan:
   - aggregate:
+    - get: cf-deployment
+      passed: [run-drats-with-integration-config]
+      trigger: true
     - get: cf-deployment-concourse-tasks
     - get: bosh-backup-and-restore-meta
   - task: bosh-delete-deployment
