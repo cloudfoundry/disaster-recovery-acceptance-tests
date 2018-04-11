@@ -102,7 +102,7 @@ jobs:
       BBL_GCP_PROJECT_ID: cf-backup-and-restore
       BBL_STATE_DIR: drats-pr-ragdoll/
       SYSTEM_DOMAIN: drats-pr-ragdoll.cf-app.com
-      OPS_FILES: "operations/scale-to-one-az.yml operations/use-compiled-releases.yml operations/experimental/enable-backup-restore.yml operations/enable-nfs-volume-service.yml operations/experimental/enable-nfs-broker-backup.yml operations/experimental/enable-instance-identity-credentials.yml operations/experimental/secure-service-credentials.yml operations/experimental/disable-interpolate-service-bindings.yml operations/experimental/enable-backup-restore-credhub.yml operations/experimental/enable-traffic-to-internal-networks.yml operations/experimental/use-bosh-dns.yml operations/experimental/use-bosh-dns-for-containers.yml"
+      OPS_FILES: "operations/scale-to-one-az.yml operations/use-compiled-releases.yml operations/experimental/enable-backup-restore.yml"
       VARS_STORE_FILE: drats-pr-ragdoll/cf-deployment-variables.yml
       GIT_COMMIT_EMAIL: cf-lazarus@pivotal.io
       GIT_COMMIT_USERNAME: "Backup & Restore Concourse"
@@ -455,11 +455,7 @@ jobs:
       BOSH_GW_PRIVATE_KEY: {{pr-ragdoll-ssh-gateway-key}}
       SSH_DESTINATION_CIDR: "10.0.0.0/8"
       DEFAULT_TIMEOUT_MINS: 30
-      NFS_SERVICE_NAME: "nfs"
-      NFS_PLAN_NAME: "Existing"
-      NFS_BROKER_USER: "nfs-broker"
-      NFS_BROKER_URL: http://nfs-broker.drats-pr-ragdoll.cf-app.com
-      NFS_BROKER_PASSWORD: {{pr-ragdoll-nfs-broker-password}}
+      FOCUSED_SUITE_NAME: cf-app|cf-networking|cf-uaa|cf-routing|app-uptime
     on_failure:
       put: disaster-recovery-acceptance-tests-prs
       params:
@@ -573,7 +569,8 @@ jobs:
       BOSH_GW_PRIVATE_KEY: {{persian-ssh-gateway-key}}
       SSH_DESTINATION_CIDR: "10.0.0.0/8"
       DEFAULT_TIMEOUT_MINS: 30
-      SKIP_SUITE_NAME: "cf-nfsbroker"
+      FOCUSED_SUITE_NAME: cf-app|cf-networking|cf-uaa|cf-routing|app-uptime
+
 
 - name: run-drats-opt-components
   serial: true
@@ -646,7 +643,7 @@ jobs:
       drats-integration-config: updated-integration-configs
     params:
       CONFIG_FILE_PATH: ci/integration_config.json
-      SKIP_SUITE_NAME: "cf-nfsbroker"
+      FOCUSED_SUITE_NAME: cf-app|cf-networking|cf-uaa|cf-routing|app-uptime
 
 - name: run-drats-continuously
   serial: true
@@ -683,7 +680,7 @@ jobs:
       BOSH_GW_PRIVATE_KEY: {{continuous-drats-ssh-gateway-key}}
       SSH_DESTINATION_CIDR: "10.0.0.0/8"
       DEFAULT_TIMEOUT_MINS: 60
-      SKIP_SUITE_NAME: "cf-nfsbroker"
+      FOCUSED_SUITE_NAME: cf-app|cf-networking|cf-uaa|cf-routing|app-uptime
   - put: continuous-counter
     params: {bump: patch}
 
@@ -719,7 +716,7 @@ jobs:
       BOSH_GW_PRIVATE_KEY: {{papillon-ssh-gateway-key}}
       SSH_DESTINATION_CIDR: "10.0.0.0/8"
       DEFAULT_TIMEOUT_MINS: 120
-      SKIP_SUITE_NAME: "cf-nfsbroker"
+      FOCUSED_SUITE_NAME: cf-app|cf-networking|cf-uaa|cf-routing|app-uptime
       DELETE_AND_REDEPLOY_CF: true
 
 ## Delete cf deployments
