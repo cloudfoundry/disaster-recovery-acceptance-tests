@@ -10,7 +10,7 @@ Tests if Cloud Foundry can be backed up and restored. The tests will back up fro
    ```
 1. Install `dep`
 
-## Running DRATS with Envrironment Variables
+## Running DRATS with Environment Variables
 
 1. Spin up a Cloud Foundry deployment.
     * CF on BOSH Lite is supported.
