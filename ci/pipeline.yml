@@ -117,6 +117,10 @@ jobs:
       bbl-state: bosh-backup-and-restore-meta
     params:
       BBL_STATE_DIR: drats-pr-ragdoll/
+  - task: wait-for-cf-api
+    file: disaster-recovery-acceptance-tests/ci/wait-for-cf-api/task.yml
+    params:
+      CF_API_URL: https://api.drats-pr-ragdoll.cf-app.com
 
 - name: deploy-cf-drats-opts-components-dragon-li
   serial: true
@@ -167,6 +171,10 @@ jobs:
       bbl-state: bosh-backup-and-restore-meta
     params:
       BBL_STATE_DIR: drats-dragon-li/
+  - task: wait-for-cf-api
+    file: disaster-recovery-acceptance-tests/ci/wait-for-cf-api/task.yml
+    params:
+      CF_API_URL: https://api.drats-dragon-li.cf-app.com
 
 - name: deploy-cf-drats-persian
   serial: true
@@ -218,6 +226,10 @@ jobs:
       bbl-state: bosh-backup-and-restore-meta
     params:
       BBL_STATE_DIR: drats-persian/
+  - task: wait-for-cf-api
+    file: disaster-recovery-acceptance-tests/ci/wait-for-cf-api/task.yml
+    params:
+      CF_API_URL: https://api.drats-persian.cf-app.com
 
 - name: deploy-cf-drats-opt-components-norwegianforest
   serial: true
@@ -269,6 +281,10 @@ jobs:
       bbl-state: bosh-backup-and-restore-meta
     params:
       BBL_STATE_DIR: drats-opt-components-norwegianforest/
+  - task: wait-for-cf-api
+    file: disaster-recovery-acceptance-tests/ci/wait-for-cf-api/task.yml
+    params:
+      CF_API_URL: https://api.drats-opt-components-norwegianforest.cf-app.com
 
 - name: deploy-cf-continuous-drats
   serial: true
@@ -317,6 +333,10 @@ jobs:
       bbl-state: bosh-backup-and-restore-meta
     params:
       BBL_STATE_DIR: continuous-drats/
+  - task: wait-for-cf-api
+    file: disaster-recovery-acceptance-tests/ci/wait-for-cf-api/task.yml
+    params:
+      CF_API_URL: https://api.continuous-drats.cf-app.com
 
 - name: deploy-cf-drats-papillon
   serial: true
@@ -369,7 +389,7 @@ jobs:
     params:
       BBL_STATE_DIR: drats-papillon/
   - task: wait-for-cf-api
-    file: disaster-recovery-acceptance-tests-prs/ci/wait-for-cf-api/task.yml
+    file: disaster-recovery-acceptance-tests/ci/wait-for-cf-api/task.yml
     params:
       CF_API_URL: https://api.drats-papillon.cf-app.com
 
@@ -424,6 +444,10 @@ jobs:
       bbl-state: bosh-backup-and-restore-meta
     params:
       BBL_STATE_DIR: drats-with-config-manx/
+  - task: wait-for-cf-api
+    file: disaster-recovery-acceptance-tests/ci/wait-for-cf-api/task.yml
+    params:
+      CF_API_URL: https://api.drats-with-config-manx.cf-app.com
 
 ### RUN TESTS
 
