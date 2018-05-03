@@ -80,6 +80,7 @@ jobs:
       trigger: true
     - get: bosh-backup-and-restore-meta
     - get: cf-deployment-concourse-tasks
+    - get: disaster-recovery-acceptance-tests
   - task: upload-stemcell
     file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
     input_mapping:
@@ -134,6 +135,7 @@ jobs:
       trigger: true
     - get: cf-deployment-concourse-tasks
     - get: bosh-backup-and-restore-meta
+    - get: disaster-recovery-acceptance-tests
   - task: upload-stemcell
     file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
     input_mapping:
@@ -296,6 +298,7 @@ jobs:
       trigger: true
     - get: bbr-binary-release
     - get: bosh-backup-and-restore-meta
+    - get: disaster-recovery-acceptance-tests
   - task: upload-stemcell
     file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
     input_mapping:
