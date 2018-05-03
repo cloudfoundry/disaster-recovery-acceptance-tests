@@ -601,6 +601,10 @@ jobs:
     file: disaster-recovery-acceptance-tests/ci/unit-tests/task.yml
     params:
       GITHUB_SSH_KEY: {{github-ssh-key}}
+  - task: wait-for-cf-api
+    file: disaster-recovery-acceptance-tests/ci/wait-for-cf-api/task.yml
+    params:
+      CF_API_URL: https://api.drats-persian.cf-app.com
   - task: acceptance-tests
     file: disaster-recovery-acceptance-tests/ci/drats/task.yml
     privileged: true
@@ -753,6 +757,10 @@ jobs:
     file: disaster-recovery-acceptance-tests/ci/unit-tests/task.yml
     params:
       GITHUB_SSH_KEY: {{github-ssh-key}}
+  - task: wait-for-cf-api
+    file: disaster-recovery-acceptance-tests/ci/wait-for-cf-api/task.yml
+    params:
+      CF_API_URL: https://api.drats-papillon.cf-app.com
   - task: acceptance-tests
     file: disaster-recovery-acceptance-tests/ci/drats/task.yml
     privileged: true
