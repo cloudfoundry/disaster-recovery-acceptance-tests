@@ -64,6 +64,12 @@ resources:
     uri: https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests.git
     branch: master
 
+- name: backup-and-restore-ci
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry-incubator/backup-and-restore-ci.git
+    branch: master
+
 jobs:
 
 ### DEPLOY CF
@@ -80,7 +86,7 @@ jobs:
       trigger: true
     - get: bosh-backup-and-restore-meta
     - get: cf-deployment-concourse-tasks
-    - get: disaster-recovery-acceptance-tests
+    - get: backup-and-restore-ci
   - task: upload-stemcell
     file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
     input_mapping:
@@ -119,7 +125,7 @@ jobs:
     params:
       BBL_STATE_DIR: drats-pr-ragdoll/
   - task: wait-for-cf-api
-    file: disaster-recovery-acceptance-tests/ci/wait-for-cf-api/task.yml
+    file: backup-and-restore-ci/tasks/wait-for-cf-api/task.yml
     params:
       CF_API_URL: https://api.drats-pr-ragdoll.cf-app.com
 
@@ -135,7 +141,7 @@ jobs:
       trigger: true
     - get: cf-deployment-concourse-tasks
     - get: bosh-backup-and-restore-meta
-    - get: disaster-recovery-acceptance-tests
+    - get: backup-and-restore-ci
   - task: upload-stemcell
     file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
     input_mapping:
@@ -174,7 +180,7 @@ jobs:
     params:
       BBL_STATE_DIR: drats-dragon-li/
   - task: wait-for-cf-api
-    file: disaster-recovery-acceptance-tests/ci/wait-for-cf-api/task.yml
+    file: backup-and-restore-ci/tasks/wait-for-cf-api/task.yml
     params:
       CF_API_URL: https://api.drats-dragon-li.cf-app.com
 
@@ -191,6 +197,7 @@ jobs:
       trigger: true
     - get: cf-deployment-concourse-tasks
     - get: bosh-backup-and-restore-meta
+    - get: backup-and-restore-ci
   - task: upload-stemcell
     file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
     input_mapping:
@@ -229,7 +236,7 @@ jobs:
     params:
       BBL_STATE_DIR: drats-persian/
   - task: wait-for-cf-api
-    file: disaster-recovery-acceptance-tests/ci/wait-for-cf-api/task.yml
+    file: backup-and-restore-ci/tasks/wait-for-cf-api/task.yml
     params:
       CF_API_URL: https://api.drats-persian.cf-app.com
 
@@ -246,6 +253,7 @@ jobs:
       trigger: true
     - get: cf-deployment-concourse-tasks
     - get: bosh-backup-and-restore-meta
+    - get: backup-and-restore-ci
   - task: upload-stemcell
     file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
     input_mapping:
@@ -284,7 +292,7 @@ jobs:
     params:
       BBL_STATE_DIR: drats-opt-components-norwegianforest/
   - task: wait-for-cf-api
-    file: disaster-recovery-acceptance-tests/ci/wait-for-cf-api/task.yml
+    file: backup-and-restore-ci/tasks/wait-for-cf-api/task.yml
     params:
       CF_API_URL: https://api.drats-opt-components-norwegianforest.cf-app.com
 
@@ -299,6 +307,7 @@ jobs:
     - get: bbr-binary-release
     - get: bosh-backup-and-restore-meta
     - get: disaster-recovery-acceptance-tests
+    - get: backup-and-restore-ci
   - task: upload-stemcell
     file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
     input_mapping:
@@ -337,7 +346,7 @@ jobs:
     params:
       BBL_STATE_DIR: continuous-drats/
   - task: wait-for-cf-api
-    file: disaster-recovery-acceptance-tests/ci/wait-for-cf-api/task.yml
+    file: backup-and-restore-ci/tasks/wait-for-cf-api/task.yml
     params:
       CF_API_URL: https://api.continuous-drats.cf-app.com
 
@@ -354,6 +363,7 @@ jobs:
       trigger: true
     - get: cf-deployment-concourse-tasks
     - get: bosh-backup-and-restore-meta
+    - get: backup-and-restore-ci
   - task: upload-stemcell
     file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
     input_mapping:
@@ -392,7 +402,7 @@ jobs:
     params:
       BBL_STATE_DIR: drats-papillon/
   - task: wait-for-cf-api
-    file: disaster-recovery-acceptance-tests/ci/wait-for-cf-api/task.yml
+    file: backup-and-restore-ci/tasks/wait-for-cf-api/task.yml
     params:
       CF_API_URL: https://api.drats-papillon.cf-app.com
 
@@ -410,6 +420,7 @@ jobs:
     - get: bbr-binary-release
       trigger: true
     - get: bosh-backup-and-restore-meta
+    - get: backup-and-restore-ci
   - task: upload-stemcell
     file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
     input_mapping:
@@ -448,7 +459,7 @@ jobs:
     params:
       BBL_STATE_DIR: drats-with-config-manx/
   - task: wait-for-cf-api
-    file: disaster-recovery-acceptance-tests/ci/wait-for-cf-api/task.yml
+    file: backup-and-restore-ci/tasks/wait-for-cf-api/task.yml
     params:
       CF_API_URL: https://api.drats-with-config-manx.cf-app.com
 
@@ -601,10 +612,6 @@ jobs:
     file: disaster-recovery-acceptance-tests/ci/unit-tests/task.yml
     params:
       GITHUB_SSH_KEY: {{github-ssh-key}}
-  - task: wait-for-cf-api
-    file: disaster-recovery-acceptance-tests/ci/wait-for-cf-api/task.yml
-    params:
-      CF_API_URL: https://api.drats-persian.cf-app.com
   - task: acceptance-tests
     file: disaster-recovery-acceptance-tests/ci/drats/task.yml
     privileged: true
@@ -757,10 +764,6 @@ jobs:
     file: disaster-recovery-acceptance-tests/ci/unit-tests/task.yml
     params:
       GITHUB_SSH_KEY: {{github-ssh-key}}
-  - task: wait-for-cf-api
-    file: disaster-recovery-acceptance-tests/ci/wait-for-cf-api/task.yml
-    params:
-      CF_API_URL: https://api.drats-papillon.cf-app.com
   - task: acceptance-tests
     file: disaster-recovery-acceptance-tests/ci/drats/task.yml
     privileged: true
