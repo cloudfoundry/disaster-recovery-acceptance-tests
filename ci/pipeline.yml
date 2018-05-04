@@ -63,6 +63,8 @@ resources:
   source:
     uri: https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests.git
     branch: master
+    ignore_paths:
+    - ci/pipeline.yml
 
 - name: backup-and-restore-ci
   type: git
