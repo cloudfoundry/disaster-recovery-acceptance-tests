@@ -78,10 +78,17 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 
 		if config.DeleteAndRedeployCF {
 			By("deleting the deployment")
-			manifest := DownloadManifest(config.CloudFoundryConfig.Name, config.BoshConfig)
+			manifestSession := RunCommandSuccessfully("bosh-cli",
+				"-e", config.BoshURL,
+				"--ca-cert", testContext.CertificatePath,
+				"--client", config.BoshConfig.BoshClient,
+				"--client-secret", config.BoshConfig.BoshClientSecret,
+				"-d", config.CloudFoundryConfig.Name,
+				"manifest",
+			)
 			file, err := ioutil.TempFile("", "cf")
 			Expect(err).NotTo(HaveOccurred())
-			_, err = file.Write([]byte(manifest))
+			_, err = file.Write(manifestSession.Out.Contents())
 			Expect(err).NotTo(HaveOccurred())
 
 			RunCommandSuccessfully("bosh-cli", "-n",
