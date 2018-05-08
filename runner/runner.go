@@ -78,7 +78,7 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 
 		if config.DeleteAndRedeployCF {
 			By("deleting the deployment")
-			manifestSession := RunCommandSuccessfully("bosh-cli",
+			manifestSession := RunCommandSuccessfullySilently("bosh-cli",
 				"-e", config.BoshURL,
 				"--ca-cert", testContext.CertificatePath,
 				"--client", config.BoshConfig.BoshClient,

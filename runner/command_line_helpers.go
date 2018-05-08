@@ -21,6 +21,12 @@ func RunCommandSuccessfully(cmd string, args ...string) *gexec.Session {
 	return session
 }
 
+func RunCommandSuccessfullySilently(cmd string, args ...string) *gexec.Session {
+	session := runCommandWithStream("", bytes.NewBufferString(""), GinkgoWriter, cmd, args...)
+	Expect(session).To(gexec.Exit(0))
+	return session
+}
+
 func RunCommandSuccessfullyWithFailureMessage(commandDescription, cmd string, args ...string) *gexec.Session {
 	session := runCommandWithStream(commandDescription, GinkgoWriter, GinkgoWriter, cmd, args...)
 	Expect(session).To(gexec.Exit(0), "Command errored: "+commandDescription)
@@ -60,41 +66,10 @@ func runCommandWithStream(commandDescription string, stdout, stderr io.Writer, c
 	return session
 }
 
-func DownloadManifest(deploymentName string, boshConfig BoshConfig) string {
-	session := runCommandWithStream("", bytes.NewBufferString(""), GinkgoWriter, join(
-		BoshCommand(boshConfig),
-		forDeployment(deploymentName),
-		"manifest",
-	))
-	Eventually(session).Should(gexec.Exit(0))
-
-	return string(session.Out.Contents())
-}
-
-func BoshCommand(boshConfig BoshConfig) string {
-	return fmt.Sprintf("bosh-cli --non-interactive --environment=%s --ca-cert=%s --client=%s --client-secret=%s",
-		boshConfig.BoshURL,
-		boshConfig.BoshCaCert,
-		boshConfig.BoshClient,
-		boshConfig.BoshClientSecret,
-	)
-}
-
-func forDeployment(deploymentName string) string {
-	return fmt.Sprintf(
-		"--deployment=%s",
-		deploymentName,
-	)
-}
-
 func MustHaveEnv(keyname string) string {
 	val := os.Getenv(keyname)
 	if val == "" {
 		panic(fmt.Sprintf("Env var %s not set", keyname))
 	}
 	return val
-}
-
-func join(args ...string) string {
-	return strings.Join(args, " ")
 }
