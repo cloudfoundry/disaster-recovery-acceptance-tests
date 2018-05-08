@@ -111,7 +111,7 @@ func loginAndGetToken(config Config) string {
 }
 
 func refreshToken() string {
-	token := string(RunCommandSuccessfully("cf oauth-token").Out.Contents()[:])
+	token := string(RunCommandSuccessfullySilently("cf oauth-token").Out.Contents()[:])
 	token = strings.Split(token, " ")[1]
 	token = strings.Trim(token, "\r\n\t ")
 	return token
