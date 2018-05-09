@@ -41,11 +41,10 @@ func (tc *CfUaaTestCase) AfterBackup(config Config) {
 	login(config, config.CloudFoundryConfig.AdminUsername, config.CloudFoundryConfig.AdminPassword)
 	RunCommandSuccessfully("cf delete-user ", tc.testUser, "-f")
 	RunCommandSuccessfully("cf logout")
-
 	RunCommandSuccessfully("cf api --skip-ssl-validation", config.CloudFoundryConfig.ApiUrl)
-	//user has been deleted. authentication should fail
-	result := RunCommand("cf auth", tc.testUser, tc.testPassword)
 
+	By("user has been deleted. authentication should fail")
+	result := RunCommand("cf auth", tc.testUser, tc.testPassword)
 	Expect(result.ExitCode()).To(Equal(1))
 }
 
