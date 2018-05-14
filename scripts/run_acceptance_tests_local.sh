@@ -22,6 +22,11 @@ set -eu -o pipefail
 : "${NFS_BROKER_USER:=""}"
 : "${NFS_BROKER_PASSWORD:=""}"
 : "${NFS_BROKER_URL:=""}"
+: "${SMB_SERVICE_NAME:=""}"
+: "${SMB_PLAN_NAME:=""}"
+: "${SMB_BROKER_USER:=""}"
+: "${SMB_BROKER_PASSWORD:=""}"
+: "${SMB_BROKER_URL:=""}"
 : "${SKIP_SUITE_NAME:=""}"
 
 tmpdir="$( mktemp -d /tmp/run-drats.XXXXXXXXXX )"
