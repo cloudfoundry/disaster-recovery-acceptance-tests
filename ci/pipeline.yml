@@ -864,6 +864,8 @@ jobs:
   serial_groups: [continuous-drats]
   plan:
   - aggregate:
+    - get: cf-deployment
+      passed: [run-drats-continuously]
     - get: cf-deployment-concourse-tasks
     - get: bosh-backup-and-restore-meta
   - task: bosh-delete-deployment
