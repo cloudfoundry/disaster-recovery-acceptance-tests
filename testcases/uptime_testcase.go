@@ -1,6 +1,7 @@
 package testcases
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"path"
@@ -103,7 +104,7 @@ func checkAppRemainsAlive(url string) chan<- bool {
 				ticker.Stop()
 				return
 			case <-tickerChannel:
-				Expect(Get(url).StatusCode).To(Equal(http.StatusOK))
+				Expect(Get(url).StatusCode).To(Equal(http.StatusOK), fmt.Sprintf("%s - expected app to consistently respond 200 OK during backup", time.Now().UTC()))
 			}
 		}
 	}()
