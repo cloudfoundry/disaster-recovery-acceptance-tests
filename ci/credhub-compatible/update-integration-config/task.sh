@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2034
 
 set -euo pipefail
 
 get_password_from_credhub() {
   local bosh_manifest_password_variable_name=$1
-  echo $(credhub find -j -n ${bosh_manifest_password_variable_name} | jq -r .credentials[].name | xargs credhub get -j -n | jq -r .value)
+  credhub find -j -n "${bosh_manifest_password_variable_name}" | jq -r .credentials[].name | xargs credhub get -j -n | jq -r .value
 }
 
 setup_bosh_env_vars() {
@@ -17,7 +18,7 @@ setup_bosh_env_vars
 
 cf_deployment_name="${CF_DEPLOYMENT_NAME}"
 cf_api_url="https://api.${SYSTEM_DOMAIN}"
-cf_admin_username=admin
+cf_admin_username="admin"
 cf_admin_password=$(get_password_from_credhub cf_admin_password)
 bosh_environment="$BOSH_ENVIRONMENT"
 bosh_client="$BOSH_CLIENT"
@@ -51,17 +52,17 @@ configs=( cf_deployment_name
         nfs_broker_user
         nfs_broker_url )
 
-integration_config=`cat integration-configs/${INTEGRATION_CONFIG_FILE_PATH}`
+integration_config="$(cat "integration-configs/${INTEGRATION_CONFIG_FILE_PATH}")"
 
 for config in "${configs[@]}"
 do
-  integration_config=$(echo ${integration_config} | jq ".${config}=\"${!config}\"")
+  integration_config=$(echo "${integration_config}" | jq ".${config}=\"${!config}\"")
 done
 
-if [ -z ${nfs_broker_password} ]; then
-  integration_config=$(echo ${integration_config} | jq '."include_cf-nfsbroker"=false')
+if [[ -z ${nfs_broker_password} ]]; then
+  integration_config=$(echo "${integration_config}" | jq '."include_cf-nfsbroker"=false')
 fi
 
-echo "${integration_config}" > integration-configs/${INTEGRATION_CONFIG_FILE_PATH}
+echo "${integration_config}" > "integration-configs/${INTEGRATION_CONFIG_FILE_PATH}"
 
 cp -Tr integration-configs updated-integration-configs
