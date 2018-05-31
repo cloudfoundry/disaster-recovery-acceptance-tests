@@ -7,10 +7,10 @@ export CONFIG="$PWD/drats-integration-config/${CONFIG_FILE_PATH}"
 export GOPATH=$PWD
 export PATH=$PATH:$GOPATH/bin
 
-BOSH_GW_USER=`jq -r .ssh_proxy_user ${CONFIG}`
-BOSH_GW_HOST=`jq -r .ssh_proxy_host ${CONFIG}`
-BOSH_GW_PRIVATE_KEY=`jq -r .ssh_proxy_private_key ${CONFIG}`
-SSH_DESTINATION_CIDR=`jq -r .ssh_proxy_cidr ${CONFIG}`
+BOSH_GW_USER=$(jq -r .ssh_proxy_user "${CONFIG}")
+BOSH_GW_HOST=$(jq -r .ssh_proxy_host "${CONFIG}")
+BOSH_GW_PRIVATE_KEY=$(jq -r .ssh_proxy_private_key "${CONFIG}")
+SSH_DESTINATION_CIDR=$(jq -r .ssh_proxy_cidr "${CONFIG}")
 
 eval "$(ssh-agent)"
 
@@ -24,8 +24,8 @@ sshuttle -r "${BOSH_GW_USER}@${BOSH_GW_HOST}" "${SSH_DESTINATION_CIDR}" --daemon
 sleep 5
 
 pushd bbr-binary-release
-  tar xvf *.tar
-  export BBR_BUILD_PATH=`pwd`/releases/bbr
+  tar xvf ./*.tar
+  export BBR_BUILD_PATH="$PWD/releases/bbr"
 popd
 
 pushd src/github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests
