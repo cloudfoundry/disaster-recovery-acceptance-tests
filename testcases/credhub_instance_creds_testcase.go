@@ -68,7 +68,5 @@ func (tc *CfCredhubSSITestCase) AfterRestore(config Config) {
 }
 
 func (tc *CfCredhubSSITestCase) Cleanup(config Config) {
-	RunCommandSuccessfully("cf api --skip-ssl-validation", config.CloudFoundryConfig.ApiUrl)
-	RunCommandSuccessfully("cf auth", config.CloudFoundryConfig.AdminUsername, config.CloudFoundryConfig.AdminPassword)
 	RunCommandSuccessfully("cf delete-org -f acceptance-test-org-" + tc.uniqueTestID)
 }
