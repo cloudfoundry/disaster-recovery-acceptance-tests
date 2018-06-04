@@ -1,6 +1,7 @@
 package testcases
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"path"
@@ -79,7 +80,7 @@ func checkApiGoesDown(apiUrl string) (chan<- bool, <-chan bool) {
 				valueApiWasDown <- apiWasDown
 				return
 			case <-tickerChannel:
-				if RunCommand("curl", "-k", "--fail", apiUrl, " 2>/dev/null > /dev/null").ExitCode() == CURL_ERROR_FOR_404 {
+				if RunCommand("curl", "-k", "--fail", "--max-time", "1", apiUrl, " 2>/dev/null > /dev/null").ExitCode() == CURL_ERROR_FOR_404 {
 					apiWasDown = true
 					ticker.Stop()
 				}
@@ -103,7 +104,7 @@ func checkAppRemainsAlive(url string) chan<- bool {
 				ticker.Stop()
 				return
 			case <-tickerChannel:
-				Expect(Get(url).StatusCode).To(Equal(http.StatusOK))
+				Expect(Get(url).StatusCode).To(Equal(http.StatusOK), fmt.Sprintf("%s - expected app to consistently respond 200 OK during backup", time.Now().UTC()))
 			}
 		}
 	}()

@@ -2,26 +2,6 @@
 
 set -eu
 
-export CF_DEPLOYMENT_NAME
-export CF_ADMIN_USERNAME
-export CF_ADMIN_PASSWORD
-export CF_API_URL
-export BOSH_CLIENT
-export BOSH_CLIENT_SECRET
-export BOSH_CA_CERT
-export BOSH_ENVIRONMENT
-export NFS_SERVICE_NAME
-export NFS_PLAN_NAME
-export NFS_BROKER_USER
-export NFS_BROKER_PASSWORD
-export NFS_BROKER_URL
-export SMB_SERVICE_NAME
-export SMB_PLAN_NAME
-export SMB_BROKER_USER
-export SMB_BROKER_PASSWORD
-export SMB_BROKER_URL
-export DELETE_AND_REDEPLOY_CF
-
 export GOPATH=$PWD
 export PATH=$PATH:$GOPATH/bin
 
@@ -37,11 +17,11 @@ sshuttle -r "${BOSH_GW_USER}@${BOSH_GW_HOST}" "${SSH_DESTINATION_CIDR}" --daemon
 sleep 5
 
 echo "$BOSH_CA_CERT" > bosh.cert
-export BOSH_CERT_PATH=`pwd`/bosh.cert
+export BOSH_CERT_PATH="$PWD/bosh.cert"
 
 pushd bbr-binary-release
-  tar xvf *.tar
-  export BBR_BUILD_PATH=`pwd`/releases/bbr
+  tar xvf ./*.tar
+  export BBR_BUILD_PATH="$PWD/releases/bbr"
 popd
 
 pushd src/github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests

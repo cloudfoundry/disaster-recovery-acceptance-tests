@@ -3,10 +3,11 @@
 set -eu
 
 eval "$(ssh-agent)"
-github_ssh_key=$(mktemp)
-echo "$GITHUB_SSH_KEY" > "$github_ssh_key"
-chmod 400 "$github_ssh_key"
-ssh-add "$github_ssh_key"
+github_ssh_key_file=$(mktemp)
+
+echo "$GITHUB_SSH_KEY" > "$github_ssh_key_file"
+chmod 400 "$github_ssh_key_file"
+ssh-add "$github_ssh_key_file"
 
 export GOPATH=$PWD
 export PATH=$PATH:$GOPATH/bin
