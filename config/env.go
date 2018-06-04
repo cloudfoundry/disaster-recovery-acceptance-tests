@@ -29,6 +29,12 @@ func FromEnv() (runner.Config, runner.TestCaseFilter) {
 	deploymentConfig.NFSBrokerPassword = os.Getenv("NFS_BROKER_PASSWORD")
 	deploymentConfig.NFSBrokerUrl = os.Getenv("NFS_BROKER_URL")
 
+	deploymentConfig.SMBServiceName = os.Getenv("SMB_SERVICE_NAME")
+	deploymentConfig.SMBPlanName = os.Getenv("SMB_PLAN_NAME")
+	deploymentConfig.SMBBrokerUser = os.Getenv("SMB_BROKER_USER")
+	deploymentConfig.SMBBrokerPassword = os.Getenv("SMB_BROKER_PASSWORD")
+	deploymentConfig.SMBBrokerUrl = os.Getenv("SMB_BROKER_URL")
+
 	timeout := TimeoutFromEnv()
 
 	deleteAndRedeployCF := os.Getenv("DELETE_AND_REDEPLOY_CF") == "true"

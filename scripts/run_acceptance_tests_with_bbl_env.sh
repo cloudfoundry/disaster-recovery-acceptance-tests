@@ -27,6 +27,22 @@ pushd $1
             export SKIP_SUITE_NAME="(${SKIP_SUITE_NAME})|cf-nfsbroker"
         fi
     fi
+
+    if grep "azurefile-broker-password" ${CF_VARS_STORE_PATH}>/dev/null; then
+        export SMB_SERVICE_NAME="smb"
+        export SMB_PLAN_NAME="Existing"
+        export SMB_BROKER_USER="admin"
+        export SMB_BROKER_PASSWORD=$(${BOSH_CLI_NAME} interpolate --path /azurefile-broker-password ${CF_VARS_STORE_PATH})
+        export SMB_BROKER_URL="http://azurefile-broker.${CF_DOMAIN}"
+    else
+        echo "Skipping cf-smbbroker testcase because azurefile-broker-password is not present in ${CF_VARS_STORE_PATH}"
+        if [ -z ${SKIP_SUITE_NAME} ]; then
+            export SKIP_SUITE_NAME="cf-smbbroker"
+        else
+            export SKIP_SUITE_NAME="(${SKIP_SUITE_NAME})|cf-smbbroker"
+        fi
+
+    fi
 popd
 
 echo "Running DRATs locally"
