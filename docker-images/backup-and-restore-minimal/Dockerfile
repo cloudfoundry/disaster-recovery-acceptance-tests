@@ -15,7 +15,7 @@ RUN (curl -L "https://cli.run.pivotal.io/stable?version=6.36.1&release=linux64-b
    chmod +x /usr/bin/cf
 
 RUN \
-  wget https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-3.0.1-linux-amd64 --output-document="/usr/bin/bosh-cli" && \
+  wget https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-5.0.1-linux-amd64 --output-document="/usr/bin/bosh-cli" && \
   cd /usr/bin && \
-  echo "ccc893bab8b219e9e4a628ed044ebca6c6de9ca0 bosh-cli" | sha1sum -c - && \
+  echo "f1f1ee58a7eb872568c85db19a17b697990a7452 bosh-cli" | sha1sum -c - && \
   chmod +x bosh-cli
