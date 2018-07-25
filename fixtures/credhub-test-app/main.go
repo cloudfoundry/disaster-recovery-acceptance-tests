@@ -13,7 +13,6 @@ import (
 const credhubBaseURL = "https://credhub.service.cf.internal:8844"
 
 func main() {
-
 	s, err := newServer()
 	if err != nil {
 		log.Fatal(err)
@@ -47,8 +46,8 @@ func (s *Server) List(w http.ResponseWriter, r *http.Request) {
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Fprintf(w, "Encountered error reading response body from credhub: [%s]", err)
 		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "Encountered error reading response body from credhub: [%s]", err)
 	}
 	defer resp.Body.Close()
 
@@ -57,13 +56,13 @@ func (s *Server) List(w http.ResponseWriter, r *http.Request) {
 
 func handleBadResponses(w http.ResponseWriter, resp *http.Response, err error) bool {
 	if err != nil {
-		fmt.Fprintf(w, "Encountered error from credhub: [%s]", err)
 		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "Encountered error from credhub: [%s]", err)
 		return false
 	}
-	if resp.StatusCode < http.StatusOK || resp.StatusCode > http.StatusBadRequest {
-		fmt.Fprintf(w, "Encountered bad response code from credhub: %d", resp.StatusCode)
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusBadRequest {
 		w.WriteHeader(resp.StatusCode)
+		fmt.Fprintf(w, "Encountered bad response code from credhub: %d", resp.StatusCode)
 		return false
 	}
 	return true
