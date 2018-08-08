@@ -14,6 +14,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"io"
 )
 
 func GetAppUrl(appName string) string {
@@ -39,16 +40,12 @@ func Get(url string) *http.Response {
 	return response
 }
 
-func GetWithRetries(url string, retries int) *http.Response {
-	var response *http.Response
-	for i := 0; i < retries; i++ {
-		response = Get(url)
-		if response.StatusCode == http.StatusOK {
-			return response
-		}
-		time.Sleep(10 * time.Second)
-	}
-
+func Post(url string, contentType string, body io.Reader) *http.Response {
+	client := &http.Client{Transport: &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}}
+	response, err := client.Post("https://" + url, contentType, body)
+	Expect(err).NotTo(HaveOccurred())
 	return response
 }
 

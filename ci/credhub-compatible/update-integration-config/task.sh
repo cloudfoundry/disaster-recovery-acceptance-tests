@@ -14,6 +14,11 @@ setup_bosh_env_vars() {
   popd
 }
 
+get_internal_ip() {
+  local bosh_vm_variable_name=$1
+  bosh vms -d "${CF_DEPLOYMENT_NAME}" --column=instance --column=ips --column=AZ --json | jq -r ".Tables[0].Rows[] | select(.instance|test(\"${bosh_vm_variable_name}.\")) | select(.az|test(\"z1\")).ips"
+}
+
 setup_bosh_env_vars
 
 cf_deployment_name="${CF_DEPLOYMENT_NAME}"
@@ -33,6 +38,8 @@ nfs_service_name="nfs"
 nfs_plan_name="Existing"
 nfs_broker_user="nfs-broker"
 nfs_broker_url="http://nfs-broker.${SYSTEM_DOMAIN}"
+credhub_client_name="credhub_admin_client"
+credhub_client_secret="$(get_password_from_credhub credhub_admin_client_secret)"
 
 configs=( cf_deployment_name
         cf_api_url
@@ -50,7 +57,9 @@ configs=( cf_deployment_name
         nfs_service_name
         nfs_plan_name
         nfs_broker_user
-        nfs_broker_url )
+        nfs_broker_url
+        credhub_client_name
+        credhub_client_secret )
 
 integration_config="$(cat "integration-configs/${INTEGRATION_CONFIG_FILE_PATH}")"
 
