@@ -19,3 +19,5 @@ RUN \
   cd /usr/bin && \
   echo "f1f1ee58a7eb872568c85db19a17b697990a7452 bosh-cli" | sha1sum -c - && \
   chmod +x bosh-cli
+
+RUN ln -s /usr/bin/bosh-cli /usr/bin/bosh
