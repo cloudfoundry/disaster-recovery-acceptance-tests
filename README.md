@@ -55,7 +55,7 @@ If these variables are not set, all test suites returned by [`testcases.OpenSour
    ```bash
    cat > integration_config.json <<EOF
     {
-     "cf_api_url": "api.<cf_system_domain>",
+     "cf_api_url": "https://api.<cf_system_domain>",
      "cf_deployment_name": "cf",
      "cf_admin_username": "admin",
      "cf_admin_password": "<cf_admin_password>",
