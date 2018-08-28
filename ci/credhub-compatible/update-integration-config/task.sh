@@ -59,8 +59,8 @@ do
   integration_config=$(echo "${integration_config}" | jq ".${config}=\"${!config}\"")
 done
 
-if [[ -z ${nfs_broker_password} ]]; then
-  integration_config=$(echo "${integration_config}" | jq '."include_cf-nfsbroker"=false')
+if [[ "${INCLUDE_NFS_BROKER_TESTCASE}" = "true" ]]; then
+  integration_config=$(echo "${integration_config}" | jq '."include_cf-nfsbroker"=true')
 fi
 
 echo "${integration_config}" > "integration-configs/${INTEGRATION_CONFIG_FILE_PATH}"

@@ -20,6 +20,7 @@ params:
   INTEGRATION_CONFIG_FILE_PATH: ci/integration_config.json
   BBL_STATE_DIR:
   SYSTEM_DOMAIN:
+  INCLUDE_NFS_BROKER_TESTCASE: false
 
 run:
   path: disaster-recovery-acceptance-tests/ci/credhub-compatible/update-integration-config/task.sh
