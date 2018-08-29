@@ -31,6 +31,7 @@ Tests if Cloud Foundry can be backed up and restored. The tests will back up fro
     * `DEFAULT_TIMEOUT_MINS` - timeout for commands run in the test. Defaults to 15 minutes.
 1. The following environment variables are optional and could be set depending on test configuration:
     * `SSH_DESTINATION_CIDR` - Default to "10.0.0.0/8"; change if your cf-deployment is deployed in a different internal network range
+    * `INCLUDE_NFS_BROKER_TESTCASE` - Environment variable that controls whether or not to run the NFS test case
     * `NFS_SERVICE_NAME` - Environment variable required to run the NFS test case
     * `NFS_PLAN_NAME` - Environment variable required to run the NFS test case
     * `NFS_CREATE_SERVICE_BROKER` - Environment variable that controls whether or not to register the NFS service broker in the NFS test case
