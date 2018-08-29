@@ -22,6 +22,7 @@ params:
   VARS_STORE_FILE_PATH: deployment-vars.yml
   BBL_STATE_DIR_PATH:
   SYSTEM_DOMAIN:
+  INCLUDE_NFS_BROKER_TESTCASE: false
 
 run:
   path: disaster-recovery-acceptance-tests/ci/update-integration-config/task.sh

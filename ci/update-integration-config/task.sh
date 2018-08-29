@@ -42,13 +42,12 @@ configs=( cf_deployment_name
 
 integration_config=$(cat "integration-configs/${INTEGRATION_CONFIG_FILE_PATH}")
 
-for config in "${configs[@]}"
-do
+for config in "${configs[@]}"; do
   integration_config=$(echo "${integration_config}" | jq ".${config}=\"${!config}\"")
 done
 
-if [ -z "${nfs_broker_password}" ]; then
-  integration_config=$(echo "${integration_config}" | jq '."include_cf-nfsbroker"=false')
+if [[ "${INCLUDE_NFS_BROKER_TESTCASE}" = "true" ]]; then
+  integration_config=$(echo "${integration_config}" | jq '."include_cf-nfsbroker"=true')
 fi
 
 echo "${integration_config}" > "integration-configs/${INTEGRATION_CONFIG_FILE_PATH}"
