@@ -103,12 +103,13 @@ If these variables are not set, all test suites returned by [`testcases.OpenSour
 * `include_<testcase-name>` - Flag for whether to run a given testcase. If omitted defaults to false
 
 #### Optional Variables
-* `nfs_service_name` - Environment variable required to run NFS test case
-* `nfs_plan_name` - Environment variable required to run NFS test case
-* `nfs_broker_user` - Environment variable required to run NFS test case
-* `nfs_broker_password` - Environment variable required to run NFS test case
-* `nfs_broker_url` - Environment variable required to run NFS test case
-* `timeout_in_minutes` - Default ginkgo `Eventually` timeout. Defaults to 15
+* `nfs_service_name` - NFS service name. Required when running the NFS test case.
+* `nfs_plan_name` - NFS plan name. Required when running the NFS test case.
+* `nfs_create_service_broker` - Flag to control whether or not to register the NFS service broker as part of the NFS test case.
+* `nfs_broker_user` - NFS broker user. Required when registering the NFS service broker as part of the NFS test case.
+* `nfs_broker_password` - NFS broker password. Required when registering the NFS service broker as part of the NFS test case.
+* `nfs_broker_url` - NFS broker URL. Required when registering the NFS service broker as part of  the NFS test case.
+* `timeout_in_minutes` - Default ginkgo `Eventually` timeout. Defaults to 15.
 * `delete_and_redeploy_cf` - Destroy and redeploy the cf between after backup and restore. Defaults to false.
 
 ## Test Structure
