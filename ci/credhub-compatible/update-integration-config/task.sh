@@ -60,6 +60,10 @@ done
 
 if [[ "${INCLUDE_NFS_BROKER_TESTCASE}" = "true" ]]; then
   integration_config=$(echo "${integration_config}" | jq '."include_cf-nfsbroker"=true')
+
+  if [[ "${NFS_CREATE_SERVICE_BROKER}" = "true" ]]; then
+    integration_config=$(echo "${integration_config}" | jq '."nfs_create_service_broker"=true')
+  fi
 fi
 
 echo "${integration_config}" > "integration-configs/${INTEGRATION_CONFIG_FILE_PATH}"

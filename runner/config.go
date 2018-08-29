@@ -9,6 +9,7 @@ type CloudFoundryConfig struct {
 	AdminPassword                     string `json:"cf_admin_password"`
 	NFSServiceName                    string `json:"nfs_service_name,omitempty"`
 	NFSPlanName                       string `json:"nfs_plan_name,omitempty"`
+	NFSCreateServiceBroker            bool   `json:"nfs_create_service_broker,omitempty"`
 	NFSBrokerUser                     string `json:"nfs_broker_user,omitempty"`
 	NFSBrokerPassword                 string `json:"nfs_broker_password,omitempty"`
 	NFSBrokerUrl                      string `json:"nfs_broker_url,omitempty"`

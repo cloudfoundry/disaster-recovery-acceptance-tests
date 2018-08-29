@@ -25,6 +25,7 @@ func FromEnv() (runner.Config, runner.TestCaseFilter) {
 
 	deploymentConfig.NFSServiceName = os.Getenv("NFS_SERVICE_NAME")
 	deploymentConfig.NFSPlanName = os.Getenv("NFS_PLAN_NAME")
+	deploymentConfig.NFSCreateServiceBroker = os.Getenv("NFS_CREATE_SERVICE_BROKER") == "true"
 	deploymentConfig.NFSBrokerUser = os.Getenv("NFS_BROKER_USER")
 	deploymentConfig.NFSBrokerPassword = os.Getenv("NFS_BROKER_PASSWORD")
 	deploymentConfig.NFSBrokerUrl = os.Getenv("NFS_BROKER_URL")
