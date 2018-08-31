@@ -19,7 +19,6 @@ set -eu -o pipefail
 # The following params are optional
 : "${NFS_SERVICE_NAME:=""}"
 : "${NFS_PLAN_NAME:=""}"
-: "${NFS_CREATE_SERVICE_BROKER:=false}"
 : "${NFS_BROKER_USER:=""}"
 : "${NFS_BROKER_PASSWORD:=""}"
 : "${NFS_BROKER_URL:=""}"
