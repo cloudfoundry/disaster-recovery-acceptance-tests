@@ -19,6 +19,9 @@ export BBR_BUILD_PATH
 export FOCUSED_SUITE_NAME
 export SKIP_SUITE_NAME
 export DELETE_AND_REDEPLOY_CF
+export RUN_EXPERIMENTAL_TEST_CASES
+export PERM_CA
+export PERM_URL
 
 go get github.com/onsi/ginkgo/ginkgo
 dep ensure

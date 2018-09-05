@@ -23,6 +23,8 @@ set -eu -o pipefail
 : "${NFS_BROKER_PASSWORD:=""}"
 : "${NFS_BROKER_URL:=""}"
 : "${SKIP_SUITE_NAME:=""}"
+: "${PERM_CA:=""}"
+: "${PERM_URL:=""}"
 
 tmpdir="$( mktemp -d /tmp/run-drats.XXXXXXXXXX )"
 

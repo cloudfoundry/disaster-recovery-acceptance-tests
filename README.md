@@ -37,6 +37,9 @@ Tests if Cloud Foundry can be backed up and restored. The tests will back up fro
     * `NFS_BROKER_PASSWORD` - Environment variable required to run NFS test case
     * `NFS_BROKER_URL` - Environment variable required to run NFS test case
     * `DELETE_AND_REDEPLOY_CF` - set to "true" to have the CF deployment destroyed and redeployed from scratch during the test cycle. **<span style="color:red"> Exercise extreme care when using this option!</span>**
+    * `RUN_EXPERIMENTAL_TEST_CASES` - set to "true" to also run the experimental test cases, such as Perm
+    * `PERM_CA` - set to the Perm server's TLS certificate authority if running the experimental test cases
+    * `PERM_URL` - set to the Perm server's URL if running the experimental test cases
 1. If you wish to run DRATS against a director deployed with `bbl`, run `scripts/run_acceptance_tests_with_bbl_env.sh <path-to-bbl-state-dir>`.
     * Set `CF_VARS_STORE_PATH` to the path to the CF vars-store file.
     * Set `BOSH_CLI_NAME` to the name of the BOSH CLI executable on your machine if it isn't `bosh`.
@@ -100,6 +103,7 @@ If these variables are not set, all test suites returned by [`testcases.OpenSour
 * `bosh_client_secret` - BOSH Director password
 * `bosh_ca_cert` - BOSH Director's CA cert content
 * `include_<testcase-name>` - Flag for whether to run a given testcase. If omitted defaults to false
+* `run_experimental_test_cases` - Flag to include experimental test cases. If omitted defaults to false
 
 #### Optional Variables
 * `nfs_service_name` - Environment variable required to run NFS test case
@@ -109,6 +113,8 @@ If these variables are not set, all test suites returned by [`testcases.OpenSour
 * `nfs_broker_url` - Environment variable required to run NFS test case
 * `timeout_in_minutes` - Default ginkgo `Eventually` timeout. Defaults to 15
 * `delete_and_redeploy_cf` - Destroy and redeploy the cf between after backup and restore. Defaults to false.
+* `perm_ca` - Perm server's TLS certificate authority. Required only if running experimental test cases.
+* `perm_url` - Perm server's URL. Necessary only if running experimental test cases.
 
 ## Test Structure
 

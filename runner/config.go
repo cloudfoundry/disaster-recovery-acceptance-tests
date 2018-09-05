@@ -12,6 +12,9 @@ type CloudFoundryConfig struct {
 	NFSBrokerUser                     string `json:"nfs_broker_user,omitempty"`
 	NFSBrokerPassword                 string `json:"nfs_broker_password,omitempty"`
 	NFSBrokerUrl                      string `json:"nfs_broker_url,omitempty"`
+	PermCA                            string `json:"perm_ca,omitempty"`
+	PermUrl                           string `json:"perm_url,omitempty"`
+	RunExperimentalTestCases          bool   `json:"run_experimental_test_cases,omitempty"`
 	NotificationsTemplateClientID     string
 	NotificationsTemplateClientSecret string
 }

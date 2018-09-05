@@ -15,3 +15,9 @@ func OpenSourceTestCases() []runner.TestCase {
 		NewCfCredhubSSITestCase(),
 	}
 }
+
+func ExperimentalTestCases() []runner.TestCase {
+	return []runner.TestCase{
+		NewPermTestCase(),
+	}
+}

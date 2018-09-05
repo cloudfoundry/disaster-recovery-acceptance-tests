@@ -19,5 +19,11 @@ var _ = Describe("backing up Cloud Foundry", func() {
 		conf, filter = config.FromEnv()
 	}
 
-	runner.RunDisasterRecoveryAcceptanceTests(conf, filter.Filter(testcases.OpenSourceTestCases()))
+	testCases := testcases.OpenSourceTestCases()
+
+	if conf.RunExperimentalTestCases {
+		testCases = append(testCases, testcases.ExperimentalTestCases()...)
+	}
+
+	runner.RunDisasterRecoveryAcceptanceTests(conf, filter.Filter(testCases))
 })
