@@ -33,15 +33,15 @@ ssh_proxy_user="jumpbox"
 ssh_proxy_host=$(bbl --state-dir "bbl-state/$BBL_STATE_DIR" jumpbox-address)
 ssh_proxy_cidr="10.0.0.0/8"
 ssh_proxy_private_key="$(cat "$JUMPBOX_PRIVATE_KEY")"
-nfs_broker_password=$(get_password_from_credhub nfs-broker-password || echo "")
 nfs_service_name="nfs"
 nfs_plan_name="Existing"
 nfs_broker_user="nfs-broker"
+nfs_broker_password=$(get_password_from_credhub nfs-broker-password || echo "")
 nfs_broker_url="http://nfs-broker.${SYSTEM_DOMAIN}"
-smb_broker_password=$(get_password_from_credhub azurefile-broker-password || echo "")
 smb_service_name="azurefile-service"
 smb_plan_name="Existing"
 smb_broker_user="admin"
+smb_broker_password=$(get_password_from_credhub azurefile-broker-password || echo "")
 smb_broker_url="http://azurefilebroker.${SYSTEM_DOMAIN}"
 credhub_client_name="credhub_admin_client"
 credhub_client_secret="$(get_password_from_credhub credhub_admin_client_secret)"
@@ -58,15 +58,15 @@ configs=( cf_deployment_name
         ssh_proxy_host
         ssh_proxy_cidr
         ssh_proxy_private_key
-        nfs_broker_password
         nfs_service_name
         nfs_plan_name
         nfs_broker_user
+        nfs_broker_password
         nfs_broker_url
-        smb_broker_password
         smb_service_name
         smb_plan_name
         smb_broker_user
+        smb_broker_password
         smb_broker_url
         credhub_client_name
         credhub_client_secret )
