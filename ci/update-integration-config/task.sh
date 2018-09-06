@@ -16,7 +16,7 @@ ssh_proxy_user="jumpbox"
 ssh_proxy_host="$(bbl --state-dir="bbl-state-store/${BBL_STATE_DIR_PATH}" jumpbox-address)"
 ssh_proxy_cidr="10.0.0.0/8"
 ssh_proxy_private_key="$(bbl --state-dir="bbl-state-store/${BBL_STATE_DIR_PATH}" ssh-key)"
-nfs_broker_password="$(bosh interpolate --path="/nfs-broker-password vars-store/${VARS_STORE_FILE_PATH}" || echo "")"
+nfs_broker_password="$(bosh interpolate --path=/nfs-broker-password "vars-store/${VARS_STORE_FILE_PATH}" || echo "")"
 nfs_service_name="nfs"
 nfs_plan_name="Existing"
 nfs_broker_user="nfs-broker"
@@ -42,14 +42,9 @@ configs=( cf_deployment_name
 
 integration_config=$(cat "integration-configs/${INTEGRATION_CONFIG_FILE_PATH}")
 
-for config in "${configs[@]}"
-do
+for config in "${configs[@]}"; do
   integration_config=$(echo "${integration_config}" | jq ".${config}=\"${!config}\"")
 done
-
-if [ -z "${nfs_broker_password}" ]; then
-  integration_config=$(echo "${integration_config}" | jq '."include_cf-nfsbroker"=false')
-fi
 
 echo "${integration_config}" > "integration-configs/${INTEGRATION_CONFIG_FILE_PATH}"
 

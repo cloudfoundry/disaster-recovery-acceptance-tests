@@ -39,11 +39,12 @@ func (tc *NFSTestCase) BeforeBackup(config Config) {
 		" -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf push dratsApp --docker-image docker/httpd --no-start --random-route")
 
-	if config.CloudFoundryConfig.NFSBrokerUser != "" {
+	if config.CloudFoundryConfig.NFSCreateServiceBroker {
 		RunCommandSuccessfully("cf create-service-broker nfsbroker-drats-" + tc.uniqueTestID + " " +
 			config.CloudFoundryConfig.NFSBrokerUser + " " + config.CloudFoundryConfig.NFSBrokerPassword + " " +
 			config.CloudFoundryConfig.NFSBrokerUrl)
 	}
+
 	RunCommandSuccessfully("cf enable-service-access " + config.CloudFoundryConfig.NFSServiceName)
 	RunCommandSuccessfully("cf create-service " + config.CloudFoundryConfig.NFSServiceName + " " +
 		config.CloudFoundryConfig.NFSPlanName + " " + tc.instanceName + " -c " +
@@ -63,7 +64,8 @@ func (tc *NFSTestCase) AfterRestore(config Config) {
 func (tc *NFSTestCase) Cleanup(config Config) {
 	By("nfs cleanup")
 	RunCommandSuccessfully("cf delete-org -f acceptance-test-org-" + tc.uniqueTestID)
-	if config.CloudFoundryConfig.NFSBrokerUser != "" {
+
+	if config.CloudFoundryConfig.NFSCreateServiceBroker {
 		RunCommandSuccessfully("cf delete-service-broker -f nfsbroker-drats-" + tc.uniqueTestID)
 	}
 }

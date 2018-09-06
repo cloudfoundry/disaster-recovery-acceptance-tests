@@ -5,6 +5,7 @@
   "cf_admin_password": "",
   "nfs_service_name": "",
   "nfs_plan_name": "",
+  "nfs_create_service_broker": false,
   "nfs_broker_user": "",
   "nfs_broker_password": "",
   "nfs_broker_url": "",
