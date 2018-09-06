@@ -38,6 +38,11 @@ nfs_service_name="nfs"
 nfs_plan_name="Existing"
 nfs_broker_user="nfs-broker"
 nfs_broker_url="http://nfs-broker.${SYSTEM_DOMAIN}"
+smb_broker_password=$(get_password_from_credhub azurefile-broker-password || echo "")
+smb_service_name="azurefile-service"
+smb_plan_name="Existing"
+smb_broker_user="admin"
+smb_broker_url="http://azurefilebroker.${SYSTEM_DOMAIN}"
 credhub_client_name="credhub_admin_client"
 credhub_client_secret="$(get_password_from_credhub credhub_admin_client_secret)"
 
@@ -58,6 +63,11 @@ configs=( cf_deployment_name
         nfs_plan_name
         nfs_broker_user
         nfs_broker_url
+        smb_broker_password
+        smb_service_name
+        smb_plan_name
+        smb_broker_user
+        smb_broker_url
         credhub_client_name
         credhub_client_secret )
 

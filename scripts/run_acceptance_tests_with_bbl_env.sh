@@ -26,6 +26,19 @@ pushd $1
   else
       echo "Skipping cf-nfsrboker testcase because INCLUDE_NFS_BROKER_TESTCASE is not set to true"
   fi
+
+  if [[ "${INCLUDE_SMB_BROKER_TESTCASE}" = "true" ]]; then
+    export SMB_SERVICE_NAME="smb"
+    export SMB_PLAN_NAME="Existing"
+
+    if [[ "${SMB_CREATE_SERVICE_BROKER}" = "true" ]]; then
+      export SMB_BROKER_USER="admin"
+      export SMB_BROKER_PASSWORD="$(${BOSH_CLI_NAME} interpolate --path=/azurefile-broker-password "${CF_VARS_STORE_PATH}")"
+      export SMB_BROKER_URL="http://azurefile-broker.${CF_DOMAIN}"
+    fi
+  else
+      echo "Skipping cf-smbrboker testcase because INCLUDE_SMB_BROKER_TESTCASE is not set to true"
+  fi
 popd
 
 echo "Running DRATs locally"
