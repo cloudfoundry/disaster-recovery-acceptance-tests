@@ -7,6 +7,8 @@ type CloudFoundryConfig struct {
 	ApiUrl                            string `json:"cf_api_url"`
 	AdminUsername                     string `json:"cf_admin_username"`
 	AdminPassword                     string `json:"cf_admin_password"`
+	CredHubClient                     string `json:"credhub_client_name"`
+	CredHubSecret                     string `json:"credhub_client_secret"`
 	NFSServiceName                    string `json:"nfs_service_name,omitempty"`
 	NFSPlanName                       string `json:"nfs_plan_name,omitempty"`
 	NFSCreateServiceBroker            bool   `json:"nfs_create_service_broker,omitempty"`

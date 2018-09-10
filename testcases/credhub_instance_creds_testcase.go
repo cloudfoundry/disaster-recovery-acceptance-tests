@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"net/http"
 	"path"
-
 	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/runner"
 	. "github.com/onsi/gomega"
+	"fmt"
+	"io/ioutil"
+	"strings"
 )
 
 type CfCredhubSSITestCase struct {
@@ -26,7 +28,9 @@ func NewCfCredhubSSITestCase() *CfCredhubSSITestCase {
 }
 
 var listResponse struct {
-	Credentials []struct{}
+	Credentials []struct{
+		Name string
+	}
 }
 
 func (tc *CfCredhubSSITestCase) Name() string {
@@ -40,15 +44,26 @@ func (tc *CfCredhubSSITestCase) BeforeBackup(config Config) {
 	RunCommandSuccessfully("cf create-space acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf target -s acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
 
+
 	var testAppPath = path.Join(CurrentTestDir(), "/../fixtures/credhub-test-app")
-	RunCommandSuccessfully("cf push " + tc.appName + " -p " + testAppPath + " -f " + testAppPath + "/manifest.yml")
+	RunCommandSuccessfully("cf push " + "--no-start " + tc.appName + " -p " + testAppPath + " -b go_buildpack" + " -f " + testAppPath + "/manifest.yml")
+	RunCommandSuccessfully("cf set-env " + tc.appName + " CREDHUB_CLIENT "+ config.CloudFoundryConfig.CredHubClient + " > /dev/null")
+	RunCommandSuccessfully("cf set-env " + tc.appName + " CREDHUB_SECRET "+ config.CloudFoundryConfig.CredHubSecret + " > /dev/null")
+	RunCommandSuccessfully("cf restart " + tc.appName)
 
 	tc.appURL = GetAppUrl(tc.appName)
+
 	appResponse := Get(tc.appURL + "/create")
+	body, _ := ioutil.ReadAll(appResponse.Body)
+	fmt.Println(string(body))
 	Expect(appResponse.StatusCode).To(Equal(http.StatusCreated))
 
 	appResponse = Get(tc.appURL + "/list")
-	Expect(json.NewDecoder(appResponse.Body).Decode(&listResponse)).To(Succeed())
+	defer appResponse.Body.Close()
+	response, err := ioutil.ReadAll(appResponse.Body)
+	Expect(err).NotTo(HaveOccurred())
+
+	Expect(json.NewDecoder(strings.NewReader(string(response))).Decode(&listResponse)).To(Succeed())
 	Expect(listResponse.Credentials).To(HaveLen(1))
 }
 
@@ -68,5 +83,7 @@ func (tc *CfCredhubSSITestCase) AfterRestore(config Config) {
 }
 
 func (tc *CfCredhubSSITestCase) Cleanup(config Config) {
+	appResponse := Get(tc.appURL + "/clean")
+	Expect(appResponse.StatusCode).To(Equal(http.StatusOK))
 	RunCommandSuccessfully("cf delete-org -f acceptance-test-org-" + tc.uniqueTestID)
 }
