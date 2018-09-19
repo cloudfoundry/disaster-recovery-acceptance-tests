@@ -24,7 +24,7 @@ pushd $1
       export NFS_BROKER_URL="http://nfs-broker.${CF_DOMAIN}"
     fi
   else
-      echo "Skipping cf-nfsrboker testcase because INCLUDE_NFS_BROKER_TESTCASE is not set to true"
+      echo "Skipping cf-nfsbroker testcase because INCLUDE_NFS_BROKER_TESTCASE is not set to true"
   fi
 
   if [[ "${INCLUDE_SMB_BROKER_TESTCASE}" = "true" ]]; then
@@ -37,7 +37,7 @@ pushd $1
       export SMB_BROKER_URL="http://azurefile-broker.${CF_DOMAIN}"
     fi
   else
-      echo "Skipping cf-smbrboker testcase because INCLUDE_SMB_BROKER_TESTCASE is not set to true"
+      echo "Skipping cf-smbbroker testcase because INCLUDE_SMB_BROKER_TESTCASE is not set to true"
   fi
 popd
 
