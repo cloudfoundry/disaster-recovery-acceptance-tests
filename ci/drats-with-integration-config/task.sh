@@ -10,18 +10,13 @@ export PATH=$PATH:$GOPATH/bin
 BOSH_GW_USER=$(jq -r .ssh_proxy_user "${CONFIG}")
 BOSH_GW_HOST=$(jq -r .ssh_proxy_host "${CONFIG}")
 BOSH_GW_PRIVATE_KEY=$(jq -r .ssh_proxy_private_key "${CONFIG}")
-SSH_DESTINATION_CIDR=$(jq -r .ssh_proxy_cidr "${CONFIG}")
-
-eval "$(ssh-agent)"
 
 rm -f ~/.gitconfig
-echo "${BOSH_GW_PRIVATE_KEY}" > ssh.pem
-chmod 0400 ssh.pem
-ssh-add ssh.pem
+echo "${BOSH_GW_PRIVATE_KEY}" > ssh.key
+chmod 0400 ssh.key
 
-sshuttle -r "${BOSH_GW_USER}@${BOSH_GW_HOST}" "${SSH_DESTINATION_CIDR}" --daemon -e 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o ServerAliveInterval=600'
-
-sleep 5
+BOSH_ALL_PROXY="ssh+socks5://${BOSH_GW_USER}@${BOSH_GW_HOST}:22?private-key=${PWD}/ssh.key"
+export BOSH_ALL_PROXY
 
 pushd bbr-binary-release
   tar xvf ./*.tar
