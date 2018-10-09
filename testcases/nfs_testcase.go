@@ -32,11 +32,11 @@ func (tc *NFSTestCase) BeforeBackup(config Config) {
 	RunCommandSuccessfully("cf api --skip-ssl-validation", config.CloudFoundryConfig.ApiUrl)
 	RunCommandSuccessfully("cf login --skip-ssl-validation -a", config.CloudFoundryConfig.ApiUrl,
 		"-u", config.CloudFoundryConfig.AdminUsername, "-p", config.CloudFoundryConfig.AdminPassword)
-	RunCommandSuccessfully("cf create-org acceptance-test-org-" + tc.uniqueTestID)
-	RunCommandSuccessfully("cf create-space acceptance-test-space-" + tc.uniqueTestID +
-		" -o acceptance-test-org-" + tc.uniqueTestID)
-	RunCommandSuccessfully("cf target -s acceptance-test-space-" + tc.uniqueTestID +
-		" -o acceptance-test-org-" + tc.uniqueTestID)
+	orgName := "acceptance-test-org-" + tc.uniqueTestID
+	spaceName := "acceptance-test-space-" + tc.uniqueTestID
+	RunCommandSuccessfully("cf create-org " + orgName)
+	RunCommandSuccessfully("cf create-space " + spaceName + " -o " + orgName)
+	RunCommandSuccessfully("cf target -o " + orgName + " -s " + spaceName)
 	RunCommandSuccessfully("cf push dratsApp --docker-image docker/httpd --no-start --random-route")
 
 	if config.CloudFoundryConfig.NFSCreateServiceBroker {
@@ -45,7 +45,7 @@ func (tc *NFSTestCase) BeforeBackup(config Config) {
 			config.CloudFoundryConfig.NFSBrokerUrl)
 	}
 
-	RunCommandSuccessfully("cf enable-service-access " + config.CloudFoundryConfig.NFSServiceName)
+	RunCommandSuccessfully("cf enable-service-access " + config.CloudFoundryConfig.NFSServiceName + " -o " + orgName)
 	RunCommandSuccessfully("cf create-service " + config.CloudFoundryConfig.NFSServiceName + " " +
 		config.CloudFoundryConfig.NFSPlanName + " " + tc.instanceName + " -c " +
 		`'{"share":"someserver.someplace.com/someshare"}'`)
