@@ -33,8 +33,8 @@ pushd $1
 
     if [[ "${SMB_CREATE_SERVICE_BROKER}" = "true" ]]; then
       export SMB_BROKER_USER="admin"
-      export SMB_BROKER_PASSWORD="$(${BOSH_CLI_NAME} interpolate --path=/azurefile-broker-password "${CF_VARS_STORE_PATH}")"
-      export SMB_BROKER_URL="http://azurefile-broker.${CF_DOMAIN}"
+      export SMB_BROKER_PASSWORD="$(${BOSH_CLI_NAME} interpolate --path=/smb-broker-password "${CF_VARS_STORE_PATH}")"
+      export SMB_BROKER_URL="http://smbbroker.${CF_DOMAIN}"
     fi
   else
       echo "Skipping cf-smbbroker testcase because INCLUDE_SMB_BROKER_TESTCASE is not set to true"

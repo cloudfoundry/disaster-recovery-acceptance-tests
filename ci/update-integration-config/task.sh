@@ -21,11 +21,11 @@ nfs_plan_name="Existing"
 nfs_broker_user="nfs-broker"
 nfs_broker_password="$(bosh interpolate --path=/nfs-broker-password "vars-store/${VARS_STORE_FILE_PATH}" || echo "")"
 nfs_broker_url="http://nfs-broker.${SYSTEM_DOMAIN}"
-smb_service_name="azurefile-service"
+smb_service_name="smb-service"
 smb_plan_name="Existing"
 smb_broker_user="admin"
-smb_broker_password="$(bosh interpolate --path="/azurefile-broker-password vars-store/${VARS_STORE_FILE_PATH}" || echo "")"
-smb_broker_url="http://azurefilebroker.${SYSTEM_DOMAIN}"
+smb_broker_password="$(bosh interpolate --path="/smb-broker-password vars-store/${VARS_STORE_FILE_PATH}" || echo "")"
+smb_broker_url="http://smbbroker.${SYSTEM_DOMAIN}"
 
 configs=( cf_deployment_name
         cf_api_url
