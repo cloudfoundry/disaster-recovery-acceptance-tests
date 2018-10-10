@@ -2,13 +2,14 @@ package testcases
 
 import (
 	"encoding/json"
-	"net/http"
-	"path"
-	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/runner"
-	. "github.com/onsi/gomega"
 	"fmt"
 	"io/ioutil"
+	"net/http"
+	"path"
 	"strings"
+
+	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/runner"
+	. "github.com/onsi/gomega"
 )
 
 type CfCredhubSSITestCase struct {
@@ -28,7 +29,7 @@ func NewCfCredhubSSITestCase() *CfCredhubSSITestCase {
 }
 
 var listResponse struct {
-	Credentials []struct{
+	Credentials []struct {
 		Name string
 	}
 }
@@ -44,11 +45,12 @@ func (tc *CfCredhubSSITestCase) BeforeBackup(config Config) {
 	RunCommandSuccessfully("cf create-space acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf target -s acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
 
-
 	var testAppPath = path.Join(CurrentTestDir(), "/../fixtures/credhub-test-app")
 	RunCommandSuccessfully("cf push " + "--no-start " + tc.appName + " -p " + testAppPath + " -b go_buildpack" + " -f " + testAppPath + "/manifest.yml")
-	RunCommandSuccessfully("cf set-env " + tc.appName + " CREDHUB_CLIENT "+ config.CloudFoundryConfig.CredHubClient + " > /dev/null")
-	RunCommandSuccessfully("cf set-env " + tc.appName + " CREDHUB_SECRET "+ config.CloudFoundryConfig.CredHubSecret + " > /dev/null")
+	if config.CloudFoundryConfig.CredHubClient != "" {
+		RunCommandSuccessfully("cf set-env " + tc.appName + " CREDHUB_CLIENT " + config.CloudFoundryConfig.CredHubClient + " > /dev/null")
+		RunCommandSuccessfully("cf set-env " + tc.appName + " CREDHUB_SECRET " + config.CloudFoundryConfig.CredHubSecret + " > /dev/null")
+	}
 	RunCommandSuccessfully("cf restart " + tc.appName)
 
 	tc.appURL = GetAppUrl(tc.appName)
