@@ -16,11 +16,16 @@ ssh_proxy_user="jumpbox"
 ssh_proxy_host="$(bbl --state-dir="bbl-state-store/${BBL_STATE_DIR_PATH}" jumpbox-address)"
 ssh_proxy_cidr="10.0.0.0/8"
 ssh_proxy_private_key="$(bbl --state-dir="bbl-state-store/${BBL_STATE_DIR_PATH}" ssh-key)"
-nfs_broker_password="$(bosh interpolate --path=/nfs-broker-password "vars-store/${VARS_STORE_FILE_PATH}" || echo "")"
 nfs_service_name="nfs"
 nfs_plan_name="Existing"
 nfs_broker_user="nfs-broker"
+nfs_broker_password="$(bosh interpolate --path=/nfs-broker-password "vars-store/${VARS_STORE_FILE_PATH}" || echo "")"
 nfs_broker_url="http://nfs-broker.${SYSTEM_DOMAIN}"
+smb_service_name="smb"
+smb_plan_name="Existing"
+smb_broker_user="admin"
+smb_broker_password="$(bosh interpolate --path="/smb-broker-password vars-store/${VARS_STORE_FILE_PATH}" || echo "")"
+smb_broker_url="http://smbbroker.${SYSTEM_DOMAIN}"
 
 configs=( cf_deployment_name
         cf_api_url
@@ -34,11 +39,16 @@ configs=( cf_deployment_name
         ssh_proxy_host
         ssh_proxy_cidr
         ssh_proxy_private_key
-        nfs_broker_password
         nfs_service_name
         nfs_plan_name
         nfs_broker_user
-        nfs_broker_url )
+        nfs_broker_password
+        nfs_broker_url
+        smb_service_name
+        smb_plan_name
+        smb_broker_user
+        smb_broker_password
+        smb_broker_url )
 
 integration_config=$(cat "integration-configs/${INTEGRATION_CONFIG_FILE_PATH}")
 

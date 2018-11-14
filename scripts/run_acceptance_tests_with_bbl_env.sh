@@ -24,7 +24,20 @@ pushd $1
       export NFS_BROKER_URL="http://nfs-broker.${CF_DOMAIN}"
     fi
   else
-      echo "Skipping cf-nfsrboker testcase because INCLUDE_NFS_BROKER_TESTCASE is not set to true"
+      echo "Skipping cf-nfsbroker testcase because INCLUDE_NFS_BROKER_TESTCASE is not set to true"
+  fi
+
+  if [[ "${INCLUDE_SMB_BROKER_TESTCASE}" = "true" ]]; then
+    export SMB_SERVICE_NAME="smb"
+    export SMB_PLAN_NAME="Existing"
+
+    if [[ "${SMB_CREATE_SERVICE_BROKER}" = "true" ]]; then
+      export SMB_BROKER_USER="admin"
+      export SMB_BROKER_PASSWORD="$(${BOSH_CLI_NAME} interpolate --path=/smb-broker-password "${CF_VARS_STORE_PATH}")"
+      export SMB_BROKER_URL="http://smbbroker.${CF_DOMAIN}"
+    fi
+  else
+      echo "Skipping cf-smbbroker testcase because INCLUDE_SMB_BROKER_TESTCASE is not set to true"
   fi
 popd
 

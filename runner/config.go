@@ -15,6 +15,12 @@ type CloudFoundryConfig struct {
 	NFSBrokerUser                     string `json:"nfs_broker_user,omitempty"`
 	NFSBrokerPassword                 string `json:"nfs_broker_password,omitempty"`
 	NFSBrokerUrl                      string `json:"nfs_broker_url,omitempty"`
+	SMBServiceName                    string `json:"smb_service_name,omitempty"`
+	SMBPlanName                       string `json:"smb_plan_name,omitempty"`
+	SMBCreateServiceBroker            bool   `json:"smb_create_service_broker,omitempty"`
+	SMBBrokerUser                     string `json:"smb_broker_user,omitempty"`
+	SMBBrokerPassword                 string `json:"smb_broker_password,omitempty"`
+	SMBBrokerUrl                      string `json:"smb_broker_url,omitempty"`
 	NotificationsTemplateClientID     string
 	NotificationsTemplateClientSecret string
 }

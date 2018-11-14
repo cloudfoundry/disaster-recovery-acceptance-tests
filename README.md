@@ -38,6 +38,13 @@ Tests if Cloud Foundry can be backed up and restored. The tests will back up fro
     * `NFS_BROKER_USER` - Environment variable required to register the NFS service broker when running the NFS test case
     * `NFS_BROKER_PASSWORD` - Environment variable required to register the NFS service broker when running the NFS test case
     * `NFS_BROKER_URL` - Environment variable required to register the NFS service broker when running the NFS test case
+    * `INCLUDE_SMB_BROKER_TESTCASE` - Environment variable that controls whether or not to run the SMB test case
+    * `SMB_SERVICE_NAME` - Environment variable required to run the SMB test case
+    * `SMB_PLAN_NAME` - Environment variable required to run the SMB test case
+    * `SMB_CREATE_SERVICE_BROKER` - Environment variable that controls whether or not to register the SMB service broker in the SMB test case
+    * `SMB_BROKER_USER` - Environment variable required to register the SMB service broker when running the SMB test case
+    * `SMB_BROKER_PASSWORD` - Environment variable required to register the SMB service broker when running the SMB test case
+    * `SMB_BROKER_URL` - Environment variable required to register the SMB service broker when running the SMB test case
     * `DELETE_AND_REDEPLOY_CF` - set to "true" to have the CF deployment destroyed and redeployed from scratch during the test cycle. **<span style="color:red"> Exercise extreme care when using this option!</span>**
 1. If you wish to run DRATS against a director deployed with `bbl`, run `scripts/run_acceptance_tests_with_bbl_env.sh <path-to-bbl-state-dir>`.
     * Set `CF_VARS_STORE_PATH` to the path to the CF vars-store file.
@@ -109,6 +116,12 @@ If these variables are not set, all test suites returned by [`testcases.OpenSour
 * `nfs_broker_user` - NFS broker user. Required when registering the NFS service broker as part of the NFS test case.
 * `nfs_broker_password` - NFS broker password. Required when registering the NFS service broker as part of the NFS test case.
 * `nfs_broker_url` - NFS broker URL. Required when registering the NFS service broker as part of  the NFS test case.
+* `smb_service_name` - SMB service name. Required when running the SMB test case.
+* `smb_plan_name` - SMB plan name. Required when running the SMB test case.
+* `smb_create_service_broker` - Flag to control whether or not to register the SMB service broker as part of the SMB test case.
+* `smb_broker_user` - SMB broker user. Required when registering the SMB service broker as part of the SMB test case.
+* `smb_broker_password` - SMB broker password. Required when registering the SMB service broker as part of the SMB test case.
+* `smb_broker_url` - SMB broker URL. Required when registering the SMB service broker as part of  the SMB test case.
 * `timeout_in_minutes` - Default ginkgo `Eventually` timeout. Defaults to 15.
 * `delete_and_redeploy_cf` - Destroy and redeploy the cf between after backup and restore. Defaults to false.
 
