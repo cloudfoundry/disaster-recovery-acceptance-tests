@@ -42,7 +42,7 @@ func RunCommandAndRetry(cmd string, retries int, args ...string) *gexec.Session 
 		time.Sleep(10 * time.Second)
 	}
 
-	Fail(fmt.Sprintf("Retried command %s times but failed", retries))
+	Fail(fmt.Sprintf("Retried command %d times but failed", retries))
 	return nil
 }
 
