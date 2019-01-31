@@ -23,6 +23,9 @@ func (tc *NFSTestCase) Name() string {
 	return "cf-nfsbroker"
 }
 
+func (tc *NFSTestCase) CheckDeployment(config Config) {
+}
+
 func (tc *NFSTestCase) BeforeBackup(config Config) {
 	By("checking the service name and plane name are provided")
 	Expect(config.CloudFoundryConfig.NFSServiceName).NotTo(BeEmpty(), "required config NFS service name not set")

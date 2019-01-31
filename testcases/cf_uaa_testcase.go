@@ -28,6 +28,9 @@ func (tc *CfUaaTestCase) Name() string {
 	return tc.name
 }
 
+func (tc *CfUaaTestCase) CheckDeployment(config Config) {
+}
+
 func (tc *CfUaaTestCase) BeforeBackup(config Config) {
 	By("we create a user and can login")
 	login(config, config.CloudFoundryConfig.AdminUsername, config.CloudFoundryConfig.AdminPassword)

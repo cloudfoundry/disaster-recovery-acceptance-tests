@@ -24,6 +24,9 @@ func (tc *CfNetworkingTestCase) Name() string {
 	return tc.name
 }
 
+func (tc *CfNetworkingTestCase) CheckDeployment(config Config) {
+}
+
 func (tc *CfNetworkingTestCase) BeforeBackup(config Config) {
 	By("creating new orgs and spaces")
 	RunCommandSuccessfully("cf api --skip-ssl-validation", config.CloudFoundryConfig.ApiUrl)
