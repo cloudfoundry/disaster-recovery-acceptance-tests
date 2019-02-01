@@ -52,7 +52,6 @@ if [ -n "${BOSH_CA_CERT}" ]; then
 fi
 
 export BBR_BUILD_PATH="${BBR_BUILD_PATH:-$(which bbr)}"
-export BOSH_URL="${BOSH_ENVIRONMENT}"
 
 echo "Running DRATs..."
 . ./scripts/_run_acceptance_tests.sh
