@@ -8,3 +8,6 @@
 [[constraint]]
   name = "code.cloudfoundry.org/credhub-cli"
   version = "2.0.0"
+
+[[constraint]]
+  name = "code.cloudfoundry.org/routing-api"
