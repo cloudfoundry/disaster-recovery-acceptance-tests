@@ -37,6 +37,8 @@ params:
   SMB_BROKER_PASSWORD:
   SMB_BROKER_URL:
   DELETE_AND_REDEPLOY_CF: false
+  CF_CREDHUB_CLIENT:
+  CF_CREDHUB_SECRET:
 
 run:
   path: src/github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/ci/drats/task.sh

@@ -8,12 +8,14 @@ set -eu -o pipefail
 : "${BOSH_CA_CERT:?}"
 : "${BOSH_GW_HOST:?}"
 : "${BOSH_GW_USER:?}"
-: "${BOSH_GW_PRIVATE_KEY_CONTENTS:?}"
+: "${JUMPBOX_PRIVATE_KEY:?}"
 : "${CF_ADMIN_PASSWORD:?}"
 : "${CF_API_URL:?}"
 : "${GOPATH:?}"
 : "${CF_DEPLOYMENT_NAME:="cf"}"
 : "${CF_ADMIN_USERNAME:="admin"}"
+: "${CF_CREDHUB_CLIENT:?}"
+: "${CF_CREDHUB_SECRET:?}"
 : "${BOSH_ENVIRONMENT:?}"
 : "${SSH_DESTINATION_CIDR:="10.0.0.0/8"}"
 # The following params are optional
@@ -32,11 +34,10 @@ set -eu -o pipefail
 tmpdir="$( mktemp -d /tmp/run-drats.XXXXXXXXXX )"
 
 ssh_key="${tmpdir}/bosh.pem"
-echo "${BOSH_GW_PRIVATE_KEY_CONTENTS}" > "${ssh_key}"
+cat "${JUMPBOX_PRIVATE_KEY}" > "${ssh_key}"
 chmod 600 "${ssh_key}"
 echo "Starting SSH tunnel, you may be prompted for your OS password..."
 sudo true # prompt for password
-# ssh -i "${ssh_key}" -o 'StrictHostKeyChecking no' -o 'UserKnownHostsFile /dev/null' ${BOSH_GW_USER}@${BOSH_GW_HOST}
 sshuttle -e "ssh -i ${ssh_key} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" -r "${BOSH_GW_USER}@${BOSH_GW_HOST}" ${SSH_DESTINATION_CIDR} &
 tunnel_pid="$!"
 

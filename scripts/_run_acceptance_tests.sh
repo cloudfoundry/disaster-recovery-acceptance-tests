@@ -24,6 +24,8 @@ export BBR_BUILD_PATH
 export FOCUSED_SUITE_NAME
 export SKIP_SUITE_NAME
 export DELETE_AND_REDEPLOY_CF
+export CF_CREDHUB_CLIENT
+export CF_CREDHUB_SECRET
 
 go get github.com/onsi/ginkgo/ginkgo
 dep ensure

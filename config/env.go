@@ -34,6 +34,8 @@ func FromEnv() (runner.Config, runner.TestCaseFilter) {
 	deploymentConfig.SMBBrokerUser = os.Getenv("SMB_BROKER_USER")
 	deploymentConfig.SMBBrokerPassword = os.Getenv("SMB_BROKER_PASSWORD")
 	deploymentConfig.SMBBrokerUrl = os.Getenv("SMB_BROKER_URL")
+	deploymentConfig.CredHubClient = os.Getenv("CF_CREDHUB_CLIENT")
+	deploymentConfig.CredHubSecret = os.Getenv("CF_CREDHUB_SECRET")
 
 	timeout := TimeoutFromEnv()
 
