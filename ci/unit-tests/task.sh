@@ -14,6 +14,6 @@ export PATH=$PATH:$GOPATH/bin
 
 pushd src/github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests
     go get github.com/onsi/ginkgo/ginkgo
-    dep ensure
+    dep ensure -vendor-only
     ginkgo -v -r --trace --skipPackage acceptance
 popd

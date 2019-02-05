@@ -28,5 +28,5 @@ export CF_CREDHUB_CLIENT
 export CF_CREDHUB_SECRET
 
 go get github.com/onsi/ginkgo/ginkgo
-dep ensure
+dep ensure -vendor-only
 ginkgo -v --trace acceptance
