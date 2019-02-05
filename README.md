@@ -129,6 +129,7 @@ If these variables are not set, all test suites returned by [`testcases.OpenSour
 
 The system tests do the following:
 
+1. Calls `CheckDeployment(common.Config)` on all provided TestCases (to e.g. check if errand-pushed apps are present).
 1. Sets up a temporary local working directory for storing the backup artifact, and CF_HOME directories for all the test cases.
 1. Calls `BeforeBackup(common.Config)` on all provided TestCases (to e.g. push unique apps to the environment to be backed up).
 1. Backs up the `CF_DEPLOYMENT_NAME` Cloud Foundry deployment.
@@ -149,8 +150,9 @@ Test cases should be used for checking that CF components' data has been backed 
 
 To add extra test cases, create a new TestCase that follows the [TestCase interface](https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/blob/master/runner/testcase.go).
 
-The methods that need to be implemented are `BeforeBackup(common.Config)`, `AfterBackup(common.Config)`, `AfterRestore(common.Config)` and `Cleanup(common.Config)`.
+The methods that need to be implemented are `CheckDeployment(common.Config)`, `BeforeBackup(common.Config)`, `AfterBackup(common.Config)`, `AfterRestore(common.Config)` and `Cleanup(common.Config)`.
 
+* `CheckDeployment(common.Config)` runs first to ensure that the test case could possibly succeed in the deployment DRATs is running against. E.g. An errand-based test case could never succeed in a deployment where the errand has never been run.
 * `BeforeBackup(common.Config)` runs before the backup is taken, and should create state in the Cloud Foundry deployment to be backed up.
 * `AfterBackup(common.Config)` runs after the backup is complete but before the restore is started. If were monitoring e.g. app uptime during the backup you could use this step to stop monitoring knowing that backup definitely finished.
 * `AfterRestore(common.Config)` runs after the restore is complete, and should assert that the state in the restored Cloud Foundry deployment matches that created in `BeforeBackup(common.Config)`.
