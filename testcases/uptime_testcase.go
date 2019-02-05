@@ -31,6 +31,9 @@ func (tc *AppUptimeTestCase) Name() string {
 	return tc.name
 }
 
+func (tc *AppUptimeTestCase) CheckDeployment(config Config) {
+}
+
 func (tc *AppUptimeTestCase) BeforeBackup(config Config) {
 	RunCommandSuccessfully("cf api --skip-ssl-validation", config.CloudFoundryConfig.ApiUrl)
 	RunCommandSuccessfully("cf auth", config.CloudFoundryConfig.AdminUsername, config.CloudFoundryConfig.AdminPassword)

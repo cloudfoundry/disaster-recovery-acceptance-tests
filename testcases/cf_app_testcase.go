@@ -30,6 +30,9 @@ func (tc *CfAppTestCase) Name() string {
 	return tc.name
 }
 
+func (tc *CfAppTestCase) CheckDeployment(config Config) {
+}
+
 func (tc *CfAppTestCase) BeforeBackup(config Config) {
 	By("creating new orgs and spaces")
 	RunCommandSuccessfully("cf api --skip-ssl-validation", config.CloudFoundryConfig.ApiUrl)

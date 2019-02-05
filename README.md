@@ -1,134 +1,30 @@
-# disaster-recovery-acceptance-tests (DRATS)
+# disaster-recovery-acceptance-tests (DRATs)
 
-Tests if Cloud Foundry can be backed up and restored. The tests will back up from and restore to `CF_DEPLOYMENT_NAME`.
+Tests if Cloud Foundry (CF) can be backed up and restored. The tests will back up from and restore to `CF_DEPLOYMENT_NAME`.
 
 ## Prerequisites
-1. Install golang, per golang.org.   
-1. Install `ginkgo`
-   ```bash
-   go get github.com/onsi/ginkgo/ginkgo
-   ```
-1. Install `dep`
+1. [Install `go`](https://golang.org/)
+1. [Install `ginkgo`](https://github.com/onsi/ginkgo)
+1. [Install `dep`](https://github.com/golang/dep)
 
-## Running DRATS with Environment Variables
+## Running DRATs with Environment Variables
 
-1. Spin up a Cloud Foundry deployment.
-    * CF on BOSH Lite is supported.
-    * [cf-deployment](https://github.com/cloudfoundry/cf-deployment) is supported. Ensure you apply the [backup-restore opsfile](https://github.com/cloudfoundry/cf-deployment/blob/master/operations/experimental/enable-backup-restore.yml) at deploy time to ensure the backup and restore scripts are enabled. This will also deploy a backup restore VM, on which the [Backup and Restore SDK](https://github.com/cloudfoundry-incubator/backup-and-restore-sdk-release) is deployed.
-1. Run `scripts/run_acceptance_tests_local.sh` with the following environment variables set:
-    * `CF_DEPLOYMENT_NAME` - name of the Cloud Foundry deployment to backup and restore
-    * `CF_API_URL` - Cloud Foundry api url
-    * `CF_ADMIN_USERNAME` - Cloud Foundry api admin user
-    * `CF_ADMIN_PASSWORD` - Cloud Foundry api admin password
-    * `BOSH_ENVIRONMENT` - URL of BOSH Director which has deployed the above Cloud Foundries
-    * `BOSH_CLIENT` - BOSH Director username
-    * `BOSH_CLIENT_SECRET` - BOSH Director password
-    * `BOSH_CA_CERT` - BOSH Director's CA cert content
-    * `BOSH_GW_HOST` - Gateway host to use for BOSH SSH connection
-    * `BOSH_GW_USER` - Gateway user to use for BOSH SSH connection
-    * `BOSH_GW_PRIVATE_KEY_CONTENTS` - Private key to use for BOSH SSH connection
-    * `BBR_BUILD_PATH` - path to BBR binary
-    * `DEFAULT_TIMEOUT_MINS` - timeout for commands run in the test. Defaults to 15 minutes.
-1. The following environment variables are optional and could be set depending on test configuration:
-    * `SSH_DESTINATION_CIDR` - Default to "10.0.0.0/8"; change if your cf-deployment is deployed in a different internal network range
-    * `INCLUDE_NFS_BROKER_TESTCASE` - Environment variable that controls whether or not to run the NFS test case
-    * `NFS_SERVICE_NAME` - Environment variable required to run the NFS test case
-    * `NFS_PLAN_NAME` - Environment variable required to run the NFS test case
-    * `NFS_CREATE_SERVICE_BROKER` - Environment variable that controls whether or not to register the NFS service broker in the NFS test case
-    * `NFS_BROKER_USER` - Environment variable required to register the NFS service broker when running the NFS test case
-    * `NFS_BROKER_PASSWORD` - Environment variable required to register the NFS service broker when running the NFS test case
-    * `NFS_BROKER_URL` - Environment variable required to register the NFS service broker when running the NFS test case
-    * `INCLUDE_SMB_BROKER_TESTCASE` - Environment variable that controls whether or not to run the SMB test case
-    * `SMB_SERVICE_NAME` - Environment variable required to run the SMB test case
-    * `SMB_PLAN_NAME` - Environment variable required to run the SMB test case
-    * `SMB_CREATE_SERVICE_BROKER` - Environment variable that controls whether or not to register the SMB service broker in the SMB test case
-    * `SMB_BROKER_USER` - Environment variable required to register the SMB service broker when running the SMB test case
-    * `SMB_BROKER_PASSWORD` - Environment variable required to register the SMB service broker when running the SMB test case
-    * `SMB_BROKER_URL` - Environment variable required to register the SMB service broker when running the SMB test case
-    * `DELETE_AND_REDEPLOY_CF` - set to "true" to have the CF deployment destroyed and redeployed from scratch during the test cycle. **<span style="color:red"> Exercise extreme care when using this option!</span>**
-1. If you wish to run DRATS against a director deployed with `bbl`, run `scripts/run_acceptance_tests_with_bbl_env.sh <path-to-bbl-state-dir>`.
-    * Set `CF_VARS_STORE_PATH` to the path to the CF vars-store file.
-    * Set `BOSH_CLI_NAME` to the name of the BOSH CLI executable on your machine if it isn't `bosh`.
+1. Spin up a Cloud Foundry deployment**.
+    * The [backup-restore ops file](https://github.com/cloudfoundry/cf-deployment/blob/master/operations/backup-and-restore/enable-backup-restore.yml) must be used during deployment. This will also deploy a backup restore VM.
+    * Other [backup-restore ops files](https://github.com/cloudfoundry/cf-deployment/blob/master/operations/backup-and-restore) will be needed depending on what test cases you want enabled.
+2. Run DRATs against it using one of the following:
+    * [Using an integration config](docs/testing_with_config.md) - **Recommended**
+    * [Using bbl](docs/testing_with_bbl.md)
+    * [Using environment variables](docs/testing_with_env_vars.md) - **Deprecated**
 
-### Focusing/Skipping a test suite
+**Cloud Foundry on BOSH Lite is supported.
 
-Run DRATS as usual but set the environment variable `FOCUSED_SUITE_NAME` and/or `SKIP_SUITE_NAME` to a regex matching the name(s) of test suites. Only those suites that both match `FOCUSED_SUITE_NAME` and don't match `SKIP_SUITE_NAME` will be run. Leaving either of these unset is supported.
-
-If these variables are not set, all test suites returned by [`testcases.OpenSourceTestCases()`](https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/blob/master/testcases/testcase_helper.go#L9) will be run.
-
-## Running DRATS with Integration Config
-
-### From a jumpbox
-1. Create an integration config json file, for example:
-   ```bash
-   cat > integration_config.json <<EOF
-    {
-     "cf_api_url": "https://api.<cf_system_domain>",
-     "cf_deployment_name": "cf",
-     "cf_admin_username": "admin",
-     "cf_admin_password": "<cf_admin_password>",
-     "bosh_environment": "https://<bosh_director_ip>:25555",
-     "bosh_client": "admin",
-     "bosh_client_secret": "<bosh_admin_password>",
-     "bosh_ca_cert": "-----BEGIN CERTIFICATE------\n...\n------END CERTIFICATE-----",
-     "include_cf-app": true,
-     "include_cf-networking": true,
-     "include_cf-uaa": true,
-     "include_cf-credhub": true,
-     "include_cf-routing": true,
-     "include_app-uptime": true
-   }
-   EOF
-   export CONFIG=$PWD/integration_config.json
-   ```
-1. Setup the following environment variables:
-   * `BBR_BUILD_PATH`
-1. [Optional] Change the default timeout by setting `DEFAULT_TIMEOUT_MINS`.
-1. Run the tests
-   ```bash
-   dep ensure
-   ginkgo -v --trace acceptance
-   ```
-### Locally
-1. Follow first two steps in jumpbox instructions.
-1. Add the following additional properties to the integration config:
-   *  `ssh_proxy_user`
-   *  `ssh_proxy_host`
-   *  `ssh_proxy_private_key`
-   *  `ssh_proxy_cidr`
-1. Run `scripts/run_acceptance_tests_local_with_config.sh`
-
-### Integration Config Variables
-* `cf_deployment_name` - name of the Cloud Foundry deployment to backup and restore
-* `cf_api_url` - Cloud Foundry api url
-* `cf_admin_username` - Cloud Foundry api admin user
-* `cf_admin_password` - Cloud Foundry api admin password
-* `bosh_environment` - URL of BOSH Director which has deployed the above Cloud Foundries
-* `bosh_client` - BOSH Director username
-* `bosh_client_secret` - BOSH Director password
-* `bosh_ca_cert` - BOSH Director's CA cert content
-* `include_<testcase-name>` - Flag for whether to run a given testcase. If omitted defaults to false
-
-#### Optional Variables
-* `nfs_service_name` - NFS service name. Required when running the NFS test case.
-* `nfs_plan_name` - NFS plan name. Required when running the NFS test case.
-* `nfs_create_service_broker` - Flag to control whether or not to register the NFS service broker as part of the NFS test case.
-* `nfs_broker_user` - NFS broker user. Required when registering the NFS service broker as part of the NFS test case.
-* `nfs_broker_password` - NFS broker password. Required when registering the NFS service broker as part of the NFS test case.
-* `nfs_broker_url` - NFS broker URL. Required when registering the NFS service broker as part of  the NFS test case.
-* `smb_service_name` - SMB service name. Required when running the SMB test case.
-* `smb_plan_name` - SMB plan name. Required when running the SMB test case.
-* `smb_create_service_broker` - Flag to control whether or not to register the SMB service broker as part of the SMB test case.
-* `smb_broker_user` - SMB broker user. Required when registering the SMB service broker as part of the SMB test case.
-* `smb_broker_password` - SMB broker password. Required when registering the SMB service broker as part of the SMB test case.
-* `smb_broker_url` - SMB broker URL. Required when registering the SMB service broker as part of  the SMB test case.
-* `timeout_in_minutes` - Default ginkgo `Eventually` timeout. Defaults to 15.
-* `delete_and_redeploy_cf` - Destroy and redeploy the cf between after backup and restore. Defaults to false.
 
 ## Test Structure
 
 The system tests do the following:
 
+1. Calls `CheckDeployment(common.Config)` on all provided TestCases (to e.g. check if errand-pushed apps are present).
 1. Sets up a temporary local working directory for storing the backup artifact, and CF_HOME directories for all the test cases.
 1. Calls `BeforeBackup(common.Config)` on all provided TestCases (to e.g. push unique apps to the environment to be backed up).
 1. Backs up the `CF_DEPLOYMENT_NAME` Cloud Foundry deployment.
@@ -137,11 +33,11 @@ The system tests do the following:
 1. Calls `AfterRestore(common.Config)` on all provided TestCases (to e.g. check the apps pushed are present in the restored environment).
 1. Calls `Cleanup(common.Config)` on all provided TestCases (to e.g. clean up the apps from the backup environment). It will do this even if an error or failure occurred in a previous step
 1. Cleans up the temporary directories created in the setup
-1. If an error occurred during a `bbr backup` command, DRATS runs `bbr backup-cleanup` to remove temporary bbr artifacts from your deployment (which would otherwise cause subsequent DRATS runs to fail)
+1. If an error occurred during a `bbr backup` command, DRATs runs `bbr backup-cleanup` to remove temporary bbr artifacts from your deployment (which would otherwise cause subsequent DRATs runs to fail)
 
-## Extending DRATS
+## Extending DRATs
 
-DRATS runs a collection of test cases against a Cloud Foundry deployment.
+DRATs runs a collection of test cases against a Cloud Foundry deployment.
 
 Test cases should be used for checking that CF components' data has been backed up and restored correctly – e.g. if your release backs up a table in a database, that the table can be altered and is then restored to its original state.
 
@@ -149,8 +45,8 @@ Test cases should be used for checking that CF components' data has been backed 
 
 To add extra test cases, create a new TestCase that follows the [TestCase interface](https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/blob/master/runner/testcase.go).
 
-The methods that need to be implemented are `BeforeBackup(common.Config)`, `AfterBackup(common.Config)`, `AfterRestore(common.Config)` and `Cleanup(common.Config)`.
-
+The methods that need to be implemented are:
+* `CheckDeployment(common.Config)` runs first to ensure that the test case could possibly succeed in the deployment DRATs is running against. E.g. An errand-based test case could never succeed in a deployment where the errand has never been run.
 * `BeforeBackup(common.Config)` runs before the backup is taken, and should create state in the Cloud Foundry deployment to be backed up.
 * `AfterBackup(common.Config)` runs after the backup is complete but before the restore is started. If were monitoring e.g. app uptime during the backup you could use this step to stop monitoring knowing that backup definitely finished.
 * `AfterRestore(common.Config)` runs after the restore is complete, and should assert that the state in the restored Cloud Foundry deployment matches that created in `BeforeBackup(common.Config)`.
@@ -163,13 +59,16 @@ The methods that need to be implemented are `BeforeBackup(common.Config)`, `Afte
 
 ## Running DRATs in your CI
 
-We have shared a [task](https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/tree/master/ci/drats) to run DRATS with your CI. This task reads credentials from environment variables. If you prefer a CATs like integration_config, we have another CI [task](https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/tree/master/ci/drats-with-integration-config) for you.
-Both run-drats tasks establish an SSH tunnel using [`sshuttle`](http://sshuttle.readthedocs.io) so that they can run from outside the network. Note the tasks will need to be run from a privileged container.
-You can also find our pipeline definition here: [pipeline](https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/tree/master/ci/pipeline.yml)
+We provide tasks to run DRATs with your CI:
+* A [`drats` task](https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/tree/master/ci/drats) that reads in environment variables
+* A [`drats-with-integration-config` task](https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/tree/master/ci/drats-with-integration-config) that read from an integration config.
 
-## Debugging your DRATS run
+Both DRATs tasks establish an SSH tunnel using [`sshuttle`](http://sshuttle.readthedocs.io) so that they can run from outside the network. Note the tasks will need to be run from a privileged container.
+You can also find [our pipeline definition here](https://github.com/cloudfoundry-incubator/backup-and-restore-ci/blob/master/pipelines/drats/pipeline.yml)
 
-DRATS runs multiple interwoven test cases (for app uptime and each of the components under test) so it can be a little tricky to work out what's gone wrong when there's an error or failure. Here are some tips on investigating DRATS failures - please PR in additions to this doc if you think of more tips that might help other teams!
+## Debugging your DRATs run
+
+DRATs runs multiple interwoven test cases (for app uptime and each of the components under test) so it can be a little tricky to work out what's gone wrong when there's an error or failure. Here are some tips on investigating DRATs failures - please PR in additions to this doc if you think of more tips that might help other teams!
 
 1. The `bbr backup-cleanup` command runs if the test run errored during the `bbr backup` step. If you see an error in the `backup-cleanup` step, it's likely that a similar problem happened in the `backup` step which caused the original failure - scroll up to see.
 1. The easiest way to see where the failure / error happened is to look for the nearest `STEP` statement in the logs

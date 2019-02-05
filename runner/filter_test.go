@@ -119,10 +119,11 @@ func (tc FakeTestCase) Name() string {
 	return tc.name
 }
 
-func (tc FakeTestCase) BeforeBackup(config runner.Config) {}
-func (tc FakeTestCase) AfterBackup(config runner.Config)  {}
-func (tc FakeTestCase) AfterRestore(config runner.Config) {}
-func (tc FakeTestCase) Cleanup(config runner.Config)      {}
+func (tc FakeTestCase) CheckDeployment(config runner.Config) {}
+func (tc FakeTestCase) BeforeBackup(config runner.Config)    {}
+func (tc FakeTestCase) AfterBackup(config runner.Config)     {}
+func (tc FakeTestCase) AfterRestore(config runner.Config)    {}
+func (tc FakeTestCase) Cleanup(config runner.Config)         {}
 
 func testCase(name string) runner.TestCase {
 	return FakeTestCase{name: name}

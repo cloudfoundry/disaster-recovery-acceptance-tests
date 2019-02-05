@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"code.cloudfoundry.org/routing-api"
+
 	"code.cloudfoundry.org/routing-api/models"
 	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/runner"
 
@@ -41,6 +42,9 @@ func NewRouterGroupTestCase() *CfRouterGroupTestCase {
 
 func (tc *CfRouterGroupTestCase) Name() string {
 	return tc.name
+}
+
+func (tc *CfRouterGroupTestCase) CheckDeployment(config Config) {
 }
 
 // BeforeBackup is run before the bbr backs up the router_group table.

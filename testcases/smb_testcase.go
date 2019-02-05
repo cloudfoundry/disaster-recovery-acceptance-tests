@@ -23,6 +23,14 @@ func (tc *SMBTestCase) Name() string {
 	return "cf-smbbroker"
 }
 
+func (tc *SMBTestCase) CheckDeployment(config Config) {
+	By("checking if the smbbroker app is present")
+	RunCommandAndRetry("cf api --skip-ssl-validation", 3, config.CloudFoundryConfig.ApiUrl)
+	RunCommandAndRetry("cf auth", 3, config.CloudFoundryConfig.AdminUsername, config.CloudFoundryConfig.AdminPassword)
+	RunCommandSuccessfullyWithFailureMessage(tc.Name()+" test case cannot be run: space smb-broker-space is not present", "cf target -o system -s smb-broker-space")
+	RunCommandSuccessfullyWithFailureMessage(tc.Name()+" test case cannot be run: app smbbroker is not present", "cf app smbbroker")
+}
+
 func (tc *SMBTestCase) BeforeBackup(config Config) {
 	By("checking the service name and plane name are provided")
 	Expect(config.CloudFoundryConfig.SMBServiceName).NotTo(BeEmpty(), "required config SMB service name not set")
