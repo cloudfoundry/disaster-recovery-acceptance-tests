@@ -59,9 +59,12 @@ The methods that need to be implemented are:
 
 ## Running DRATs in your CI
 
-We have shared a [task](https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/tree/master/ci/DRATs) to run DRATs with your CI. This task reads credentials from environment variables. If you prefer a CATs like integration_config, we have another CI [task](https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/tree/master/ci/DRATs-with-integration-config) for you.
-Both run-DRATs tasks establish an SSH tunnel using [`sshuttle`](http://sshuttle.readthedocs.io) so that they can run from outside the network. Note the tasks will need to be run from a privileged container.
-You can also find our pipeline definition here: [pipeline](https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/tree/master/ci/pipeline.yml)
+We provide tasks to run DRATs with your CI:
+* A [`drats` task](https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/tree/master/ci/drats) that reads in environment variables
+* A [`drats-with-integration-config` task](https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/tree/master/ci/drats-with-integration-config) that read from an integration config.
+
+Both DRATs tasks establish an SSH tunnel using [`sshuttle`](http://sshuttle.readthedocs.io) so that they can run from outside the network. Note the tasks will need to be run from a privileged container.
+You can also find [our pipeline definition here](https://github.com/cloudfoundry-incubator/backup-and-restore-ci/blob/master/pipelines/drats/pipeline.yml)
 
 ## Debugging your DRATs run
 
