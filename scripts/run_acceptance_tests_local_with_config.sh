@@ -8,6 +8,17 @@ set -eu -o pipefail
 # The following params are optional
 : "${SKIP_SUITE_NAME:=""}"
 
+cleanup() {
+  rm -rf "${tmpdir}"
+
+  echo "Closing SSH tunnel..."
+  if [[ -f sshuttle.pid ]]; then
+    kill "$(cat sshuttle.pid)"
+  fi
+  rm -f sshuttle.pid
+}
+trap 'cleanup' EXIT
+
 tmpdir="$( mktemp -d /tmp/run-drats.XXXXXXXXXX )"
 
 BOSH_GW_USER=`jq -r .ssh_proxy_user ${CONFIG}`
@@ -21,13 +32,13 @@ chmod 600 "${ssh_key}"
 echo "Starting SSH tunnel, you may be prompted for your OS password..."
 sudo true # prompt for password
 sshuttle -e "ssh -i ${ssh_key} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" -r "${BOSH_GW_USER}@${BOSH_GW_HOST}" ${SSH_DESTINATION_CIDR} &
-tunnel_pid="$!"
 
-cleanup() {
-  kill "${tunnel_pid}"
-  rm -rf "${tmpdir}"
-}
-trap 'cleanup' EXIT
+sleep 5
+
+if ! stat sshuttle.pid > /dev/null 2>&1; then
+  echo "Failed to start sshuttle daemon"
+  exit 1
+fi
 
 export BBR_BUILD_PATH=$(which bbr)
 

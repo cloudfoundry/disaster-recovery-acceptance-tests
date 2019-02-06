@@ -24,11 +24,13 @@ func (tc *NFSTestCase) Name() string {
 }
 
 func (tc *NFSTestCase) CheckDeployment(config Config) {
-	By("checking if the nfsbroker app is present")
-	RunCommandAndRetry("cf api --skip-ssl-validation", 3, config.CloudFoundryConfig.ApiUrl)
+	By("checking if the NFS service is registered")
+	RunCommandAndRetry("cf api --skip-ssl-validation", 3, config.CloudFoundryConfig.APIURL)
 	RunCommandAndRetry("cf auth", 3, config.CloudFoundryConfig.AdminUsername, config.CloudFoundryConfig.AdminPassword)
-	RunCommandSuccessfullyWithFailureMessage(tc.Name()+" test case cannot be run: space nfs-broker-space is not present", "cf target -o system -s nfs-broker-space")
-	RunCommandSuccessfullyWithFailureMessage(tc.Name()+" test case cannot be run: app nfs-broker is not present", "cf app nfs-broker")
+	RunCommandSuccessfullyWithFailureMessage(
+		tc.Name()+" test case cannot be run: NFS service is not registered",
+		"cf service-access -e "+config.CloudFoundryConfig.NFSServiceName,
+	)
 }
 
 func (tc *NFSTestCase) BeforeBackup(config Config) {
@@ -37,8 +39,8 @@ func (tc *NFSTestCase) BeforeBackup(config Config) {
 	Expect(config.CloudFoundryConfig.NFSPlanName).NotTo(BeEmpty(), "required config NFS plan name not set")
 
 	By("creating an NFS service broker and service instance")
-	RunCommandSuccessfully("cf api --skip-ssl-validation", config.CloudFoundryConfig.ApiUrl)
-	RunCommandSuccessfully("cf login --skip-ssl-validation -a", config.CloudFoundryConfig.ApiUrl,
+	RunCommandSuccessfully("cf api --skip-ssl-validation", config.CloudFoundryConfig.APIURL)
+	RunCommandSuccessfully("cf login --skip-ssl-validation -a", config.CloudFoundryConfig.APIURL,
 		"-u", config.CloudFoundryConfig.AdminUsername, "-p", config.CloudFoundryConfig.AdminPassword)
 	orgName := "acceptance-test-org-" + tc.uniqueTestID
 	spaceName := "acceptance-test-space-" + tc.uniqueTestID
@@ -50,7 +52,7 @@ func (tc *NFSTestCase) BeforeBackup(config Config) {
 	if config.CloudFoundryConfig.NFSCreateServiceBroker {
 		RunCommandSuccessfully("cf create-service-broker nfsbroker-drats-" + tc.uniqueTestID + " " +
 			config.CloudFoundryConfig.NFSBrokerUser + " " + config.CloudFoundryConfig.NFSBrokerPassword + " " +
-			config.CloudFoundryConfig.NFSBrokerUrl)
+			config.CloudFoundryConfig.NFSBrokerURL)
 	}
 
 	RunCommandSuccessfully("cf enable-service-access " + config.CloudFoundryConfig.NFSServiceName + " -o " + orgName)

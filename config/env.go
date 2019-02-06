@@ -18,7 +18,7 @@ func FromEnv() (runner.Config, runner.TestCaseFilter) {
 	}
 	deploymentConfig := runner.CloudFoundryConfig{
 		Name:          mustHaveEnv("CF_DEPLOYMENT_NAME"),
-		ApiUrl:        mustHaveEnv("CF_API_URL"),
+		APIURL:        mustHaveEnv("CF_API_URL"),
 		AdminUsername: mustHaveEnv("CF_ADMIN_USERNAME"),
 		AdminPassword: mustHaveEnv("CF_ADMIN_PASSWORD"),
 	}
@@ -27,13 +27,13 @@ func FromEnv() (runner.Config, runner.TestCaseFilter) {
 	deploymentConfig.NFSPlanName = os.Getenv("NFS_PLAN_NAME")
 	deploymentConfig.NFSBrokerUser = os.Getenv("NFS_BROKER_USER")
 	deploymentConfig.NFSBrokerPassword = os.Getenv("NFS_BROKER_PASSWORD")
-	deploymentConfig.NFSBrokerUrl = os.Getenv("NFS_BROKER_URL")
+	deploymentConfig.NFSBrokerURL = os.Getenv("NFS_BROKER_URL")
 
 	deploymentConfig.SMBServiceName = os.Getenv("SMB_SERVICE_NAME")
 	deploymentConfig.SMBPlanName = os.Getenv("SMB_PLAN_NAME")
 	deploymentConfig.SMBBrokerUser = os.Getenv("SMB_BROKER_USER")
 	deploymentConfig.SMBBrokerPassword = os.Getenv("SMB_BROKER_PASSWORD")
-	deploymentConfig.SMBBrokerUrl = os.Getenv("SMB_BROKER_URL")
+	deploymentConfig.SMBBrokerURL = os.Getenv("SMB_BROKER_URL")
 	deploymentConfig.CredHubClient = os.Getenv("CF_CREDHUB_CLIENT")
 	deploymentConfig.CredHubSecret = os.Getenv("CF_CREDHUB_SECRET")
 

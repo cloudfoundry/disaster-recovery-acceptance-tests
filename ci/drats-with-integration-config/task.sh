@@ -23,6 +23,11 @@ sshuttle -r "${BOSH_GW_USER}@${BOSH_GW_HOST}" "${SSH_DESTINATION_CIDR}" --daemon
 
 sleep 5
 
+if ! stat sshuttle.pid > /dev/null 2>&1; then
+  echo "Failed to start sshuttle daemon"
+  exit 1
+fi
+
 pushd bbr-binary-release
   tar xvf ./*.tar
   export BBR_BUILD_PATH="$PWD/releases/bbr"

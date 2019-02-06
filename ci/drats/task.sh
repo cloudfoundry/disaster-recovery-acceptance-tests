@@ -16,6 +16,11 @@ sshuttle -r "${BOSH_GW_USER}@${BOSH_GW_HOST}" "${SSH_DESTINATION_CIDR}" --daemon
 
 sleep 5
 
+if ! stat sshuttle.pid > /dev/null 2>&1; then
+  echo "Failed to start sshuttle daemon"
+  exit 1
+fi
+
 echo "$BOSH_CA_CERT" > bosh.cert
 export BOSH_CERT_PATH="$PWD/bosh.cert"
 
