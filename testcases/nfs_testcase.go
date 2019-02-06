@@ -24,11 +24,13 @@ func (tc *NFSTestCase) Name() string {
 }
 
 func (tc *NFSTestCase) CheckDeployment(config Config) {
-	By("checking if the nfsbroker app is present")
+	By("checking if the NFS service is registered")
 	RunCommandAndRetry("cf api --skip-ssl-validation", 3, config.CloudFoundryConfig.ApiUrl)
 	RunCommandAndRetry("cf auth", 3, config.CloudFoundryConfig.AdminUsername, config.CloudFoundryConfig.AdminPassword)
-	RunCommandSuccessfullyWithFailureMessage(tc.Name()+" test case cannot be run: space nfs-broker-space is not present", "cf target -o system -s nfs-broker-space")
-	RunCommandSuccessfullyWithFailureMessage(tc.Name()+" test case cannot be run: app nfs-broker is not present", "cf app nfs-broker")
+	RunCommandSuccessfullyWithFailureMessage(
+		tc.Name()+" test case cannot be run: NFS service is not registered",
+		"cf service-access -e "+config.CloudFoundryConfig.NFSServiceName,
+	)
 }
 
 func (tc *NFSTestCase) BeforeBackup(config Config) {
