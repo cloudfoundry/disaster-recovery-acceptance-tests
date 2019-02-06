@@ -22,12 +22,12 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 	var err error
 
 	BeforeEach(func() {
-		fmt.Println("Running test cases:")
+		fmt.Println("\nRunning test cases:")
 		for _, testCase := range testCases {
 			fmt.Println(testCase.Name())
 		}
 
-		fmt.Println("Checking deployment has been set up for test cases...")
+		fmt.Println("\nChecking deployment has been set up for test cases...")
 		for _, testCase := range testCases {
 			testCase.CheckDeployment(config)
 		}
