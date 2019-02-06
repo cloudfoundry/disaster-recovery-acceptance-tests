@@ -12,23 +12,24 @@ import (
 	"fmt"
 	"net/url"
 
+	"io"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"io"
 )
 
-func GetAppUrl(appName string) string {
+func GetAppURL(appName string) string {
 	appStats := string(RunCommandAndRetry("cf app "+appName, 5).Out.Contents())
-	var appUrl string
+	var appURL string
 	for _, line := range strings.Split(appStats, "\n") {
 		if strings.HasPrefix(line, "routes:") {
 			s := strings.Split(line, " ")
-			appUrl = s[len(s)-1]
+			appURL = s[len(s)-1]
 		}
 	}
 
-	Expect(appUrl).NotTo(BeEmpty())
-	return appUrl
+	Expect(appURL).NotTo(BeEmpty())
+	return appURL
 }
 
 func Get(url string) *http.Response {
@@ -44,16 +45,16 @@ func Post(url string, contentType string, body io.Reader) *http.Response {
 	client := &http.Client{Transport: &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}}
-	response, err := client.Post("https://" + url, contentType, body)
+	response, err := client.Post("https://"+url, contentType, body)
 	Expect(err).NotTo(HaveOccurred())
 	return response
 }
 
-func StatusCode(rawUrl string) func() (int, error) {
-	parsedUrl, err := url.Parse(rawUrl)
+func StatusCode(rawURL string) func() (int, error) {
+	parsedURL, err := url.Parse(rawURL)
 	Expect(err).NotTo(HaveOccurred(), "error parsing api url")
-	if parsedUrl.Scheme == "" {
-		parsedUrl.Scheme = "https"
+	if parsedURL.Scheme == "" {
+		parsedURL.Scheme = "https"
 	}
 
 	return func() (int, error) {
@@ -64,8 +65,8 @@ func StatusCode(rawUrl string) func() (int, error) {
 					InsecureSkipVerify: true,
 				},
 			}}
-		fmt.Fprintf(GinkgoWriter, "Trying to connect to api url: %s\n", parsedUrl.String())
-		resp, err := client.Get(parsedUrl.String())
+		fmt.Fprintf(GinkgoWriter, "Trying to connect to api url: %s\n", parsedURL.String())
+		resp, err := client.Get(parsedURL.String())
 		Expect(err).NotTo(HaveOccurred(), "error connecting to api url")
 		return resp.StatusCode, err
 	}

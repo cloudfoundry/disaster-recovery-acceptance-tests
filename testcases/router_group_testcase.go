@@ -59,7 +59,7 @@ func (tc *CfRouterGroupTestCase) BeforeBackup(config Config) {
 	By("Creating a pre-backup router group backup")
 	var err error
 
-	tc.routingAPIClient = routing_api.NewClient(config.CloudFoundryConfig.ApiUrl, true)
+	tc.routingAPIClient = routing_api.NewClient(config.CloudFoundryConfig.APIURL, true)
 	tc.routerGroupsPreBackup, err = tc.readRouterGroups(token)
 	Expect(err).NotTo(HaveOccurred())
 }
@@ -110,7 +110,7 @@ func (tc *CfRouterGroupTestCase) Cleanup(config Config) {
 }
 
 func loginAndGetToken(config Config) string {
-	RunCommandSuccessfully("cf login --skip-ssl-validation -a", config.CloudFoundryConfig.ApiUrl, "-u", config.CloudFoundryConfig.AdminUsername, "-p", config.CloudFoundryConfig.AdminPassword)
+	RunCommandSuccessfully("cf login --skip-ssl-validation -a", config.CloudFoundryConfig.APIURL, "-u", config.CloudFoundryConfig.AdminUsername, "-p", config.CloudFoundryConfig.AdminPassword)
 	return refreshToken()
 }
 

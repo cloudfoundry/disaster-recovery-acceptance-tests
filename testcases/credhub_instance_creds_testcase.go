@@ -42,7 +42,7 @@ func (tc *CfCredhubSSITestCase) CheckDeployment(config Config) {
 }
 
 func (tc *CfCredhubSSITestCase) BeforeBackup(config Config) {
-	RunCommandSuccessfully("cf api --skip-ssl-validation", config.CloudFoundryConfig.ApiUrl)
+	RunCommandSuccessfully("cf api --skip-ssl-validation", config.CloudFoundryConfig.APIURL)
 	RunCommandSuccessfully("cf auth", config.CloudFoundryConfig.AdminUsername, config.CloudFoundryConfig.AdminPassword)
 	RunCommandSuccessfully("cf create-org acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf create-space acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
@@ -54,7 +54,7 @@ func (tc *CfCredhubSSITestCase) BeforeBackup(config Config) {
 	RunCommandSuccessfully("cf set-env " + tc.appName + " CREDHUB_SECRET " + config.CloudFoundryConfig.CredHubSecret + " > /dev/null")
 	RunCommandSuccessfully("cf restart " + tc.appName)
 
-	tc.appURL = GetAppUrl(tc.appName)
+	tc.appURL = GetAppURL(tc.appName)
 
 	appResponse := Get(tc.appURL + "/create")
 	body, _ := ioutil.ReadAll(appResponse.Body)

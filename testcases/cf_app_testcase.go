@@ -35,7 +35,7 @@ func (tc *CfAppTestCase) CheckDeployment(config Config) {
 
 func (tc *CfAppTestCase) BeforeBackup(config Config) {
 	By("creating new orgs and spaces")
-	RunCommandSuccessfully("cf api --skip-ssl-validation", config.CloudFoundryConfig.ApiUrl)
+	RunCommandSuccessfully("cf api --skip-ssl-validation", config.CloudFoundryConfig.APIURL)
 	RunCommandSuccessfully("cf auth", config.CloudFoundryConfig.AdminUsername, config.CloudFoundryConfig.AdminPassword)
 	RunCommandSuccessfully("cf create-org acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf create-space acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
@@ -59,7 +59,7 @@ func (tc *CfAppTestCase) AfterRestore(config Config) {
 
 	By("verifying apps are back")
 	RunCommandSuccessfully("cf target -s acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
-	url := GetAppUrl(tc.appName)
+	url := GetAppURL(tc.appName)
 
 	Eventually(StatusCode("https://"+url), 5*time.Minute, 5*time.Second).Should(Equal(200))
 	Expect(string(RunCommandSuccessfully("cf env " + tc.appName).Out.Contents())).To(MatchRegexp("winnebago" + tc.uniqueTestID))

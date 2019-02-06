@@ -20,7 +20,7 @@ func NewCfUaaTestCase() *CfUaaTestCase {
 }
 
 func login(config Config, username, password string) {
-	RunCommandSuccessfully("cf api --skip-ssl-validation", config.CloudFoundryConfig.ApiUrl)
+	RunCommandSuccessfully("cf api --skip-ssl-validation", config.CloudFoundryConfig.APIURL)
 	RunCommandSuccessfully("cf auth", username, password)
 }
 
@@ -44,7 +44,7 @@ func (tc *CfUaaTestCase) AfterBackup(config Config) {
 	login(config, config.CloudFoundryConfig.AdminUsername, config.CloudFoundryConfig.AdminPassword)
 	RunCommandSuccessfully("cf delete-user ", tc.testUser, "-f")
 	RunCommandSuccessfully("cf logout")
-	RunCommandSuccessfully("cf api --skip-ssl-validation", config.CloudFoundryConfig.ApiUrl)
+	RunCommandSuccessfully("cf api --skip-ssl-validation", config.CloudFoundryConfig.APIURL)
 
 	By("user has been deleted. authentication should fail")
 	result := RunCommand("cf auth", tc.testUser, tc.testPassword)

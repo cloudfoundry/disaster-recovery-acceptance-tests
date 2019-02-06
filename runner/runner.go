@@ -73,7 +73,7 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 			))
 		backupRunning = false
 
-		Eventually(StatusCode(config.CloudFoundryConfig.ApiUrl), 5*time.Minute).Should(Equal(200))
+		Eventually(StatusCode(config.CloudFoundryConfig.APIURL), 5*time.Minute).Should(Equal(200))
 
 		for _, testCase := range testCases {
 			By("running the AfterBackup step for " + testCase.Name())
@@ -134,7 +134,7 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 			))
 		restoreRunning = false
 
-		Eventually(StatusCode(config.CloudFoundryConfig.ApiUrl), 5*time.Minute).Should(Equal(200))
+		Eventually(StatusCode(config.CloudFoundryConfig.APIURL), 5*time.Minute).Should(Equal(200))
 
 		By("checking state in restored environment")
 		for _, testCase := range testCases {

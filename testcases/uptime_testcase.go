@@ -18,7 +18,7 @@ type AppUptimeTestCase struct {
 	uniqueTestID            string
 	stopCheckingAppAlive    chan<- bool
 	stopCheckingAPIGoesDown chan<- bool
-	valueApiWasDown         <-chan bool
+	valueAPIWasDown         <-chan bool
 	name                    string
 }
 
@@ -35,7 +35,7 @@ func (tc *AppUptimeTestCase) CheckDeployment(config Config) {
 }
 
 func (tc *AppUptimeTestCase) BeforeBackup(config Config) {
-	RunCommandSuccessfully("cf api --skip-ssl-validation", config.CloudFoundryConfig.ApiUrl)
+	RunCommandSuccessfully("cf api --skip-ssl-validation", config.CloudFoundryConfig.APIURL)
 	RunCommandSuccessfully("cf auth", config.CloudFoundryConfig.AdminUsername, config.CloudFoundryConfig.AdminPassword)
 	RunCommandSuccessfully("cf create-org acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf create-space acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
@@ -44,9 +44,9 @@ func (tc *AppUptimeTestCase) BeforeBackup(config Config) {
 	RunCommandSuccessfully("cf push test_app_" + tc.uniqueTestID + " -p " + testAppFixturePath)
 
 	By("checking the app stays up")
-	appUrl := GetAppUrl("test_app_" + tc.uniqueTestID)
-	tc.stopCheckingAppAlive = checkAppRemainsAlive(appUrl)
-	tc.stopCheckingAPIGoesDown, tc.valueApiWasDown = checkApiGoesDown(config.CloudFoundryConfig.ApiUrl)
+	appURL := GetAppURL("test_app_" + tc.uniqueTestID)
+	tc.stopCheckingAppAlive = checkAppRemainsAlive(appURL)
+	tc.stopCheckingAPIGoesDown, tc.valueAPIWasDown = checkAPIGoesDown(config.CloudFoundryConfig.APIURL)
 }
 
 func (tc *AppUptimeTestCase) AfterBackup(config Config) {
@@ -55,8 +55,8 @@ func (tc *AppUptimeTestCase) AfterBackup(config Config) {
 	tc.stopCheckingAppAlive <- true
 	log.Println("writing to stopCheckingAPIGoesDown...")
 	tc.stopCheckingAPIGoesDown <- true
-	log.Println("reading from valueApiWasDown...")
-	Expect(<-tc.valueApiWasDown).To(BeTrue(), "expected api to be down, but it isn't")
+	log.Println("reading from valueAPIWasDown...")
+	Expect(<-tc.valueAPIWasDown).To(BeTrue(), "expected api to be down, but it isn't")
 }
 
 func (tc *AppUptimeTestCase) AfterRestore(config Config) {
@@ -68,9 +68,9 @@ func (tc *AppUptimeTestCase) Cleanup(config Config) {
 	RunCommandSuccessfully("cf delete-org -f acceptance-test-org-" + tc.uniqueTestID)
 }
 
-func checkApiGoesDown(apiUrl string) (chan<- bool, <-chan bool) {
+func checkAPIGoesDown(apiURL string) (chan<- bool, <-chan bool) {
 	doneChannel := make(chan bool)
-	valueApiWasDown := make(chan bool)
+	valueAPIWasDown := make(chan bool)
 	ticker := time.NewTicker(1 * time.Second)
 	tickerChannel := ticker.C
 
@@ -80,10 +80,10 @@ func checkApiGoesDown(apiUrl string) (chan<- bool, <-chan bool) {
 		for {
 			select {
 			case <-doneChannel:
-				valueApiWasDown <- apiWasDown
+				valueAPIWasDown <- apiWasDown
 				return
 			case <-tickerChannel:
-				if RunCommand("curl", "-k", "--fail", "--max-time", "1", apiUrl, " 2>/dev/null > /dev/null").ExitCode() == CURL_ERROR_FOR_404 {
+				if RunCommand("curl", "-k", "--fail", "--max-time", "1", apiURL, " 2>/dev/null > /dev/null").ExitCode() == CURL_ERROR_FOR_404 {
 					apiWasDown = true
 					ticker.Stop()
 				}
@@ -91,7 +91,7 @@ func checkApiGoesDown(apiUrl string) (chan<- bool, <-chan bool) {
 		}
 	}()
 
-	return doneChannel, valueApiWasDown
+	return doneChannel, valueAPIWasDown
 }
 
 func checkAppRemainsAlive(url string) chan<- bool {
