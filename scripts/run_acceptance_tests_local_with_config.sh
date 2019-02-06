@@ -10,7 +10,12 @@ set -eu -o pipefail
 
 cleanup() {
   rm -rf "${tmpdir}"
-  kill "$(cat sshuttle.pid)"
+
+  echo "Closing SSH tunnel..."
+  if [[ -f sshuttle.pid ]]; then
+    kill "$(cat sshuttle.pid)"
+  fi
+  rm -f sshuttle.pid
 }
 trap 'cleanup' EXIT
 
