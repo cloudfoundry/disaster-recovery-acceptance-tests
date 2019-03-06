@@ -88,7 +88,7 @@ For further configure the run of DRATs, you can set the following integration co
     <th>Usage</th>
   </tr>
     <tr>
-        <td>`default_timeout_mins`</td>
+        <td>`timeout_in_minutes`</td>
         <td>Timeout for commands run in the test (defaults to 15 minutes)</td>
     </tr>
     <tr>
