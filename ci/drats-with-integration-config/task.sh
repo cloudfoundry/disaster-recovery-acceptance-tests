@@ -19,7 +19,7 @@ echo "${BOSH_GW_PRIVATE_KEY}" > ssh.pem
 chmod 0400 ssh.pem
 ssh-add ssh.pem
 
-sshuttle -r "${BOSH_GW_USER}@${BOSH_GW_HOST}" "${SSH_DESTINATION_CIDR}" --daemon -e 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o ServerAliveInterval=600'
+sshuttle -r "${BOSH_GW_USER}@${BOSH_GW_HOST}" "${SSH_DESTINATION_CIDR}" --daemon -e 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o ServerAliveInterval=600' --no-latency-control
 
 sleep 5
 
