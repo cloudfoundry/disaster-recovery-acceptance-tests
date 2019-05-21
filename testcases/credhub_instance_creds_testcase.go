@@ -52,7 +52,7 @@ func (tc *CfCredhubSSITestCase) BeforeBackup(config Config) {
 	RunCommandSuccessfully("cf push " + "--no-start " + tc.appName + " -p " + testAppPath + " -b go_buildpack" + " -f " + testAppPath + "/manifest.yml")
 	RunCommandSuccessfully("cf set-env " + tc.appName + " CREDHUB_CLIENT " + config.CloudFoundryConfig.CredHubClient + " > /dev/null")
 	RunCommandSuccessfully("cf set-env " + tc.appName + " CREDHUB_SECRET " + config.CloudFoundryConfig.CredHubSecret + " > /dev/null")
-	RunCommandSuccessfully("cf restart " + tc.appName)
+	RunCommandSuccessfully("cf start " + tc.appName)
 
 	tc.appURL = GetAppURL(tc.appName)
 
