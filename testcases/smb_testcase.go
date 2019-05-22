@@ -2,6 +2,7 @@ package testcases
 
 import (
 	"fmt"
+	"time"
 
 	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/runner"
 	. "github.com/onsi/ginkgo"
@@ -68,6 +69,7 @@ func (tc *SMBTestCase) AfterBackup(config Config) {
 
 func (tc *SMBTestCase) AfterRestore(config Config) {
 	By("re-binding the SMB service instance after restore")
+	time.Sleep(5 * time.Minute)
 	RunCommandSuccessfully("cf bind-service dratsApp " + tc.instanceName + ` -c '{"username":"someuser","password":"somepass"}'`)
 }
 
