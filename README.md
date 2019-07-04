@@ -1,6 +1,8 @@
 # disaster-recovery-acceptance-tests (DRATs)
 
 Tests if Cloud Foundry (CF) can be backed up and restored. The tests will back up from and restore to `CF_DEPLOYMENT_NAME`.
+Specifically, DRATs adds state to a Cloud Foundry deployment by testing backup and restore during a CF operation such as pushing an app. DRATs backs up the deployment, restores from the backup, and asserts that the state is present after restore.
+
 
 ## Prerequisites
 1. [Install `go`](https://golang.org/)
