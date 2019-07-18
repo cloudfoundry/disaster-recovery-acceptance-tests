@@ -22,7 +22,7 @@ Specifically, DRATs adds state to a Cloud Foundry deployment by testing backup a
 **Cloud Foundry on BOSH Lite is supported.
 
 
-## Test Structure
+## Test Structure 
 
 The system tests do the following:
 
