@@ -22,6 +22,8 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 	var err error
 
 	BeforeEach(func() {
+		SetDefaultEventuallyTimeout(config.Timeout)
+
 		fmt.Println("\nRunning test cases:")
 		for _, testCase := range testCases {
 			fmt.Println(testCase.Name())
@@ -33,8 +35,6 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 		}
 
 		backupRunning = false
-
-		SetDefaultEventuallyTimeout(config.Timeout)
 
 		uniqueTestID = RandomStringNumber()
 		testContext, err = NewTestContext(uniqueTestID, config.BoshConfig)
