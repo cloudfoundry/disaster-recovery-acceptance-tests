@@ -15,6 +15,8 @@ type CloudFoundryConfig struct {
 	NFSBrokerUser                     string `json:"nfs_broker_user,omitempty"`
 	NFSBrokerPassword                 string `json:"nfs_broker_password,omitempty"`
 	NFSBrokerURL                      string `json:"nfs_broker_url,omitempty"`
+	SelectiveBackup                   bool   `json:"selective_backup,omitempty"`
+	SelectiveBackupType               string `json:"selective_backup_type,omitempty"`
 	SMBServiceName                    string `json:"smb_service_name,omitempty"`
 	SMBPlanName                       string `json:"smb_plan_name,omitempty"`
 	SMBCreateServiceBroker            bool   `json:"smb_create_service_broker,omitempty"`

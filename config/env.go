@@ -37,6 +37,9 @@ func FromEnv() (runner.Config, runner.TestCaseFilter) {
 	deploymentConfig.CredHubClient = os.Getenv("CF_CREDHUB_CLIENT")
 	deploymentConfig.CredHubSecret = os.Getenv("CF_CREDHUB_SECRET")
 
+	deploymentConfig.SelectiveBackup = os.Getenv("SELECTIVE_BACKUP") == "true"
+	deploymentConfig.SelectiveBackupType = os.Getenv("SELECTIVE_BACKUP_TYPE")
+
 	timeout := TimeoutFromEnv()
 
 	deleteAndRedeployCF := os.Getenv("DELETE_AND_REDEPLOY_CF") == "true"

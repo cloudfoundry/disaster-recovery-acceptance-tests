@@ -136,6 +136,14 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 
 		Eventually(StatusCode(config.CloudFoundryConfig.APIURL), 5*time.Minute).Should(Equal(200))
 
+		if config.SelectiveBackup {
+			for _, testCase := range testCases {
+				By("running the EnsureAfterSelectiveRestore step for " + testCase.Name())
+				os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir, testCase))
+				testCase.EnsureAfterSelectiveRestore(config)
+			}
+		}
+
 		By("checking state in restored environment")
 		for _, testCase := range testCases {
 			By("running the AfterRestore step for " + testCase.Name())
