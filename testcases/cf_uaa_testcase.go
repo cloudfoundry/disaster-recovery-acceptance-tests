@@ -51,6 +51,8 @@ func (tc *CfUaaTestCase) AfterBackup(config Config) {
 	Expect(result.ExitCode()).To(Equal(1))
 }
 
+func (tc *CfUaaTestCase) EnsureAfterSelectiveRestore(config Config) {}
+
 func (tc *CfUaaTestCase) AfterRestore(config Config) {
 	By("we can login again")
 	login(config, tc.testUser, tc.testPassword)

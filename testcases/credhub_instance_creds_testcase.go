@@ -79,6 +79,8 @@ func (tc *CfCredhubSSITestCase) AfterBackup(config Config) {
 	Expect(listResponse.Credentials).To(HaveLen(2))
 }
 
+func (tc *CfCredhubSSITestCase) EnsureAfterSelectiveRestore(config Config) {}
+
 func (tc *CfCredhubSSITestCase) AfterRestore(config Config) {
 	appResponse := Get(tc.appURL + "/list")
 	Expect(json.NewDecoder(appResponse.Body).Decode(&listResponse)).To(Succeed())

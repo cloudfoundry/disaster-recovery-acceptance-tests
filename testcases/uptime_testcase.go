@@ -59,6 +59,8 @@ func (tc *AppUptimeTestCase) AfterBackup(config Config) {
 	Expect(<-tc.valueAPIWasDown).To(BeTrue(), "expected api to be down, but it isn't")
 }
 
+func (tc *AppUptimeTestCase) EnsureAfterSelectiveRestore(config Config) {}
+
 func (tc *AppUptimeTestCase) AfterRestore(config Config) {
 
 }

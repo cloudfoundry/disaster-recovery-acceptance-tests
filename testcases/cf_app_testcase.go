@@ -49,6 +49,8 @@ func (tc *CfAppTestCase) AfterBackup(config Config) {
 	tc.deletePushedApps(config)
 }
 
+func (tc *CfAppTestCase) EnsureAfterSelectiveRestore(config Config) {}
+
 func (tc *CfAppTestCase) AfterRestore(config Config) {
 	By("finding credentials for the deployment to restore")
 

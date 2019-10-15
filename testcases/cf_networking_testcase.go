@@ -45,6 +45,8 @@ func (tc *CfNetworkingTestCase) AfterBackup(config Config) {
 	RunCommandSuccessfully(fmt.Sprintf("cf remove-network-policy %s --destination-app %s --port 8080 --protocol tcp", testAppName, testAppName))
 }
 
+func (tc *CfNetworkingTestCase) EnsureAfterSelectiveRestore(config Config) {}
+
 func (tc *CfNetworkingTestCase) AfterRestore(config Config) {
 	By("finding credentials for the deployment to restore")
 	session := RunCommand(fmt.Sprintf("cf network-policies"))

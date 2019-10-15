@@ -67,6 +67,8 @@ func (tc *NFSTestCase) AfterBackup(config Config) {
 	RunCommandSuccessfully("cf delete-service " + tc.instanceName + " -f")
 }
 
+func (tc *NFSTestCase) EnsureAfterSelectiveRestore(config Config) {}
+
 func (tc *NFSTestCase) AfterRestore(config Config) {
 	By("re-binding the NFS service instance after restore")
 	time.Sleep(5 * time.Minute)
