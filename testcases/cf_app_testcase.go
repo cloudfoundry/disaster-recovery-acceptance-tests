@@ -10,19 +10,21 @@ import (
 )
 
 type CfAppTestCase struct {
-	uniqueTestID string
-	appName      string
-	envVarValue  string
-	name         string
+	uniqueTestID       string
+	appName            string
+	envVarValue        string
+	name               string
+	testAppFixturePath string
 }
 
 func NewCfAppTestCase() *CfAppTestCase {
 	id := RandomStringNumber()
 	return &CfAppTestCase{
-		uniqueTestID: id,
-		appName:      "test_app_" + id,
-		envVarValue:  "winnebago" + id,
-		name:         "cf-app",
+		uniqueTestID:       id,
+		appName:            "test_app_" + id,
+		envVarValue:        "winnebago" + id,
+		name:               "cf-app",
+		testAppFixturePath: path.Join(CurrentTestDir(), "/../fixtures/test_app/"),
 	}
 }
 
@@ -40,8 +42,7 @@ func (tc *CfAppTestCase) BeforeBackup(config Config) {
 	RunCommandSuccessfully("cf create-org acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf create-space acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf target -s acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
-	var testAppFixturePath = path.Join(CurrentTestDir(), "/../fixtures/test_app/")
-	RunCommandSuccessfully("cf push " + tc.appName + " -p " + testAppFixturePath)
+	RunCommandSuccessfully("cf push " + tc.appName + " -p " + tc.testAppFixturePath)
 	RunCommandSuccessfully("cf set-env " + tc.appName + " MY_SPECIAL_VAR " + tc.envVarValue)
 }
 
@@ -49,7 +50,11 @@ func (tc *CfAppTestCase) AfterBackup(config Config) {
 	tc.deletePushedApps(config)
 }
 
-func (tc *CfAppTestCase) EnsureAfterSelectiveRestore(config Config) {}
+func (tc *CfAppTestCase) EnsureAfterSelectiveRestore(config Config) {
+	By("repushing apps if restoring from a selective restore")
+	RunCommandSuccessfully("cf target -s acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
+	RunCommandSuccessfully("cf push " + tc.appName + " -p " + tc.testAppFixturePath)
+}
 
 func (tc *CfAppTestCase) AfterRestore(config Config) {
 	By("finding credentials for the deployment to restore")
