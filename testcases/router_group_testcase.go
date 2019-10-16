@@ -89,6 +89,8 @@ func (tc *CfRouterGroupTestCase) AfterBackup(config Config) {
 	Expect(err).NotTo(HaveOccurred())
 }
 
+func (tc *CfRouterGroupTestCase) EnsureAfterSelectiveRestore(config Config) {}
+
 // AfterRestore is run after the bbr is done restoring the database.
 // The function compares the post restore router group table with
 // pre restore router group table.

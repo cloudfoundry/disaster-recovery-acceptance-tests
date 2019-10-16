@@ -177,3 +177,20 @@ To also run the test case for the optional component SMB Broker, set the followi
         <td>Required to register the SMB service broker when running the SMB test case</td>
     <tr>
 </table>
+
+### DRATs with Selective Backup
+If you have deployed your cf-deployment to selectively backup blobs, set the following variables:
+<table style="width:100%">
+  <tr>
+    <th>Selective Backup Environment Variable</th>
+    <th>Usage</th>
+  </tr>
+    <tr>
+        <td>`SELECTIVE_BACKUP`</td>
+        <td>Set to "true" to run the EnsureAfterSelectiveRestore test case step</td>
+    <tr>
+    <tr>
+        <td>`SELECTIVE_BACKUP_TYPE`</td>
+        <td>set to droplets or droplets_and_packages</td>
+    <tr>
+</table>

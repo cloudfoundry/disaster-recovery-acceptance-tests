@@ -66,6 +66,10 @@ func (tc *SMBTestCase) AfterBackup(config Config) {
 	By("deleting the SMB service instance after backup")
 	RunCommandSuccessfully("cf delete-service " + tc.instanceName + " -f")
 }
+func (tc *SMBTestCase) EnsureAfterSelectiveRestore(config Config) {
+	By("repushing apps if restoring from a selective restore")
+	RunCommandSuccessfully("cf push dratsApp --docker-image docker/httpd --no-start --random-route")
+}
 
 func (tc *SMBTestCase) AfterRestore(config Config) {
 	By("re-binding the SMB service instance after restore")

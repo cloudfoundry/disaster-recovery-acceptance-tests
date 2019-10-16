@@ -11,13 +11,20 @@ import (
 )
 
 type CfNetworkingTestCase struct {
-	uniqueTestID string
-	name         string
+	uniqueTestID       string
+	name               string
+	testAppFixturePath string
+	testAppName        string
 }
 
 func NewCfNetworkingTestCase() *CfNetworkingTestCase {
 	id := RandomStringNumber()
-	return &CfNetworkingTestCase{uniqueTestID: id, name: "cf-networking"}
+	return &CfNetworkingTestCase{
+		uniqueTestID:       id,
+		name:               "cf-networking",
+		testAppFixturePath: path.Join(CurrentTestDir(), "/../fixtures/test_app/"),
+		testAppName:        fmt.Sprintf("test_app_%s", id),
+	}
 }
 
 func (tc *CfNetworkingTestCase) Name() string {
@@ -34,15 +41,18 @@ func (tc *CfNetworkingTestCase) BeforeBackup(config Config) {
 	RunCommandSuccessfully("cf create-org acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf create-space acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf target -s acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
-	var testAppFixturePath = path.Join(CurrentTestDir(), "/../fixtures/test_app/")
-	testAppName := fmt.Sprintf("test_app_%s", tc.uniqueTestID)
-	RunCommandSuccessfully("cf push " + testAppName + " -p " + testAppFixturePath)
-	RunCommandSuccessfully(fmt.Sprintf("cf add-network-policy %s --destination-app %s --port 8080 --protocol tcp", testAppName, testAppName))
+	RunCommandSuccessfully("cf push " + tc.testAppName + " -p " + tc.testAppFixturePath)
+	RunCommandSuccessfully(fmt.Sprintf("cf add-network-policy %s --destination-app %s --port 8080 --protocol tcp", tc.testAppName, tc.testAppName))
 }
 
 func (tc *CfNetworkingTestCase) AfterBackup(config Config) {
 	testAppName := fmt.Sprintf("test_app_%s", tc.uniqueTestID)
 	RunCommandSuccessfully(fmt.Sprintf("cf remove-network-policy %s --destination-app %s --port 8080 --protocol tcp", testAppName, testAppName))
+}
+
+func (tc *CfNetworkingTestCase) EnsureAfterSelectiveRestore(config Config) {
+	By("repushing apps if restoring from a selective restore")
+	RunCommandSuccessfully("cf push " + tc.testAppName + " -p " + tc.testAppFixturePath)
 }
 
 func (tc *CfNetworkingTestCase) AfterRestore(config Config) {
