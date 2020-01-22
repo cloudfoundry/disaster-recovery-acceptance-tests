@@ -69,7 +69,7 @@ func (tc *CfAppTestCase) AfterRestore(config Config) {
 	url := GetAppURL(tc.appName)
 
 	Eventually(StatusCode("https://"+url), 5*time.Minute, 5*time.Second).Should(Equal(200))
-	Expect(string(RunCommandSuccessfully("cf v3-env " + tc.appName).Out.Contents())).To(MatchRegexp("winnebago" + tc.uniqueTestID))
+	Expect(string(RunCommandSuccessfully("cf env " + tc.appName).Out.Contents())).To(MatchRegexp("winnebago" + tc.uniqueTestID))
 }
 
 func (tc *CfAppTestCase) Cleanup(config Config) {
