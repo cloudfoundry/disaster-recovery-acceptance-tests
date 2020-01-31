@@ -15,10 +15,6 @@ import (
 type none struct{}
 type status bool
 
-const (
-	alwaysAvailable    = status(true)
-	notAlwaysAvailable = status(false)
-)
 
 // CfRouterGroupTestCase holds common variables across roter group testcases.
 type CfRouterGroupTestCase struct {
