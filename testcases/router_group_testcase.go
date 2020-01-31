@@ -77,8 +77,8 @@ func (tc *CfRouterGroupTestCase) AfterBackup(config Config) {
 	By("Adding an entry in the router group table")
 	tc.routingAPIClient.SetToken(token)
 	routerGroupEntry := models.RouterGroup{
-		Guid:            "RandomTestGUID",
-		Name:            "RandomTestName",
+		Guid:            "RandomTestGUID" + "_" + RandomStringNumber(),
+		Name:            "RandomTestName" + "_" + RandomStringNumber(),
 		Type:            "tcp",
 		ReservablePorts: "2000-4000",
 	}
