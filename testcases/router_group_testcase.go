@@ -3,7 +3,7 @@ package testcases
 import (
 	"strings"
 
-	"code.cloudfoundry.org/routing-api"
+	routing_api "code.cloudfoundry.org/routing-api"
 
 	"code.cloudfoundry.org/routing-api/models"
 	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/runner"
@@ -15,10 +15,7 @@ import (
 type none struct{}
 type status bool
 
-const (
-	alwaysAvailable    = status(true)
-	notAlwaysAvailable = status(false)
-)
+var cleanupRouterGroups func() error
 
 // CfRouterGroupTestCase holds common variables across roter group testcases.
 type CfRouterGroupTestCase struct {
@@ -80,11 +77,13 @@ func (tc *CfRouterGroupTestCase) AfterBackup(config Config) {
 	By("Adding an entry in the router group table")
 	tc.routingAPIClient.SetToken(token)
 	routerGroupEntry := models.RouterGroup{
-		Guid:            "RandomTestGUID",
-		Name:            "RandomTestName",
+		Guid:            "RandomTestGUID" + "_" + RandomStringNumber(),
+		Name:            "RandomTestName" + "_" + RandomStringNumber(),
 		Type:            "tcp",
 		ReservablePorts: "2000-4000",
 	}
+
+	cleanupRouterGroups = func() error { return tc.routingAPIClient.DeleteRouterGroup(routerGroupEntry) }
 	err := tc.routingAPIClient.CreateRouterGroup(routerGroupEntry)
 	Expect(err).NotTo(HaveOccurred())
 }
@@ -109,6 +108,7 @@ func (tc *CfRouterGroupTestCase) AfterRestore(config Config) {
 
 // Cleanup is called at the end to remove the test artifacts left behind.
 func (tc *CfRouterGroupTestCase) Cleanup(config Config) {
+	cleanupRouterGroups()
 }
 
 func loginAndGetToken(config Config) string {
