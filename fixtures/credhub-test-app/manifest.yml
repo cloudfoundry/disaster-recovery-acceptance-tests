@@ -1,5 +1,5 @@
 ---
 applications:
 - env:
-    GOVERSION: go1.12
+    GOVERSION: go1.13
     GOPACKAGENAME: server
