@@ -32,6 +32,20 @@ func GetAppURL(appName string) string {
 	return appURL
 }
 
+func GetRequestedState(appName string) string {
+	appStats := string(RunCommandAndRetry("cf app "+appName, 5).Out.Contents())
+	var appRequestedState string
+	for _, line := range strings.Split(appStats, "\n") {
+		if strings.HasPrefix(line, "requested state:") {
+			s := strings.Split(line, " ")
+			appRequestedState = s[len(s)-1]
+		}
+	}
+
+	Expect(appRequestedState).NotTo(BeEmpty())
+	return appRequestedState
+}
+
 func Get(url string) *http.Response {
 	client := &http.Client{Transport: &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
