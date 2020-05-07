@@ -11,8 +11,7 @@ import (
 
 type CfAppTestCase struct {
 	uniqueTestID       string
-	runningAppName     string
-	stoppedAppName     string
+	appName            string
 	envVarValue        string
 	name               string
 	testAppFixturePath string
@@ -22,8 +21,7 @@ func NewCfAppTestCase() *CfAppTestCase {
 	id := RandomStringNumber()
 	return &CfAppTestCase{
 		uniqueTestID:       id,
-		runningAppName:     "test_app_" + id,
-		stoppedAppName:     "stopped_test_app_" + id,
+		appName:            "test_app_" + id,
 		envVarValue:        "winnebago" + id,
 		name:               "cf-app",
 		testAppFixturePath: path.Join(CurrentTestDir(), "/../fixtures/test_app/"),
@@ -44,13 +42,8 @@ func (tc *CfAppTestCase) BeforeBackup(config Config) {
 	RunCommandSuccessfully("cf create-org acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf create-space acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf target -s acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
-	RunCommandSuccessfully("cf push " + tc.runningAppName + " -p " + tc.testAppFixturePath)
-	RunCommandSuccessfully("cf push " + tc.stoppedAppName + " -p " + tc.testAppFixturePath)
-
-	RunCommandSuccessfully("cf set-env " + tc.runningAppName + " MY_SPECIAL_VAR " + tc.envVarValue)
-	RunCommandSuccessfully("cf set-env " + tc.stoppedAppName + " MY_STOPPED_SPECIAL_VAR " + tc.envVarValue)
-
-	RunCommandSuccessfully("cf stop " + tc.stoppedAppName)
+	RunCommandSuccessfully("cf push " + tc.appName + " -p " + tc.testAppFixturePath)
+	RunCommandSuccessfully("cf set-env " + tc.appName + " MY_SPECIAL_VAR " + tc.envVarValue)
 }
 
 func (tc *CfAppTestCase) AfterBackup(config Config) {
@@ -60,7 +53,7 @@ func (tc *CfAppTestCase) AfterBackup(config Config) {
 func (tc *CfAppTestCase) EnsureAfterSelectiveRestore(config Config) {
 	By("repushing apps if restoring from a selective restore")
 	RunCommandSuccessfully("cf target -s acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
-	RunCommandSuccessfully("cf push " + tc.runningAppName + " -p " + tc.testAppFixturePath)
+	RunCommandSuccessfully("cf push " + tc.appName + " -p " + tc.testAppFixturePath)
 }
 
 func (tc *CfAppTestCase) AfterRestore(config Config) {
@@ -73,15 +66,10 @@ func (tc *CfAppTestCase) AfterRestore(config Config) {
 
 	By("verifying apps are back")
 	RunCommandSuccessfully("cf target -s acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
+	url := GetAppURL(tc.appName)
 
-	runningAppUrl := GetAppURL(tc.runningAppName)
-	Eventually(StatusCode("https://"+runningAppUrl), 5*time.Minute, 5*time.Second).Should(Equal(200))
-	Expect(string(RunCommandSuccessfully("cf env " + tc.runningAppName).Out.Contents())).To(MatchRegexp("winnebago" + tc.uniqueTestID))
-
-	stoppedAppUrl := GetAppURL(tc.stoppedAppName)
-	Eventually(StatusCode("https://"+stoppedAppUrl), 5*time.Minute, 5*time.Second).Should(Equal(404))
-	Expect(GetRequestedState(tc.stoppedAppName)).To(Equal("stopped"))
-	Expect(string(RunCommandSuccessfully("cf env " + tc.stoppedAppName).Out.Contents())).To(MatchRegexp("winnebago" + tc.uniqueTestID))
+	Eventually(StatusCode("https://"+url), 5*time.Minute, 5*time.Second).Should(Equal(200))
+	Expect(string(RunCommandSuccessfully("cf env " + tc.appName).Out.Contents())).To(MatchRegexp("winnebago" + tc.uniqueTestID))
 }
 
 func (tc *CfAppTestCase) Cleanup(config Config) {

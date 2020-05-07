@@ -2,15 +2,15 @@
 
 
 [[projects]]
-  digest = "1:8237d041afec57ff5e403f5b00efe88dd7584dfec9b5c257ff23061d4bc91166"
+  digest = "1:2c620dd8ec51475b61f876e9ec1dac8a06e3a4f81b5ffb5cb28d1ce9725b4c52"
   name = "code.cloudfoundry.org/cfhttp"
   packages = ["v2"]
-  pruneopts = "UT"
+  pruneopts = ""
   revision = "96f7a23cbfc6b07fdc47b5b51ed7ca6215dfeb0c"
   version = "v2.0.0"
 
 [[projects]]
-  digest = "1:bcc7d110ff5e55826109fbbad07617976e44afcbb17663238e84b480496cc2d7"
+  digest = "1:b128a4802cfe3b583ea4ecae307b79a9909373edf950189a2cbc1400887062da"
   name = "code.cloudfoundry.org/credhub-cli"
   packages = [
     "credhub",
@@ -23,64 +23,63 @@
     "credhub/server",
     "errors",
   ]
-  pruneopts = "UT"
-  revision = "4ba6e6ae8c9d7de0ee7801ba11682393ad748b23"
-  version = "2.7.0"
+  pruneopts = ""
+  revision = "a0589223ffa93c548d80547ffca93c82029fbe1b"
+  version = "2.6.2"
 
 [[projects]]
   branch = "master"
-  digest = "1:7154d63883cfefadd06baa59baa4b7c3f7e16905cb93414849e27435809be3a8"
+  digest = "1:12d57391271c0369fbf07bab1ad957ab9d3bec9143edfbcd6ffb560a6dbd8031"
   name = "code.cloudfoundry.org/routing-api"
   packages = [
     ".",
     "models",
   ]
-  pruneopts = "UT"
-  revision = "8cf9b4589b27e775d573f8cab298356a01a72174"
+  pruneopts = ""
+  revision = "f6cbb5b92d122334ec00ffc08c37f880cf56f8fb"
 
 [[projects]]
   branch = "master"
-  digest = "1:133c748d60a89400639f72bb9cb94941374c82b119bb3df467b95bbae1fd9138"
+  digest = "1:d3ed3fce6cbec092c15e1e44fa0599e67aaaebee05db5f4bd9ded7e68b782baf"
   name = "code.cloudfoundry.org/trace-logger"
   packages = ["."]
-  pruneopts = "UT"
+  pruneopts = ""
   revision = "107ef08a939d5be6092ce2b5f171a16aba149cb2"
 
 [[projects]]
   branch = "master"
-  digest = "1:2099049d052c80cc81243a4c5f691667161425d1cf6aa64b05d23f6bc640a0a3"
+  digest = "1:da54e55f2f63347514121c0d7b53631970367b26281d057ec66925c57324b8f1"
   name = "github.com/bmizerany/pat"
   packages = ["."]
-  pruneopts = "UT"
+  pruneopts = ""
   revision = "6226ea591a40176dd3ff9cd8eff81ed6ca721a00"
 
 [[projects]]
   branch = "master"
-  digest = "1:a8022e3b5ae297d4c99a589b772c607a15284107fc037127142e177ac16b30a0"
+  digest = "1:b9aa4288038198d87f3e6eb7e844a8840766d8be27e69fd78f5d81bbba089018"
   name = "github.com/cloudfoundry/go-socks5"
   packages = ["."]
-  pruneopts = "UT"
+  pruneopts = ""
   revision = "54f73bdb8a8e85a6611d3d29ab9bbf98c2a060d7"
 
 [[projects]]
-  digest = "1:dfedafdd42492d6a20ac115b8e1d6ccc6085ffba33274d5f07e66b83e9a0b02b"
+  digest = "1:6e4dba984b464f6cdc3fb6d10ca28703c4620b8062ec5f85d3210e556a90918f"
   name = "github.com/cloudfoundry/socks5-proxy"
   packages = ["."]
-  pruneopts = "UT"
+  pruneopts = ""
   revision = "633b6fe4c3d8d72a4e7397a948027db02a8e2a96"
   version = "v0.2.0"
 
 [[projects]]
-  digest = "1:88e0b0baeb9072f0a4afbcf12dda615fc8be001d1802357538591155998da21b"
+  digest = "1:2f0c811248aeb64978037b357178b1593372439146bda860cb16f2c80785ea93"
   name = "github.com/hashicorp/go-version"
   packages = ["."]
-  pruneopts = "UT"
+  pruneopts = ""
   revision = "ac23dc3fea5d1a983c43f6a0f6e2c13f0195d8bd"
   version = "v1.2.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:59392ed8afb901aab4287d4894df8191722e34f3957716f4350c8c133ce99046"
+  digest = "1:b3c5b95e56c06f5aa72cb2500e6ee5f44fcd122872d4fec2023a488e561218bc"
   name = "github.com/hpcloud/tail"
   packages = [
     ".",
@@ -89,19 +88,20 @@
     "watch",
     "winfile",
   ]
-  pruneopts = "UT"
-  revision = "a1dbeea552b7c8df4b542c66073e393de198a800"
+  pruneopts = ""
+  revision = "a30252cb686a21eb2d0b98132633053ec2f7f1e5"
+  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
-  digest = "1:0e1e5f960c58fdc677212fcc70e55042a0084d367623e51afbdb568963832f5d"
+  digest = "1:55c48c9cfdf8bab6f4911f621616fbe223c0b72a6df9aab6b172ab7e5cfc6bd2"
   name = "github.com/nu7hatch/gouuid"
   packages = ["."]
-  pruneopts = "UT"
+  pruneopts = ""
   revision = "179d4d0c4d8d407a32af483c2354df1d2c91e6c3"
 
 [[projects]]
-  digest = "1:3a7da5fe2be70407dd32d2e79e04ff15c2d592cd0336b71ea480688c9fc572db"
+  digest = "1:7d91dd44311060450afe8aecfaeb1d13f02b60eb75b6dd2e04168aa02524772c"
   name = "github.com/onsi/ginkgo"
   packages = [
     ".",
@@ -123,12 +123,12 @@
     "reporters/stenographer/support/go-isatty",
     "types",
   ]
-  pruneopts = "UT"
-  revision = "40598150331533e3cd497f21dcce387dae84b561"
-  version = "v1.12.0"
+  pruneopts = ""
+  revision = "388ac7e50a3abf0798010091d5094171f4aefc0b"
+  version = "v1.11.0"
 
 [[projects]]
-  digest = "1:1cebadc5bc9a0d87b1cc7317d278c084cf03bd1cec25aef6ba7a2a4d65f80d4d"
+  digest = "1:7629480825744221a7f0f05ce8f054692758b3619677c0beff8afc4f5d1dbb1e"
   name = "github.com/onsi/gomega"
   packages = [
     ".",
@@ -146,32 +146,31 @@
     "matchers/support/goraph/util",
     "types",
   ]
-  pruneopts = "UT"
-  revision = "6be6c439588487cd908a3a700795660c2a16dfec"
-  version = "v1.9.0"
+  pruneopts = ""
+  revision = "22a9feb22fe99439870ed2e013401725a9d495df"
+  version = "v1.8.1"
 
 [[projects]]
-  digest = "1:13dd0b927dfd82ff32299ff620f76fb2840c298dc71e36389d038a6bd1103567"
+  digest = "1:5eb69e54b6af5896a81dc45c5125eebe4b37a70df5e121e41d5a879a0c740234"
   name = "github.com/tedsuo/rata"
   packages = ["."]
-  pruneopts = "UT"
+  pruneopts = ""
   revision = "0649c23705dfb45a9693b668c4fc1c0666f485d9"
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:25253213243fe3cf02abf5820334bc5ba13a6a743480f1c5f80c2611d6ece9df"
+  digest = "1:c08877a1449a912a4ab75f557c70bd2e1af5a024e61dbc6118a0229f4def32ad"
   name = "github.com/vito/go-sse"
   packages = ["sse"]
-  pruneopts = "UT"
+  pruneopts = ""
   revision = "6da6c7343a744d57f29151a2d2c3817c21ffe9bf"
   version = "v1.0.0"
 
 [[projects]]
   branch = "master"
-  digest = "1:6481b321e52388f6d8a66f6f0fb8cd64c51a704acc9b94b793579f19dc87aa49"
+  digest = "1:26df9d3abe9f6470c2706b7d2f7660fb3e9ce44e894b1db19be1f094531d6bb4"
   name = "golang.org/x/crypto"
   packages = [
-    "blowfish",
     "chacha20",
     "curve25519",
     "ed25519",
@@ -179,14 +178,13 @@
     "internal/subtle",
     "poly1305",
     "ssh",
-    "ssh/internal/bcrypt_pbkdf",
   ]
-  pruneopts = "UT"
-  revision = "4b2356b1ed79e6be3deca3737a3db3d132d2847a"
+  pruneopts = ""
+  revision = "69ecbb4d6d5dab05e49161c6e77ea40a030884e1"
 
 [[projects]]
   branch = "master"
-  digest = "1:532252ac3b338b8a61bfc43b798ff16d78d63afecf72e7f86966d386cfa83905"
+  digest = "1:bce1fb1dafa615413d845819aa75ba69d0979cdc2ac3b840e1c19c802a737916"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -196,23 +194,22 @@
     "internal/socks",
     "proxy",
   ]
-  pruneopts = "UT"
-  revision = "e0ff5e5a1de5b859e2d48a2830d7933b3ab5b75f"
+  pruneopts = ""
+  revision = "6afb5195e5aab057fda82e27171243402346b0ad"
 
 [[projects]]
   branch = "master"
-  digest = "1:32c9daa22a90424f14ab496550bbbb3ea78b61bc5f9f6fd024f4bad77b6722cd"
+  digest = "1:2dc6ac731cf3c523a1664304b556e76736924ba2974daa9cebcbf1372c0641ec"
   name = "golang.org/x/sys"
   packages = [
     "cpu",
-    "internal/unsafeheader",
     "unix",
   ]
-  pruneopts = "UT"
-  revision = "bc7a7d42d5c30f4d0fe808715c002826ce2c624e"
+  pruneopts = ""
+  revision = "9fbb57f87de9ccfe3a99d4e3270ce8a926ebba4f"
 
 [[projects]]
-  digest = "1:8a0baffd5559acaa560f854d7d525c02f4fec2d4f8a214398556fb661a10f6e0"
+  digest = "1:740b51a55815493a8d0f2b1e0d0ae48fe48953bf7eaf3fcc4198823bf67768c0"
   name = "golang.org/x/text"
   packages = [
     "encoding",
@@ -235,41 +232,43 @@
     "transform",
     "unicode/cldr",
   ]
-  pruneopts = "UT"
+  pruneopts = ""
   revision = "342b2e1fbaa52c93f31447ad2c6abc048c63e475"
   version = "v0.3.2"
 
 [[projects]]
   branch = "master"
-  digest = "1:918a46e4a2fb83df33f668f5a6bd51b2996775d073fce1800d3ec01b0a5ddd2b"
+  digest = "1:9d4ac09a835404ae9306c6e1493cf800ecbb0f3f828f4333b3e055de4c962eea"
   name = "golang.org/x/xerrors"
   packages = [
     ".",
     "internal",
   ]
-  pruneopts = "UT"
+  pruneopts = ""
   revision = "9bdfabe68543c54f90421aeb9a60ef8061b5b544"
 
 [[projects]]
-  digest = "1:80057945464ffb5b0da1f026beb8df0e8dbd098eaf771a349291bed2cd29a83e"
-  name = "gopkg.in/fsnotify/fsnotify.v1"
+  digest = "1:eb53021a8aa3f599d29c7102e65026242bdedce998a54837dc67f14b6a97c5fd"
+  name = "gopkg.in/fsnotify.v1"
   packages = ["."]
-  pruneopts = "UT"
-  revision = "45d7d09e39ef4ac08d493309fa031790c15bfe8a"
-  version = "v1.4.9"
+  pruneopts = ""
+  revision = "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9"
+  source = "https://github.com/fsnotify/fsnotify/archive/v1.4.7.tar.gz"
+  version = "v1.4.7"
 
 [[projects]]
-  digest = "1:3c839a777de0e6da035c9de900b60cbec463b0a89351192c1ea083eaf9e0fce0"
+  branch = "v1"
+  digest = "1:a96d16bd088460f2e0685d46c39bcf1208ba46e0a977be2df49864ec7da447dd"
   name = "gopkg.in/tomb.v1"
   packages = ["."]
-  pruneopts = "UT"
-  revision = "c131134a1947e9afd9cecfe11f4c6dff0732ae58"
+  pruneopts = ""
+  revision = "dd632973f1e7218eb1089048e0798ec9ae7dceb8"
 
 [[projects]]
-  digest = "1:55b110c99c5fdc4f14930747326acce56b52cfce60b24b1c03ef686ac0e46bb1"
+  digest = "1:2efc9662a6a1ff28c65c84fc2f9030f13d3afecdb2ecad445f3b0c80e75fc281"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
-  pruneopts = "UT"
+  pruneopts = ""
   revision = "53403b58ad1b561927d19068c655246f2db79d48"
   version = "v2.2.8"
 
