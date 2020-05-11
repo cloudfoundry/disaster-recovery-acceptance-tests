@@ -10,14 +10,14 @@ import (
 )
 
 type CfAppTestCase struct {
-	uniqueTestID       string
-	deletedAppName     string
-	stoppedAppName     string
-	runningAppName     string
-	envVarValue        string
-	name               string
-	testAppFixturePath string
-	selectiveRestore   bool
+	uniqueTestID            string
+	deletedAppName          string
+	stoppedAppName          string
+	runningAppName          string
+	envVarValue             string
+	name                    string
+	testAppFixturePath      string
+	failedToRestoreDroplets bool
 }
 
 func NewCfAppTestCase() *CfAppTestCase {
@@ -53,7 +53,7 @@ func (tc *CfAppTestCase) BeforeBackup(config Config) {
 
 	RunCommandSuccessfully("cf set-env " + tc.deletedAppName + " MY_SPECIAL_VAR " + tc.envVarValue)
 	RunCommandSuccessfully("cf set-env " + tc.stoppedAppName + " MY_STOPPED_SPECIAL_VAR " + tc.envVarValue)
-	RunCommandSuccessfully("cf set-env " + tc.runningAppName + " MY_STOPPED_SPECIAL_VAR " + tc.envVarValue)
+	RunCommandSuccessfully("cf set-env " + tc.runningAppName + " MY_RUNNING_SPECIAL_VAR " + tc.envVarValue)
 
 	RunCommandSuccessfully("cf stop " + tc.stoppedAppName)
 }
@@ -69,7 +69,7 @@ func (tc *CfAppTestCase) EnsureAfterSelectiveRestore(config Config) {
 	RunCommandSuccessfully("cf target -s acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf push " + tc.deletedAppName + " -p " + tc.testAppFixturePath)
 
-	tc.selectiveRestore = true
+	tc.failedToRestoreDroplets = true
 }
 
 func (tc *CfAppTestCase) AfterRestore(config Config) {
@@ -93,7 +93,7 @@ func (tc *CfAppTestCase) AfterRestore(config Config) {
 	Expect(string(RunCommandSuccessfully("cf env " + tc.stoppedAppName).Out.Contents())).To(MatchRegexp("winnebago" + tc.uniqueTestID))
 
 	// when a selective restore occurs we know this app won't be running as the droplet won't exist, so lets not assert it.
-	if !tc.selectiveRestore {
+	if !tc.failedToRestoreDroplets {
 		runningAppUrl := GetAppURL(tc.runningAppName)
 		Eventually(StatusCode("https://"+runningAppUrl), 5*time.Minute, 5*time.Second).Should(Equal(200))
 		Expect(string(RunCommandSuccessfully("cf env " + tc.runningAppName).Out.Contents())).To(MatchRegexp("winnebago" + tc.uniqueTestID))
