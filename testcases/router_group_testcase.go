@@ -1,6 +1,7 @@
 package testcases
 
 import (
+	"net/url"
 	"strings"
 	"time"
 
@@ -127,5 +128,12 @@ func refreshToken() string {
 
 func (tc *CfRouterGroupTestCase) readRouterGroups(token string) (models.RouterGroups, error) {
 	tc.routingAPIClient.SetToken(token)
-	return tc.routingAPIClient.RouterGroups()
+	response, err := tc.routingAPIClient.RouterGroups()
+	if err != nil {
+		switch err.(type) {
+		case *url.Error:
+			response, err = tc.routingAPIClient.RouterGroups()
+		}
+	}
+	return response, err
 }
