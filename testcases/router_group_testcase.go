@@ -2,6 +2,7 @@ package testcases
 
 import (
 	"strings"
+	"time"
 
 	routing_api "code.cloudfoundry.org/routing-api"
 
@@ -55,7 +56,7 @@ func (tc *CfRouterGroupTestCase) BeforeBackup(config Config) {
 	token := loginAndGetToken(config)
 	By("Creating a pre-backup router group backup")
 	var err error
-
+	time.Sleep(15 * time.Second)
 	tc.routingAPIClient = routing_api.NewClient(config.CloudFoundryConfig.APIURL, true)
 	tc.routerGroupsPreBackup, err = tc.readRouterGroups(token)
 	Expect(err).NotTo(HaveOccurred())
@@ -101,6 +102,7 @@ func (tc *CfRouterGroupTestCase) AfterRestore(config Config) {
 	token := refreshToken()
 
 	By("Taking a snapshot of restored table and comparing it with the pre-backup table")
+	time.Sleep(15 * time.Second)
 	routerGroupsPostRestore, err := tc.readRouterGroups(token)
 	Expect(err).NotTo(HaveOccurred())
 	Expect(routerGroupsPostRestore).To(ConsistOf(tc.routerGroupsPreBackup))
