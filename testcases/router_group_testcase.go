@@ -129,11 +129,20 @@ func refreshToken() string {
 func (tc *CfRouterGroupTestCase) readRouterGroups(token string) (models.RouterGroups, error) {
 	tc.routingAPIClient.SetToken(token)
 	response, err := tc.routingAPIClient.RouterGroups()
-	if err != nil {
-		switch err.(type) {
-		case *url.Error:
-			response, err = tc.routingAPIClient.RouterGroups()
+
+	for retries := 0; retries < 5; retries += 1 {
+		if err != nil {
+			switch err.(type) {
+			case *url.Error:
+				time.Sleep(1 * time.Second)
+				response, err = tc.routingAPIClient.RouterGroups()
+			default:
+				break
+			}
+		} else {
+			break
 		}
 	}
+
 	return response, err
 }
