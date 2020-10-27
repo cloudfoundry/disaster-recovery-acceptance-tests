@@ -134,7 +134,7 @@ func (tc *CfRouterGroupTestCase) readRouterGroups(token string) (models.RouterGr
 		if err != nil {
 			switch err.(type) {
 			case *url.Error:
-				time.Sleep(1 * time.Second)
+				time.Sleep(time.Duration(retries*retries) * time.Second)
 				response, err = tc.routingAPIClient.RouterGroups()
 			default:
 				break
