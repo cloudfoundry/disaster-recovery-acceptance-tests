@@ -1,6 +1,7 @@
 package testcases
 
 import (
+	"fmt"
 	"net/url"
 	"strings"
 	"time"
@@ -86,7 +87,9 @@ func (tc *CfRouterGroupTestCase) AfterBackup(config Config) {
 	}
 
 	cleanupRouterGroups = func() error { return tc.routingAPIClient.DeleteRouterGroup(routerGroupEntry) }
-	err := tc.routingAPIClient.CreateRouterGroup(routerGroupEntry)
+	_, err := routerGroupRequestWithRetry(func() (models.RouterGroups, error) {
+		return nil, tc.routingAPIClient.CreateRouterGroup(routerGroupEntry)
+	}, 5)
 	Expect(err).NotTo(HaveOccurred())
 }
 
@@ -128,14 +131,21 @@ func refreshToken() string {
 
 func (tc *CfRouterGroupTestCase) readRouterGroups(token string) (models.RouterGroups, error) {
 	tc.routingAPIClient.SetToken(token)
-	response, err := tc.routingAPIClient.RouterGroups()
+	response, err := routerGroupRequestWithRetry(func() (models.RouterGroups, error) {
+		return tc.routingAPIClient.RouterGroups()
+	}, 5)
+	return response, err
+}
 
-	for retries := 0; retries < 5; retries += 1 {
+func routerGroupRequestWithRetry(request func() (models.RouterGroups, error), retries int) (response models.RouterGroups, err error) {
+	response, err = request()
+	for attempt := 0; attempt < retries; attempt += 1 {
 		if err != nil {
 			switch err.(type) {
 			case *url.Error:
-				time.Sleep(time.Duration(retries*retries) * time.Second)
-				response, err = tc.routingAPIClient.RouterGroups()
+				time.Sleep(time.Duration(attempt*attempt) * time.Second)
+				fmt.Printf("--- RouterGroup request retry attempt:%v ---\n\n", attempt)
+				response, err = request()
 			default:
 				break
 			}
@@ -143,6 +153,5 @@ func (tc *CfRouterGroupTestCase) readRouterGroups(token string) (models.RouterGr
 			break
 		}
 	}
-
 	return response, err
 }
