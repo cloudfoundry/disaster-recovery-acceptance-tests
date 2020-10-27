@@ -1,6 +1,7 @@
 package testcases
 
 import (
+	"fmt"
 	"net/url"
 	"strings"
 	"time"
@@ -87,6 +88,20 @@ func (tc *CfRouterGroupTestCase) AfterBackup(config Config) {
 
 	cleanupRouterGroups = func() error { return tc.routingAPIClient.DeleteRouterGroup(routerGroupEntry) }
 	err := tc.routingAPIClient.CreateRouterGroup(routerGroupEntry)
+	for retries := 0; retries < 5; retries += 1 {
+		if err != nil {
+			switch err.(type) {
+			case *url.Error:
+				time.Sleep(time.Duration(retries*retries) * time.Second)
+				fmt.Printf("--- RouterGroup POST retry attempt:%v ---\n\n", retries)
+				err = tc.routingAPIClient.CreateRouterGroup(routerGroupEntry)
+			default:
+				break
+			}
+		} else {
+			break
+		}
+	}
 	Expect(err).NotTo(HaveOccurred())
 }
 
@@ -135,6 +150,7 @@ func (tc *CfRouterGroupTestCase) readRouterGroups(token string) (models.RouterGr
 			switch err.(type) {
 			case *url.Error:
 				time.Sleep(time.Duration(retries*retries) * time.Second)
+				fmt.Printf("--- RouterGroup GET retry attempt:%v ---\n\n", retries)
 				response, err = tc.routingAPIClient.RouterGroups()
 			default:
 				break
