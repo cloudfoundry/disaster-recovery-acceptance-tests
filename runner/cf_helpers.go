@@ -18,6 +18,8 @@ import (
 	. "github.com/onsi/gomega"
 )
 
+var insecureTransport *http.Transport
+
 func GetAppURL(appName string) string {
 	appStats := string(RunCommandAndRetry("cf app "+appName, 5).Out.Contents())
 	var appURL string
@@ -46,19 +48,26 @@ func GetRequestedState(appName string) string {
 	return appRequestedState
 }
 
+func GetInsecureTransport() *http.Transport {
+	if insecureTransport == nil {
+		insecureTransport = &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+	}
+
+	return insecureTransport
+}
+
 func Get(url string) *http.Response {
-	client := &http.Client{Transport: &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}}
+	client := &http.Client{Transport: GetInsecureTransport()}
 	response, err := client.Get("https://" + url)
+
 	Expect(err).NotTo(HaveOccurred())
 	return response
 }
 
 func Post(url string, contentType string, body io.Reader) *http.Response {
-	client := &http.Client{Transport: &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}}
+	client := &http.Client{Transport: GetInsecureTransport()}
 	response, err := client.Post("https://"+url, contentType, body)
 	Expect(err).NotTo(HaveOccurred())
 	return response
@@ -74,13 +83,12 @@ func StatusCode(rawURL string) func() (int, error) {
 	return func() (int, error) {
 		client := &http.Client{
 			Timeout: time.Minute,
-			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{
-					InsecureSkipVerify: true,
-				},
-			}}
+			Transport:  GetInsecureTransport()
+		}
 		fmt.Fprintf(GinkgoWriter, "Trying to connect to api url: %s\n", parsedURL.String())
 		resp, err := client.Get(parsedURL.String())
+		defer resp.Body.Close()
+
 		Expect(err).NotTo(HaveOccurred(), "error connecting to api url")
 		return resp.StatusCode, err
 	}
