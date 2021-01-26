@@ -83,7 +83,7 @@ func StatusCode(rawURL string) func() (int, error) {
 	return func() (int, error) {
 		client := &http.Client{
 			Timeout: time.Minute,
-			Transport:  GetInsecureTransport()
+			Transport:  GetInsecureTransport(),
 		}
 		fmt.Fprintf(GinkgoWriter, "Trying to connect to api url: %s\n", parsedURL.String())
 		resp, err := client.Get(parsedURL.String())
