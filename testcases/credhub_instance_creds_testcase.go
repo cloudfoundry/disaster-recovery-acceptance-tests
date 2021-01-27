@@ -57,14 +57,17 @@ func (tc *CfCredhubSSITestCase) BeforeBackup(config Config) {
 
 	tc.appURL = GetAppURL(tc.appName)
 
-	appResponse := Get(tc.appURL + "/create")
-	body, _ := ioutil.ReadAll(appResponse.Body)
-	fmt.Println(string(body))
-	Expect(appResponse.StatusCode).To(Equal(http.StatusCreated))
+	appCreateResponse := Get(tc.appURL + "/create")
+	defer appCreateResponse.Body.Close()
 
-	appResponse = Get(tc.appURL + "/list")
-	defer appResponse.Body.Close()
-	response, err := ioutil.ReadAll(appResponse.Body)
+	body, _ := ioutil.ReadAll(appCreateResponse.Body)
+	fmt.Println(string(body))
+	Expect(appCreateResponse.StatusCode).To(Equal(http.StatusCreated))
+
+	appListResponse := Get(tc.appURL + "/list")
+	defer appListResponse.Body.Close()
+
+	response, err := ioutil.ReadAll(appListResponse.Body)
 	Expect(err).NotTo(HaveOccurred())
 
 	Expect(json.NewDecoder(strings.NewReader(string(response))).Decode(&listResponse)).To(Succeed())
@@ -72,11 +75,15 @@ func (tc *CfCredhubSSITestCase) BeforeBackup(config Config) {
 }
 
 func (tc *CfCredhubSSITestCase) AfterBackup(config Config) {
-	appResponse := Get(tc.appURL + "/create")
-	Expect(appResponse.StatusCode).To(Equal(http.StatusCreated))
+	appCreateResponse := Get(tc.appURL + "/create")
+	defer appCreateResponse.Body.Close()
 
-	appResponse = Get(tc.appURL + "/list")
-	Expect(json.NewDecoder(appResponse.Body).Decode(&listResponse)).To(Succeed())
+	Expect(appCreateResponse.StatusCode).To(Equal(http.StatusCreated))
+
+	appListResponse := Get(tc.appURL + "/list")
+	defer appListResponse.Body.Close()
+
+	Expect(json.NewDecoder(appListResponse.Body).Decode(&listResponse)).To(Succeed())
 	Expect(listResponse.Credentials).To(HaveLen(2))
 }
 
@@ -89,12 +96,16 @@ func (tc *CfCredhubSSITestCase) EnsureAfterSelectiveRestore(config Config) {
 
 func (tc *CfCredhubSSITestCase) AfterRestore(config Config) {
 	appResponse := Get(tc.appURL + "/list")
+	defer appResponse.Body.Close()
+
 	Expect(json.NewDecoder(appResponse.Body).Decode(&listResponse)).To(Succeed())
 	Expect(listResponse.Credentials).To(HaveLen(1))
 }
 
 func (tc *CfCredhubSSITestCase) Cleanup(config Config) {
 	appResponse := Get(tc.appURL + "/clean")
+	defer appResponse.Body.Close()
+
 	Expect(appResponse.StatusCode).To(Equal(http.StatusOK))
 	RunCommandSuccessfully("cf delete-org -f acceptance-test-org-" + tc.uniqueTestID)
 }
