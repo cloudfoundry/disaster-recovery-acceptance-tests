@@ -18,7 +18,18 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var insecureTransport *http.Transport
+var clientWithInsecureTransport *http.Client
+
+func getClientWithInsecureTransport() *http.Client {
+	if clientWithInsecureTransport == nil {
+		clientWithInsecureTransport = &http.Client {
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			},
+		}
+	}
+	return clientWithInsecureTransport
+}
 
 func GetAppURL(appName string) string {
 	appStats := string(RunCommandAndRetry("cf app "+appName, 5).Out.Contents())
@@ -48,18 +59,8 @@ func GetRequestedState(appName string) string {
 	return appRequestedState
 }
 
-func GetInsecureTransport() *http.Transport {
-	if insecureTransport == nil {
-		insecureTransport = &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}
-	}
-
-	return insecureTransport
-}
-
 func Get(url string) *http.Response {
-	client := &http.Client{Transport: GetInsecureTransport()}
+	client := getClientWithInsecureTransport()
 	response, err := client.Get("https://" + url)
 
 	Expect(err).NotTo(HaveOccurred())
@@ -67,7 +68,7 @@ func Get(url string) *http.Response {
 }
 
 func Post(url string, contentType string, body io.Reader) *http.Response {
-	client := &http.Client{Transport: GetInsecureTransport()}
+	client := getClientWithInsecureTransport()
 	response, err := client.Post("https://"+url, contentType, body)
 	Expect(err).NotTo(HaveOccurred())
 	return response
@@ -81,10 +82,9 @@ func StatusCode(rawURL string) func() (int, error) {
 	}
 
 	return func() (int, error) {
-		client := &http.Client{
-			Timeout: time.Minute,
-			Transport:  GetInsecureTransport(),
-		}
+		client := getClientWithInsecureTransport()
+		client.Timeout = time.Minute
+
 		fmt.Fprintf(GinkgoWriter, "Trying to connect to api url: %s\n", parsedURL.String())
 		resp, err := client.Get(parsedURL.String())
 		defer resp.Body.Close()
