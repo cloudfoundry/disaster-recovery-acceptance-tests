@@ -26,6 +26,7 @@ func getClientWithInsecureTransport() *http.Client {
 			Transport: &http.Transport{
 				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 			},
+			Timeout: time.Minute,
 		}
 	}
 	return clientWithInsecureTransport
@@ -83,7 +84,6 @@ func StatusCode(rawURL string) func() (int, error) {
 
 	return func() (int, error) {
 		client := getClientWithInsecureTransport()
-		client.Timeout = time.Minute
 
 		fmt.Fprintf(GinkgoWriter, "Trying to connect to api url: %s\n", parsedURL.String())
 		resp, err := client.Get(parsedURL.String())
