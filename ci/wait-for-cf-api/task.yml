@@ -1,0 +1,17 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: {repository: pcfplatformrecovery/backup-and-restore-minimal}
+
+inputs:
+- name: disaster-recovery-acceptance-tests
+
+params:
+  CF_API_URL:
+  CF_UAA_URL:
+  RETRY_COUNT: 15
+
+run:
+  path: disaster-recovery-acceptance-tests/ci/wait-for-cf-api/task.sh
