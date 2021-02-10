@@ -24,4 +24,4 @@ params:
   SYSTEM_DOMAIN:
 
 run:
-  path: disaster-recovery-acceptance-tests/ci/update-integration-config/task.sh
+  path: disaster-recovery-acceptance-tests/ci/tasks/update-integration-config/task.sh

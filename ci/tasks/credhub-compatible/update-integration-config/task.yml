@@ -22,4 +22,4 @@ params:
   SYSTEM_DOMAIN:
 
 run:
-  path: disaster-recovery-acceptance-tests/ci/credhub-compatible/update-integration-config/task.sh
+  path: disaster-recovery-acceptance-tests/ci/tasks/credhub-compatible/update-integration-config/task.sh

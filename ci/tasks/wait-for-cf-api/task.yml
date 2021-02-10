@@ -14,4 +14,4 @@ params:
   RETRY_COUNT: 15
 
 run:
-  path: disaster-recovery-acceptance-tests/ci/wait-for-cf-api/task.sh
+  path: disaster-recovery-acceptance-tests/ci/tasks/wait-for-cf-api/task.sh
