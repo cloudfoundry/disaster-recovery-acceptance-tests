@@ -1,9 +1,20 @@
 ---
+vault_creds: &vault_creds
+  url: ((vault/server.url))
+  role_id: ((vault/resource_credentials.role_id))
+  secret_id: ((vault/resource_credentials.secret_id))
+
 resource_types:
 - name: pull-request
   type: docker-image
   source:
     repository: jtarchie/pr
+    tag: latest
+
+- name: vault
+  type: docker-image
+  source:
+    repository: wfernandes/vault-resource
     tag: latest
 
 resources:
@@ -21,15 +32,7 @@ resources:
     branch: main
     tag_filter: v13.*
 
-- name: bosh-backup-and-restore-meta
-  type: git
-  source:
-    uri: git@github.com:pivotal-cf/bosh-backup-and-restore-meta.git
-    private_key: ((github.ssh_key))
-    git_crypt_key: ((github-bbr.crypt_key))
-    branch: master
-
-- name: disaster-recovery-acceptance-tests-prs
+- name: disaster-recovery-acceptance-tests
   type: pull-request
   source:
     repo: cloudfoundry-incubator/disaster-recovery-acceptance-tests
@@ -42,59 +45,65 @@ resources:
     repository: bosh-backup-and-restore
     access_token: ((github.access_token))
 
+- name: bbl-state
+  type: vault
+  source:
+    <<: *vault_creds
+    path: /concourse/bosh-backup-restore/drats/bbl-state
+    tarball: true
+
 jobs:
 
-## DEPLOY CF
+- name: set-pipeline
+  plan:
+    - get: disaster-recovery-acceptance-tests
+      trigger: true
+    - set_pipeline: drats
+      file: disaster-recovery-acceptance-tests/ci/pipeline.yml
+
+  ## DEPLOY CF
 
 - name: deploy-cf-prs
   serial: true
   serial_groups: [drats-prs]
   plan:
   - in_parallel:
-    - get: disaster-recovery-acceptance-tests-prs
+    - get: disaster-recovery-acceptance-tests
       version: every
+      passed: [set-pipeline]
     - get: cf-deployment
-    - get: bosh-backup-and-restore-meta
+    - get: bbl-state
     - get: cf-deployment-concourse-tasks
+  - load_var: system_domain
+    file: bbl-state/bbl-state.json
+    format: json
   - task: deploy-cf
     file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
     input_mapping:
-      bbl-state: bosh-backup-and-restore-meta
       ops-files: cf-deployment
-      vars-store: bosh-backup-and-restore-meta
-      vars-files: bosh-backup-and-restore-meta
     params:
-      BBL_STATE_DIR: drats-pr-ragdoll/
-      SYSTEM_DOMAIN: drats-pr-ragdoll.cryo.cf-app.com
+      SYSTEM_DOMAIN: ((.:system_domain.lb.domain))
       OPS_FILES: "operations/scale-to-one-az.yml operations/use-compiled-releases.yml operations/backup-and-restore/enable-backup-restore.yml operations/enable-nfs-volume-service.yml operations/experimental/disable-interpolate-service-bindings.yml operations/experimental/enable-traffic-to-internal-networks.yml operations/experimental/enable-smb-volume-service.yml operations/backup-and-restore/skip-backup-restore-droplets-and-packages.yml"
-      GIT_COMMIT_EMAIL: cf-lazarus@pivotal.io
-      GIT_COMMIT_USERNAME: "Cryogenics Concourse"
+      BBL_STATE_DIR: .
   - task: wait-for-cf-api
-    file: disaster-recovery-acceptance-tests-prs/ci/tasks/wait-for-cf-api/task.yml
+    file: disaster-recovery-acceptance-tests/ci/tasks/wait-for-cf-api/task.yml
     params:
-      CF_API_URL: https://api.drats-pr-ragdoll.cryo.cf-app.com
-      CF_UAA_URL: https://uaa.drats-pr-ragdoll.cryo.cf-app.com
+      CF_API_URL: https://api.((.:system_domain.lb.domain))
+      CF_UAA_URL: https://uaa.((.:system_domain.lb.domain))
   - task: bosh-run-errand-nfsbrokerpush
     file: cf-deployment-concourse-tasks/run-errand/task.yml
-    input_mapping:
-      bbl-state: bosh-backup-and-restore-meta
     params:
-      BBL_STATE_DIR: drats-pr-ragdoll/
       ERRAND_NAME: nfsbrokerpush
+      BBL_STATE_DIR: .
   - task: bosh-run-errand-smbbrokerpush
     file: cf-deployment-concourse-tasks/run-errand/task.yml
-    input_mapping:
-      bbl-state: bosh-backup-and-restore-meta
     params:
-      BBL_STATE_DIR: drats-pr-ragdoll/
       ERRAND_NAME: smbbrokerpush
+      BBL_STATE_DIR: .
   - task: bosh-cleanup
     file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
-    input_mapping:
-      bbl-state: bosh-backup-and-restore-meta
     params:
-      BBL_STATE_DIR: drats-pr-ragdoll/
-
+      BBL_STATE_DIR: .
 ### RUN TESTS
 
 - name: run-drats-prs
@@ -104,58 +113,55 @@ jobs:
   - in_parallel:
     - get: cf-deployment
       passed: [deploy-cf-prs]
-    - get: disaster-recovery-acceptance-tests-prs
+    - get: disaster-recovery-acceptance-tests
       trigger: true
       passed: [deploy-cf-prs]
       version: every
     - get: bbr-binary-release
-    - get: bosh-backup-and-restore-meta
-  - put: disaster-recovery-acceptance-tests-prs
+    - get: bbl-state
+  - load_var: system_domain
+    file: bbl-state/bbl-state.json
+    format: json
+  - put: disaster-recovery-acceptance-tests
     params:
-      path: disaster-recovery-acceptance-tests-prs
+      path: disaster-recovery-acceptance-tests
       status: pending
       context: drats
   - task: unit-tests
-    file: disaster-recovery-acceptance-tests-prs/ci/unit-tests/task.yml
-    input_mapping:
-      disaster-recovery-acceptance-tests: disaster-recovery-acceptance-tests-prs
+    file: disaster-recovery-acceptance-tests/ci/tasks/unit-tests/task.yml
     params:
       GITHUB_SSH_KEY: ((github.ssh_key))
     on_failure:
-      put: disaster-recovery-acceptance-tests-prs
+      put: disaster-recovery-acceptance-tests
       params:
-        path: disaster-recovery-acceptance-tests-prs
+        path: disaster-recovery-acceptance-tests
         status: failure
         context: drats
   - task: create-integration-config
-    file: disaster-recovery-acceptance-tests-prs/ci/credhub-compatible/update-integration-config/task.yml
+    file: disaster-recovery-acceptance-tests/ci/tasks/credhub-compatible/update-integration-config/task.yml
     input_mapping:
-      disaster-recovery-acceptance-tests: disaster-recovery-acceptance-tests-prs
-      integration-configs: bosh-backup-and-restore-meta
-      bbl-state: bosh-backup-and-restore-meta
+      integration-configs: disaster-recovery-acceptance-tests
     params:
-      BBL_STATE_DIR: drats-pr-ragdoll/
-      SYSTEM_DOMAIN: drats-pr-ragdoll.cryo.cf-app.com
-      INTEGRATION_CONFIG_FILE_PATH: drats-pr-ragdoll/integration_config.json
+      BBL_STATE_DIR: .
+      SYSTEM_DOMAIN: ((.:system_domain.lb.domain))
   - task: acceptance-tests
-    file: disaster-recovery-acceptance-tests-prs/ci/drats-with-integration-config/task.yml
+    file: disaster-recovery-acceptance-tests/ci/tasks/drats-with-integration-config/task.yml
     privileged: true
     input_mapping:
-      disaster-recovery-acceptance-tests: disaster-recovery-acceptance-tests-prs
       drats-integration-config: updated-integration-configs
     params:
-      CONFIG_FILE_PATH: drats-pr-ragdoll/integration_config.json
+      CONFIG_FILE_PATH: ci/integration_config.json
       CF_DIAL_TIMEOUT: 300
     on_failure:
-      put: disaster-recovery-acceptance-tests-prs
+      put: disaster-recovery-acceptance-tests
       params:
-        path: disaster-recovery-acceptance-tests-prs
+        path: disaster-recovery-acceptance-tests
         status: failure
         context: drats
     on_success:
-      put: disaster-recovery-acceptance-tests-prs
+      put: disaster-recovery-acceptance-tests
       params:
-        path: disaster-recovery-acceptance-tests-prs
+        path: disaster-recovery-acceptance-tests
         status: success
         context: drats
 
@@ -167,16 +173,13 @@ jobs:
   - in_parallel:
     - get: cf-deployment
       passed: [run-drats-prs]
-    - get: disaster-recovery-acceptance-tests-prs
+    - get: disaster-recovery-acceptance-tests
       trigger: true
       passed: [run-drats-prs]
     - get: cf-deployment-concourse-tasks
-    - get: bosh-backup-and-restore-meta
+    - get: bbl-state
   - task: bosh-delete-deployment
     file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
-    input_mapping:
-      bbl-state: bosh-backup-and-restore-meta
     params:
-      BBL_STATE_DIR: drats-pr-ragdoll/
-
+      BBL_STATE_DIR: .
 
