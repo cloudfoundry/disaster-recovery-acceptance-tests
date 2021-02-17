@@ -33,7 +33,7 @@ export BBR_BUILD_PATH=$(which bbr)
 
 echo "Running DRATs..."
 go get github.com/onsi/ginkgo/ginkgo
-dep ensure -vendor-only
+go mod tidy
 ginkgo -v --trace acceptance
 
 echo "Successfully ran DRATs!"

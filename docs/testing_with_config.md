@@ -10,7 +10,7 @@ In order to run DRATs using an integration config file, you can use [`scripts/ru
    * `CONFIG`: Path to your `integration_config.json`
 1. Run the tests
    ```bash
-   $> dep ensure
+   $> go mod tidy
    $> ginkgo -v --trace acceptance
    ```
 
