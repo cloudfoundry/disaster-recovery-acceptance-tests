@@ -59,7 +59,7 @@ jobs:
     - get: disaster-recovery-acceptance-tests
       trigger: true
     - set_pipeline: drats
-      file: disaster-recovery-acceptance-tests/ci/pipeline.yml
+      file: disaster-recovery-acceptance-tests/ci/pipelines/drats/pipeline.yml
 
   ## DEPLOY CF
 
