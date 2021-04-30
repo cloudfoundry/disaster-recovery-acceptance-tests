@@ -8,8 +8,7 @@ resource_types:
 - name: pull-request
   type: docker-image
   source:
-    repository: jtarchie/pr
-    tag: latest
+    repository: teliaoss/github-pr-resource
 
 - name: vault
   type: docker-image
@@ -35,7 +34,7 @@ resources:
 - name: disaster-recovery-acceptance-tests
   type: pull-request
   source:
-    repo: cloudfoundry-incubator/disaster-recovery-acceptance-tests
+    repository: cloudfoundry-incubator/disaster-recovery-acceptance-tests
     access_token: ((github.access_token))
 
 - name: bbr-binary-release
