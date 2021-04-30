@@ -71,6 +71,7 @@ jobs:
     - get: disaster-recovery-acceptance-tests
       version: every
       passed: [set-pipeline]
+      trigger: true
     - get: cf-deployment
     - get: bbl-state
     - get: cf-deployment-concourse-tasks
