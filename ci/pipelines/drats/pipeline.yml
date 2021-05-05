@@ -29,7 +29,6 @@ resources:
   source:
     uri: https://github.com/cloudfoundry/cf-deployment.git
     branch: main
-    tag_filter: v13.*
 
 - name: disaster-recovery-acceptance-tests
   type: pull-request
