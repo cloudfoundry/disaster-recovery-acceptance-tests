@@ -11,15 +11,9 @@ require (
 	github.com/hashicorp/go-version v1.2.0 // indirect
 	github.com/hpcloud/tail v1.0.1-0.20180514194441-a1dbeea552b7 // indirect
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
-	github.com/onsi/ginkgo v1.12.0
-	github.com/onsi/gomega v1.9.0
+	github.com/onsi/ginkgo v1.16.2
+	github.com/onsi/gomega v1.10.1
 	github.com/tedsuo/rata v1.0.0 // indirect
 	github.com/vito/go-sse v1.0.0 // indirect
-	golang.org/x/crypto v0.0.0-20200429183012-4b2356b1ed79 // indirect
-	golang.org/x/net v0.0.0-20200501053045-e0ff5e5a1de5 // indirect
-	golang.org/x/sys v0.0.0-20200501145240-bc7a7d42d5c3 // indirect
-	golang.org/x/text v0.3.2 // indirect
-	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543 // indirect
 	gopkg.in/fsnotify/fsnotify.v1 v1.4.7 // indirect
-	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
