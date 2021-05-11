@@ -35,7 +35,6 @@ resources:
   source:
     repository: cloudfoundry-incubator/disaster-recovery-acceptance-tests
     access_token: ((github.access_token))
-    branch: main
 
 - name: bbr-binary-release
   type: github-release
