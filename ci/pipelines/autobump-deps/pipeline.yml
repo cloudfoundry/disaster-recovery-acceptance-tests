@@ -152,4 +152,12 @@ jobs:
       GITHUB_ACCESS_TOKEN: ((github.access_token))
       DIRECTORY_PATH: /
       BRANCH: main
+  - task: bump-credhub-test-app-deps
+    image: dockerfile-rootfs
+    file: cryogenics-meta/ci/tasks/dependencies-automation/bump-go-deps/task-bump-go-deps.yml
+    params:
+      PROJECT_PATH: cloudfoundry-incubator/disaster-recovery-acceptance-tests
+      GITHUB_ACCESS_TOKEN: ((github.access_token))
+      DIRECTORY_PATH: /fixtures/credhub-test-app
+      BRANCH: main
 
