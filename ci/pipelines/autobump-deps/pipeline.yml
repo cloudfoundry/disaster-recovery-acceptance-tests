@@ -1,0 +1,155 @@
+groups:
+- name: bump-go-deps
+  jobs:
+  - bump-go-deps
+
+- name: handle-new-prs
+  jobs:
+  - automerge-prs
+
+resource_types:
+- name: pull-request
+  type: docker-image
+  source:
+    repository: teliaoss/github-pr-resource
+
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: cfcommunity/slack-notification-resource
+
+resources:
+- name: cryogenics-meta
+  type: git
+  source:
+    uri: git@github.com:pivotal-cf/cryogenics-meta.git
+    private_key: ((github.ssh_key))
+    branch: main
+
+- name: every-three-hours
+  type: time
+  source:
+    interval: 3h
+
+- name: drats-pr
+  type: pull-request
+  source:
+    repository: cloudfoundry-incubator/disaster-recovery-acceptance-tests
+    access_token: ((github.access_token))
+    base_branch: main
+    disable_forks: true
+    states:
+    - OPEN
+
+- name: drats-repo
+  type: git
+  source:
+    uri: git@github.com:cloudfoundry-incubator/disaster-recovery-acceptance-tests.git
+    private_key: ((github.ssh_key))
+    branch: main
+
+- name: slack-cryo-notification
+  type: slack-notification
+  source:
+    url: ((slack.webhook))
+
+jobs:
+- name: automerge-prs
+  plan:
+  - get: every-three-hours
+    trigger: true
+  - get: cryogenics-meta
+  - get: drats-pr
+    version: every
+  - task: build-task-image_check-ready-to-merge
+    privileged: true
+    file: cryogenics-meta/ci/tasks/check-ready-to-merge/task-build-dockerfile.yml
+    input_mapping:
+      context: cryogenics-meta
+    params:
+      CONTEXT: ./ci/tasks/check-ready-to-merge/
+    output_mapping:
+      image: check-ready-to-merge-image
+  - task: build-task-image_merge-pr
+    privileged: true
+    file: cryogenics-meta/ci/tasks/merge-pr/task-build-dockerfile.yml
+    input_mapping:
+      context: cryogenics-meta
+    params:
+      CONTEXT: ./ci/tasks/merge-pr/
+    output_mapping:
+      image: merge-pr-image
+  - load_var: pr-branch
+    file: drats-pr/.git/resource/head_name
+  - load_var: pr-url
+    file: drats-pr/.git/resource/url
+  - put: drats-pr
+    params:
+      path: drats-pr
+      status: success
+      # We need to reset PR concourse-ci/status and set its status to "success"
+      # Otherwise "check-ready-to-merge" task fails if the PR errored last time.
+
+  - try:
+      task: check-ready-to-merge
+      file: cryogenics-meta/ci/tasks/check-ready-to-merge/task-check-ready-to-merge.yml
+      image: check-ready-to-merge-image
+      input_mapping:
+        source-repo: drats-pr
+      params:
+        GH_TOKEN: ((github.access_token))
+        BRANCH: ((.:pr-branch))
+      on_success:
+        do:
+        - task: merge-pull-request
+          file: cryogenics-meta/ci/tasks/merge-pr/task-merge-pr.yml
+          image: merge-pr-image
+          input_mapping:
+            source-repo: drats-pr
+          params:
+            GH_TOKEN: ((github.access_token))
+            PR_REF: ((.:pr-url))
+            METHOD: SQUASH
+
+        - put: slack-cryo-notification
+          params:
+            text: |
+              A new PR has been merged automatically.
+              All tests were passing successfully.
+              You can review it  <((.:pr-url))|*here*>.
+      on_failure:
+        put: drats-pr
+        params:
+          path: drats-pr
+          status: failure
+      on_error:
+        put: drats-pr
+        params:
+          path: drats-pr
+          status: error
+
+- name: bump-go-deps
+  plan:
+  - in_parallel:
+    - get: every-three-hours
+      trigger: true
+    - get: cryogenics-meta
+    - get: drats-repo
+  - task: build-task-image
+    privileged: true
+    file: cryogenics-meta/ci/tasks/dependencies-automation/bump-go-deps/task-build-dockerfile.yml
+    input_mapping:
+      context: cryogenics-meta
+    params:
+      CONTEXT: ./ci/tasks/dependencies-automation/bump-go-deps/
+    output_mapping:
+      image: dockerfile-rootfs
+  - task: bump-go-deps
+    image: dockerfile-rootfs
+    file: cryogenics-meta/ci/tasks/dependencies-automation/bump-go-deps/task-bump-go-deps.yml
+    params:
+      PROJECT_PATH: cloudfoundry-incubator/disaster-recovery-acceptance-tests
+      GITHUB_ACCESS_TOKEN: ((github.access_token))
+      DIRECTORY_PATH: /
+      BRANCH: main
+
