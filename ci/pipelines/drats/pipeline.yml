@@ -36,6 +36,14 @@ resources:
     repository: cloudfoundry-incubator/disaster-recovery-acceptance-tests
     access_token: ((github.access_token))
 
+- name: every-day
+  type: time
+  source:
+    start: 8:00 AM
+    stop: 9:00 AM
+    days: [Monday, Tuesday, Wednesday, Thursday, Friday]
+    location: Europe/London
+
 - name: bbr-binary-release
   type: github-release
   source:
@@ -51,15 +59,14 @@ resources:
     tarball: true
 
 jobs:
-
 - name: set-pipeline
   plan:
     - get: disaster-recovery-acceptance-tests
       trigger: true
+    - get: every-day
+      trigger: true
     - set_pipeline: drats
       file: disaster-recovery-acceptance-tests/ci/pipelines/drats/pipeline.yml
-
-  ## DEPLOY CF
 
 - name: deploy-cf-prs
   serial: true
@@ -70,6 +77,9 @@ jobs:
       version: every
       passed: [set-pipeline]
       trigger: true
+    - get: every-day
+      trigger: true
+      passed: [set-pipeline]
     - get: cf-deployment
     - get: bbl-state
     - get: cf-deployment-concourse-tasks
@@ -103,13 +113,15 @@ jobs:
     file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
     params:
       BBL_STATE_DIR: .
-### RUN TESTS
 
 - name: run-drats-prs
   serial: true
   serial_groups: [drats-prs]
   plan:
   - in_parallel:
+    - get: every-day
+      trigger: true
+      passed: [deploy-cf-prs]
     - get: cf-deployment
       passed: [deploy-cf-prs]
     - get: disaster-recovery-acceptance-tests
@@ -164,12 +176,14 @@ jobs:
         status: success
         context: drats
 
-## Delete cf deployments
 - name: delete-cf-prs
   serial: true
   serial_groups: [drats-prs]
   plan:
   - in_parallel:
+    - get: every-day
+      trigger: true
+      passed: [run-drats-prs]
     - get: cf-deployment
       passed: [run-drats-prs]
     - get: disaster-recovery-acceptance-tests
