@@ -110,13 +110,32 @@ jobs:
             GH_TOKEN: ((github.access_token))
             PR_REF: ((.:pr-url))
             METHOD: SQUASH
-
         - put: slack-cryo-notification
           params:
             text: |
               A new PR has been merged automatically.
               All tests were passing successfully.
               You can review it  <((.:pr-url))|*here*>.
+        - task: find-pr-story
+          file: cryogenics-meta/ci/tasks/find-pr-story/task.yml
+          params:
+            TRACKER_API_TOKEN: ((tracker.api_token))
+            TRACKER_PROJECT_ID: ((tracker.project_id))
+            GIT_REPOSITORY: cloudfoundry-incubator/disaster-recovery-acceptance-tests
+        - task: deliver-stories
+          file: cryogenics-meta/ci/tasks/deliver-stories/task.yml
+          params:
+            TRACKER_API_TOKEN: ((tracker.api_token))
+            TRACKER_PROJECT_ID: ((tracker.project_id))
+            GIT_REPOSITORY: cloudfoundry-incubator/disaster-recovery-acceptance-tests
+          input_mapping:
+            git-repo-pr: drats-pr
+        - task: accept-stories
+          file: backup-and-restore-sdk-release/ci/tasks/accept-stories/task.yml
+          params:
+            TRACKER_API_TOKEN: ((tracker.api_token))
+            TRACKER_PROJECT_ID: ((tracker.project_id))
+            GIT_REPOSITORY: cloudfoundry-incubator/disaster-recovery-acceptance-tests
       on_failure:
         put: drats-pr
         params:
