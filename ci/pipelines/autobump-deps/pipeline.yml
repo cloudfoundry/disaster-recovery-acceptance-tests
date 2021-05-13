@@ -83,13 +83,6 @@ jobs:
     file: drats-pr/.git/resource/head_name
   - load_var: pr-url
     file: drats-pr/.git/resource/url
-  - put: drats-pr
-    params:
-      path: drats-pr
-      status: success
-      # We need to reset PR concourse-ci/status and set its status to "success"
-      # Otherwise "check-ready-to-merge" task fails if the PR errored last time.
-
   - try:
       task: check-ready-to-merge
       file: cryogenics-meta/ci/tasks/check-ready-to-merge/task-check-ready-to-merge.yml
@@ -122,6 +115,8 @@ jobs:
             TRACKER_API_TOKEN: ((tracker.api_token))
             TRACKER_PROJECT_ID: ((tracker.project_id))
             GIT_REPOSITORY: cloudfoundry-incubator/disaster-recovery-acceptance-tests
+          input_mapping:
+            git-repo: drats-pr
         - task: deliver-stories
           file: cryogenics-meta/ci/tasks/deliver-stories/task.yml
           params:
@@ -136,16 +131,6 @@ jobs:
             TRACKER_API_TOKEN: ((tracker.api_token))
             TRACKER_PROJECT_ID: ((tracker.project_id))
             GIT_REPOSITORY: cloudfoundry-incubator/disaster-recovery-acceptance-tests
-      on_failure:
-        put: drats-pr
-        params:
-          path: drats-pr
-          status: failure
-      on_error:
-        put: drats-pr
-        params:
-          path: drats-pr
-          status: error
 
 - name: bump-go-deps
   plan:
