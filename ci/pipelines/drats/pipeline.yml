@@ -16,6 +16,11 @@ resource_types:
     repository: wfernandes/vault-resource
     tag: latest
 
+- name: pcf-pool
+  type: docker-image
+  source:
+    repository: cftoolsmiths/toolsmiths-envs-resource
+
 resources:
 - name: cf-deployment-concourse-tasks
   type: git
@@ -30,11 +35,26 @@ resources:
     uri: https://github.com/cloudfoundry/cf-deployment.git
     branch: main
 
+- name: bbr-binary-release
+  type: github-release
+  source:
+    owner: cloudfoundry-incubator
+    repository: bosh-backup-and-restore
+    access_token: ((github.access_token))
+
 - name: disaster-recovery-acceptance-tests
   type: pull-request
   source:
     repository: cloudfoundry-incubator/disaster-recovery-acceptance-tests
     access_token: ((github.access_token))
+
+- name: cf-deployment-env
+  icon: pool
+  type: pcf-pool
+  source:
+    api_token: ((toolsmiths.api_token))
+    hostname: environments.toolsmiths.cf-app.com
+    pool_name: cf-deployment
 
 - name: every-day
   type: time
@@ -44,100 +64,100 @@ resources:
     days: [Monday, Tuesday, Wednesday, Thursday, Friday]
     location: Europe/London
 
-- name: bbr-binary-release
-  type: github-release
-  source:
-    owner: cloudfoundry-incubator
-    repository: bosh-backup-and-restore
-    access_token: ((github.access_token))
-
-- name: bbl-state
-  type: vault
-  source:
-    <<: *vault_creds
-    path: /concourse/bosh-backup-restore/drats/bbl-state
-    tarball: true
-
 jobs:
 - name: set-pipeline
   plan:
     - get: disaster-recovery-acceptance-tests
       trigger: true
+      version: every
     - get: every-day
       trigger: true
     - set_pipeline: drats
       file: disaster-recovery-acceptance-tests/ci/pipelines/drats/pipeline.yml
 
-- name: deploy-cf-prs
-  serial: true
-  serial_groups: [drats-prs]
+- name: claim-cf-deployment
   plan:
   - in_parallel:
     - get: disaster-recovery-acceptance-tests
-      version: every
       passed: [set-pipeline]
       trigger: true
+      version: every
     - get: every-day
       trigger: true
       passed: [set-pipeline]
-    - get: cf-deployment
-    - get: bbl-state
-    - get: cf-deployment-concourse-tasks
-  - load_var: system_domain
-    file: bbl-state/bbl-state.json
-    format: json
-  - task: deploy-cf
-    file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
-    input_mapping:
-      ops-files: cf-deployment
-    params:
-      SYSTEM_DOMAIN: ((.:system_domain.lb.domain))
-      OPS_FILES: "operations/scale-to-one-az.yml operations/use-compiled-releases.yml operations/backup-and-restore/enable-backup-restore.yml operations/enable-nfs-volume-service.yml operations/experimental/disable-interpolate-service-bindings.yml operations/experimental/enable-traffic-to-internal-networks.yml operations/experimental/enable-smb-volume-service.yml operations/backup-and-restore/skip-backup-restore-droplets-and-packages.yml"
-      BBL_STATE_DIR: .
-  - task: wait-for-cf-api
-    file: disaster-recovery-acceptance-tests/ci/tasks/wait-for-cf-api/task.yml
-    params:
-      CF_API_URL: https://api.((.:system_domain.lb.domain))
-      CF_UAA_URL: https://uaa.((.:system_domain.lb.domain))
-  - task: bosh-run-errand-nfsbrokerpush
-    file: cf-deployment-concourse-tasks/run-errand/task.yml
-    params:
-      ERRAND_NAME: nfsbrokerpush
-      BBL_STATE_DIR: .
-  - task: bosh-run-errand-smbbrokerpush
-    file: cf-deployment-concourse-tasks/run-errand/task.yml
-    params:
-      ERRAND_NAME: smbbrokerpush
-      BBL_STATE_DIR: .
-  - task: bosh-cleanup
-    file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
-    params:
-      BBL_STATE_DIR: .
+    - put: cf-deployment-env
+      params:
+        action: claim
 
-- name: run-drats-prs
-  serial: true
-  serial_groups: [drats-prs]
+- name: deploy-backup-restore-components
   plan:
   - in_parallel:
+    - get: disaster-recovery-acceptance-tests
+      version: every
+      passed: [claim-cf-deployment]
+      trigger: true
     - get: every-day
       trigger: true
-      passed: [deploy-cf-prs]
-    - get: cf-deployment
-      passed: [deploy-cf-prs]
-    - get: disaster-recovery-acceptance-tests
+      passed: [claim-cf-deployment]
+    - get: cf-deployment-env
+      passed: [claim-cf-deployment]
       trigger: true
-      passed: [deploy-cf-prs]
       version: every
-    - get: bbr-binary-release
-    - get: bbl-state
-  - load_var: system_domain
-    file: bbl-state/bbl-state.json
-    format: json
+    - get: cf-deployment
+    - get: cf-deployment-concourse-tasks
   - put: disaster-recovery-acceptance-tests
     params:
       path: disaster-recovery-acceptance-tests
       status: pending
       context: drats
+  - task: deploy-backup-restore-components
+    file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
+    input_mapping:
+      toolsmiths-env: cf-deployment-env
+      ops-files: cf-deployment
+    params:
+      OPS_FILES: >
+        operations/scale-to-one-az.yml
+        operations/use-compiled-releases.yml
+        operations/backup-and-restore/enable-backup-restore.yml
+        operations/enable-nfs-volume-service.yml
+        operations/experimental/disable-interpolate-service-bindings.yml
+        operations/experimental/enable-traffic-to-internal-networks.yml
+        operations/experimental/enable-smb-volume-service.yml
+        operations/backup-and-restore/skip-backup-restore-droplets-and-packages.yml
+  - task: bosh-run-errand-nfsbrokerpush
+    file: cf-deployment-concourse-tasks/run-errand/task.yml
+    input_mapping:
+      toolsmiths-env: cf-deployment-env
+    params:
+      ERRAND_NAME: nfsbrokerpush
+  - task: bosh-run-errand-smbbrokerpush
+    file: cf-deployment-concourse-tasks/run-errand/task.yml
+    input_mapping:
+      toolsmiths-env: cf-deployment-env
+    params:
+      ERRAND_NAME: smbbrokerpush
+
+- name: run-drats-tests
+  plan:
+  - in_parallel:
+    - get: every-day
+      trigger: true
+      passed: [deploy-backup-restore-components]
+    - get: cf-deployment
+      passed: [deploy-backup-restore-components]
+    - get: disaster-recovery-acceptance-tests
+      trigger: true
+      passed: [deploy-backup-restore-components]
+      version: every
+    - get: cf-deployment-env
+      passed: [deploy-backup-restore-components]
+      trigger: true
+      version: every
+    - get: bbr-binary-release
+  - load_var: pooled-env
+    file: cf-deployment-env/metadata
+    format: json
   - task: unit-tests
     file: disaster-recovery-acceptance-tests/ci/tasks/unit-tests/task.yml
     params:
@@ -148,13 +168,23 @@ jobs:
         path: disaster-recovery-acceptance-tests
         status: failure
         context: drats
-  - task: create-integration-config
-    file: disaster-recovery-acceptance-tests/ci/tasks/credhub-compatible/update-integration-config/task.yml
+  - task: update-integration-config
+    file: disaster-recovery-acceptance-tests/ci/tasks/update-integration-config/task.yml
     input_mapping:
       integration-configs: disaster-recovery-acceptance-tests
     params:
-      BBL_STATE_DIR: .
-      SYSTEM_DOMAIN: ((.:system_domain.lb.domain))
+      SYSTEM_DOMAIN: ((.:pooled-env.name)).cf-app.com
+      JUMPBOX_PRIVATE_KEY: ((.:pooled-env.bosh.jumpbox_private_key))
+      CREDHUB_CLIENT: ((.:pooled-env.bosh.credhub_client))
+      CREDHUB_SECRET: ((.:pooled-env.bosh.credhub_secret))
+      CREDHUB_CA_CERT: ((.:pooled-env.bosh.credhub_ca_cert))
+      CREDHUB_SERVER: ((.:pooled-env.bosh.credhub_server))
+      CREDHUB_PROXY: ((.:pooled-env.bosh.bosh_all_proxy))
+      BOSH_ENVIRONMENT: ((.:pooled-env.bosh.bosh_environment))
+      BOSH_CA_CERT: ((.:pooled-env.bosh.bosh_ca_cert))
+      BOSH_ALL_PROXY: ((.:pooled-env.bosh.bosh_all_proxy))
+      BOSH_CLIENT: ((.:pooled-env.bosh.bosh_client))
+      BOSH_CLIENT_SECRET: ((.:pooled-env.bosh.bosh_client_secret))
   - task: acceptance-tests
     file: disaster-recovery-acceptance-tests/ci/tasks/drats-with-integration-config/task.yml
     privileged: true
@@ -176,23 +206,16 @@ jobs:
         status: success
         context: drats
 
-- name: delete-cf-prs
-  serial: true
-  serial_groups: [drats-prs]
+- name: unclaim-cf-deployment
   plan:
-  - in_parallel:
-    - get: every-day
-      trigger: true
-      passed: [run-drats-prs]
-    - get: cf-deployment
-      passed: [run-drats-prs]
-    - get: disaster-recovery-acceptance-tests
-      trigger: true
-      passed: [run-drats-prs]
-    - get: cf-deployment-concourse-tasks
-    - get: bbl-state
-  - task: bosh-delete-deployment
-    file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
+  - get: cf-deployment-env
+    passed: [run-drats-tests]
+    trigger: true
+    version: every
+  - get: every-day
+    trigger: true
+    passed: [run-drats-tests]
+  - put: cf-deployment-env
     params:
-      BBL_STATE_DIR: .
-
+      action: unclaim
+      env_file: cf-deployment-env/metadata
