@@ -64,6 +64,12 @@ resources:
     days: [Monday, Tuesday, Wednesday, Thursday, Friday]
     location: Europe/London
 
+- name: cryogenics-meta
+  type: git
+  source:
+    uri: git@github.com:pivotal-cf/cryogenics-meta.git
+    private_key: ((github.ssh_key))
+
 jobs:
 - name: set-pipeline
   plan:
@@ -205,6 +211,7 @@ jobs:
         path: disaster-recovery-acceptance-tests
         status: success
         context: drats
+        comment: "@dependabot merge"
 
 - name: unclaim-cf-deployment
   plan:
@@ -219,3 +226,26 @@ jobs:
     params:
       action: unclaim
       env_file: cf-deployment-env/metadata
+
+- name: update-tracker
+  plan:
+  - get: cryogenics-meta
+  - get: every-day
+    trigger: true
+    passed: [run-drats-tests]
+  - get: disaster-recovery-acceptance-tests
+    trigger: true
+    passed: [run-drats-tests]
+    version: every
+  - task: deliver-stories
+    file: cryogenics-meta/ci/tasks/tracker-automation/deliver-stories/task.yml
+    params:
+      TRACKER_API_TOKEN: ((tracker.api_token))
+      TRACKER_PROJECT_ID: ((tracker.project_id))
+      GIT_REPOSITORY: cloudfoundry-incubator/disaster-recovery-acceptance-tests
+  - task: accept-stories
+    file: cryogenics-meta/ci/tasks/tracker-automation/accept-stories/task.yml
+    params:
+      TRACKER_API_TOKEN: ((tracker.api_token))
+      TRACKER_PROJECT_ID: ((tracker.project_id))
+      GIT_REPOSITORY: cloudfoundry-incubator/disaster-recovery-acceptance-tests
