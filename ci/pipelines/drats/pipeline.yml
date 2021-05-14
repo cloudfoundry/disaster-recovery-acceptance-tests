@@ -94,6 +94,25 @@ jobs:
     - put: cf-deployment-env
       params:
         action: claim
+    - get: cryogenics-meta
+  - task: find-pr-story
+    attempts: 5
+    file: cryogenics-meta/ci/tasks/tracker-automation/find-pr-story/task.yml
+    input_mapping:
+      pr: disaster-recovery-acceptance-tests
+    params:
+      TRACKER_API_TOKEN: ((tracker.api_token))
+      TRACKER_PROJECT_ID: ((tracker.project_id))
+      GIT_REPOSITORY: cloudfoundry-incubator/disaster-recovery-acceptance-tests
+  - task: start-story
+    attempts: 5
+    file: cryogenics-meta/ci/tasks/tracker-automation/start-story/task.yml
+    input_mapping:
+      pr: disaster-recovery-acceptance-tests
+    params:
+      TRACKER_API_TOKEN: ((tracker.api_token))
+      TRACKER_PROJECT_ID: ((tracker.project_id))
+      ESTIMATE: 1
 
 - name: deploy-backup-restore-components
   plan:
