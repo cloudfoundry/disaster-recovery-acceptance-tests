@@ -228,6 +228,11 @@ jobs:
         context: drats
     on_success:
       do:
+      - put: disaster-recovery-acceptance-tests
+        params:
+          path: disaster-recovery-acceptance-tests
+          status: success
+          context: drats
       - load_var: pr-url
         file: disaster-recovery-acceptance-tests/.git/resource/url
       - task: build-task-image_merge-pr
