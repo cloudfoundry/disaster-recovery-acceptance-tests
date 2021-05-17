@@ -181,6 +181,7 @@ jobs:
       trigger: true
       version: every
     - get: bbr-binary-release
+    - get: cryogenics-meta
   - load_var: pooled-env
     file: cf-deployment-env/metadata
     format: json
@@ -227,16 +228,27 @@ jobs:
         context: drats
     on_success:
       do:
-      - put: disaster-recovery-acceptance-tests
+      - load_var: pr-url
+        file: disaster-recovery-acceptance-tests/.git/resource/url
+      - task: build-task-image_merge-pr
+        privileged: true
+        file: cryogenics-meta/ci/tasks/merge-pr/task-build-dockerfile.yml
+        input_mapping:
+          context: cryogenics-meta
         params:
-          path: disaster-recovery-acceptance-tests
-          status: success
-          context: drats
+          CONTEXT: ./ci/tasks/merge-pr/
+        output_mapping:
+          image: merge-pr-image
       - task: merge-pr
-        file: cryogenics-meta/ci/tasks/merge-pr/task.sh
+        file: cryogenics-meta/ci/tasks/merge-pr/task.yml
+        image: merge-pr-image
+        input_mapping:
+          source-repo: disaster-recovery-acceptance-tests
         params:
           DELETE: TRUE
           AUTHOR: dependabot
+          GH_TOKEN: ((github.access_token))
+          PR_REF: ((.:pr-url))
 
 - name: unclaim-cf-deployment
   plan:
