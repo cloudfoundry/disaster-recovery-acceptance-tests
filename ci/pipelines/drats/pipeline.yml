@@ -225,12 +225,17 @@ jobs:
         status: failure
         context: drats
     on_success:
-      put: disaster-recovery-acceptance-tests
-      params:
-        path: disaster-recovery-acceptance-tests
-        status: success
-        context: drats
-        comment: "@dependabot merge"
+      do:
+      - put: disaster-recovery-acceptance-tests
+        params:
+          path: disaster-recovery-acceptance-tests
+          status: success
+          context: drats
+      - task: merge-pr
+        file: cryogenics-meta/ci/tasks/merge-pr/task.sh
+        params:
+          DELETE: TRUE
+          AUTHOR: dependabot
 
 - name: unclaim-cf-deployment
   plan:
