@@ -254,16 +254,6 @@ jobs:
           AUTHOR: dependabot
           GH_TOKEN: ((github.access_token))
           PR_REF: ((.:pr-url))
-
-- name: unclaim-cf-deployment
-  plan:
-  - get: cf-deployment-env
-    passed: [run-drats-tests]
-    trigger: true
-    version: every
-  - get: every-day
-    trigger: true
-    passed: [run-drats-tests]
   - put: cf-deployment-env
     params:
       action: unclaim
