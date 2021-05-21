@@ -65,11 +65,12 @@ resources:
     days: [Monday, Tuesday, Wednesday, Thursday, Friday]
     location: Europe/London
 
-- name: cryogenics-meta
+- name: cryogenics-concourse-tasks
   type: git
   source:
-    uri: git@github.com:pivotal-cf/cryogenics-meta.git
+    uri: git@github.com:pivotal/cryogenics-concourse-tasks.git
     private_key: ((github.ssh_key))
+    branch: main
 
 jobs:
 - name: set-pipeline
@@ -95,10 +96,10 @@ jobs:
     - put: cf-deployment-env
       params:
         action: claim
-    - get: cryogenics-meta
+    - get: cryogenics-concourse-tasks
   - task: find-pr-story
     attempts: 5
-    file: cryogenics-meta/ci/tasks/tracker-automation/find-pr-story/task.yml
+    file: cryogenics-concourse-tasks/tracker-automation/find-pr-story/task.yml
     input_mapping:
       pr: disaster-recovery-acceptance-tests
     params:
@@ -107,7 +108,7 @@ jobs:
       GIT_REPOSITORY: cloudfoundry-incubator/disaster-recovery-acceptance-tests
   - task: start-story
     attempts: 5
-    file: cryogenics-meta/ci/tasks/tracker-automation/start-story/task.yml
+    file: cryogenics-concourse-tasks/tracker-automation/start-story/task.yml
     input_mapping:
       pr: disaster-recovery-acceptance-tests
     params:
@@ -181,7 +182,7 @@ jobs:
       trigger: true
       version: every
     - get: bbr-binary-release
-    - get: cryogenics-meta
+    - get: cryogenics-concourse-tasks
   - load_var: pooled-env
     file: cf-deployment-env/metadata
     format: json
@@ -235,18 +236,8 @@ jobs:
           context: drats
       - load_var: pr-url
         file: disaster-recovery-acceptance-tests/.git/resource/url
-      - task: build-task-image_merge-pr
-        privileged: true
-        file: cryogenics-meta/ci/tasks/merge-pr/task-build-dockerfile.yml
-        input_mapping:
-          context: cryogenics-meta
-        params:
-          CONTEXT: ./ci/tasks/merge-pr/
-        output_mapping:
-          image: merge-pr-image
       - task: merge-pr
-        file: cryogenics-meta/ci/tasks/merge-pr/task.yml
-        image: merge-pr-image
+        file: cryogenics-concourse-tasks/github-automation/merge-pr/task.yml
         input_mapping:
           source-repo: disaster-recovery-acceptance-tests
         params:
@@ -261,7 +252,6 @@ jobs:
 
 - name: update-tracker
   plan:
-  - get: cryogenics-meta
   - get: every-day
     trigger: true
     passed: [run-drats-tests]
@@ -269,14 +259,15 @@ jobs:
     trigger: true
     passed: [run-drats-tests]
     version: every
+  - get: cryogenics-concourse-tasks
   - task: deliver-stories
-    file: cryogenics-meta/ci/tasks/tracker-automation/deliver-stories/task.yml
+    file: cryogenics-concourse-tasks/tracker-automation/deliver-stories/task.yml
     params:
       TRACKER_API_TOKEN: ((tracker.api_token))
       TRACKER_PROJECT_ID: ((tracker.project_id))
       GIT_REPOSITORY: cloudfoundry-incubator/disaster-recovery-acceptance-tests
   - task: accept-stories
-    file: cryogenics-meta/ci/tasks/tracker-automation/accept-stories/task.yml
+    file: cryogenics-concourse-tasks/tracker-automation/accept-stories/task.yml
     params:
       TRACKER_API_TOKEN: ((tracker.api_token))
       TRACKER_PROJECT_ID: ((tracker.project_id))
