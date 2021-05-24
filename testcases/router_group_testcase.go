@@ -83,7 +83,7 @@ func (tc *CfRouterGroupTestCase) AfterBackup(config Config) {
 		Guid:            "RandomTestGUID" + "_" + RandomStringNumber(),
 		Name:            "RandomTestName" + "_" + RandomStringNumber(),
 		Type:            "tcp",
-		ReservablePorts: "2000-4000",
+		ReservablePorts: "2822 2825 3457",
 	}
 
 	cleanupRouterGroups = func() error { return tc.routingAPIClient.DeleteRouterGroup(routerGroupEntry) }
