@@ -1,4 +1,4 @@
-module github.com/disaster-recovery-acceptance-tests/fixtures/credhub-test-app
+module github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/fixtures/credhub-test-app
 
 go 1.14
 
