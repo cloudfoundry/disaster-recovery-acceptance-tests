@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"path"
+	"os"
+	"path/filepath"
 	"strings"
 
+	"github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/fixtures"
 	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/runner"
+
 	. "github.com/onsi/gomega"
 )
 
@@ -23,10 +26,9 @@ type CfCredhubSSITestCase struct {
 func NewCfCredhubSSITestCase() *CfCredhubSSITestCase {
 	id := RandomStringNumber()
 	return &CfCredhubSSITestCase{
-		uniqueTestID:       id,
-		name:               "cf-credhub",
-		appName:            "app" + id,
-		testAppFixturePath: path.Join(CurrentTestDir(), "/../fixtures/credhub-test-app"),
+		uniqueTestID: id,
+		name:         "cf-credhub",
+		appName:      "app" + id,
 	}
 }
 
@@ -44,6 +46,12 @@ func (tc *CfCredhubSSITestCase) CheckDeployment(config Config) {
 }
 
 func (tc *CfCredhubSSITestCase) BeforeBackup(config Config) {
+	tmpDir, err := ioutil.TempDir("", "cf-app-test-case-fixtures")
+	Expect(err).NotTo(HaveOccurred())
+	err = fixtures.WriteFixturesToTemporaryDirectory(tmpDir, "credhub-test-app")
+	Expect(err).NotTo(HaveOccurred())
+	tc.testAppFixturePath = filepath.Join(tmpDir, "credhub-test-app")
+
 	RunCommandSuccessfully("cf api --skip-ssl-validation", config.CloudFoundryConfig.APIURL)
 	RunCommandSuccessfully("cf auth", config.CloudFoundryConfig.AdminUsername, config.CloudFoundryConfig.AdminPassword)
 	RunCommandSuccessfully("cf create-org acceptance-test-org-" + tc.uniqueTestID)
@@ -108,4 +116,7 @@ func (tc *CfCredhubSSITestCase) Cleanup(config Config) {
 
 	Expect(appResponse.StatusCode).To(Equal(http.StatusOK))
 	RunCommandSuccessfully("cf delete-org -f acceptance-test-org-" + tc.uniqueTestID)
+
+	err := os.RemoveAll(tc.testAppFixturePath)
+	Expect(err).NotTo(HaveOccurred())
 }

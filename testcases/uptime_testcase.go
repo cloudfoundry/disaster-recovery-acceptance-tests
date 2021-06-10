@@ -2,12 +2,16 @@ package testcases
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
-	"path"
+	"os"
+	"path/filepath"
 	"time"
 
+	"github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/fixtures"
 	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/runner"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -20,6 +24,7 @@ type AppUptimeTestCase struct {
 	stopCheckingAPIGoesDown chan<- bool
 	valueAPIWasDown         <-chan bool
 	name                    string
+	testAppFixturePath      string
 }
 
 func NewAppUptimeTestCase() *AppUptimeTestCase {
@@ -35,13 +40,18 @@ func (tc *AppUptimeTestCase) CheckDeployment(config Config) {
 }
 
 func (tc *AppUptimeTestCase) BeforeBackup(config Config) {
+	tmpDir, err := ioutil.TempDir("", "cf-app-test-case-fixtures")
+	Expect(err).NotTo(HaveOccurred())
+	err = fixtures.WriteFixturesToTemporaryDirectory(tmpDir, "test_app")
+	Expect(err).NotTo(HaveOccurred())
+	tc.testAppFixturePath = filepath.Join(tmpDir, "test_app")
+
 	RunCommandSuccessfully("cf api --skip-ssl-validation", config.CloudFoundryConfig.APIURL)
 	RunCommandSuccessfully("cf auth", config.CloudFoundryConfig.AdminUsername, config.CloudFoundryConfig.AdminPassword)
 	RunCommandSuccessfully("cf create-org acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf create-space acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf target -o acceptance-test-org-" + tc.uniqueTestID + " -s acceptance-test-space-" + tc.uniqueTestID)
-	var testAppFixturePath = path.Join(CurrentTestDir(), "/../fixtures/test_app/")
-	RunCommandSuccessfully("cf push test_app_" + tc.uniqueTestID + " -p " + testAppFixturePath)
+	RunCommandSuccessfully("cf push test_app_" + tc.uniqueTestID + " -p " + tc.testAppFixturePath)
 
 	By("checking the app stays up")
 	appURL := GetAppURL("test_app_" + tc.uniqueTestID)
@@ -68,6 +78,9 @@ func (tc *AppUptimeTestCase) AfterRestore(config Config) {
 func (tc *AppUptimeTestCase) Cleanup(config Config) {
 	By("cleaning up orgs, spaces and apps")
 	RunCommandSuccessfully("cf delete-org -f acceptance-test-org-" + tc.uniqueTestID)
+
+	err := os.RemoveAll(tc.testAppFixturePath)
+	Expect(err).NotTo(HaveOccurred())
 }
 
 func checkAPIGoesDown(apiURL string) (chan<- bool, <-chan bool) {

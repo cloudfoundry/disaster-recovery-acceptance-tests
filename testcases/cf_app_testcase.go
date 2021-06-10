@@ -1,10 +1,14 @@
 package testcases
 
 import (
-	"path"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 	"time"
 
+	"github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/fixtures"
 	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/runner"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -23,13 +27,12 @@ type CfAppTestCase struct {
 func NewCfAppTestCase() *CfAppTestCase {
 	id := RandomStringNumber()
 	return &CfAppTestCase{
-		uniqueTestID:       id,
-		deletedAppName:     "test_app_" + id,
-		stoppedAppName:     "stopped_test_app_" + id,
-		runningAppName:     "running_test_app_" + id,
-		envVarValue:        "winnebago" + id,
-		name:               "cf-app",
-		testAppFixturePath: path.Join(CurrentTestDir(), "/../fixtures/test_app/"),
+		uniqueTestID:   id,
+		deletedAppName: "test_app_" + id,
+		stoppedAppName: "stopped_test_app_" + id,
+		runningAppName: "running_test_app_" + id,
+		envVarValue:    "winnebago" + id,
+		name:           "cf-app",
 	}
 }
 
@@ -41,6 +44,12 @@ func (tc *CfAppTestCase) CheckDeployment(config Config) {
 }
 
 func (tc *CfAppTestCase) BeforeBackup(config Config) {
+	tmpDir, err := ioutil.TempDir("", "cf-app-test-case-fixtures")
+	Expect(err).NotTo(HaveOccurred())
+	err = fixtures.WriteFixturesToTemporaryDirectory(tmpDir, "test_app")
+	Expect(err).NotTo(HaveOccurred())
+	tc.testAppFixturePath = filepath.Join(tmpDir, "test_app")
+
 	By("creating new orgs and spaces")
 	RunCommandSuccessfully("cf api --skip-ssl-validation", config.CloudFoundryConfig.APIURL)
 	RunCommandSuccessfully("cf auth", config.CloudFoundryConfig.AdminUsername, config.CloudFoundryConfig.AdminPassword)
@@ -102,6 +111,9 @@ func (tc *CfAppTestCase) AfterRestore(config Config) {
 
 func (tc *CfAppTestCase) Cleanup(config Config) {
 	tc.deletePushedApps(config)
+
+	err := os.RemoveAll(tc.testAppFixturePath)
+	Expect(err).NotTo(HaveOccurred())
 }
 
 func (tc *CfAppTestCase) deletePushedApps(config Config) {
