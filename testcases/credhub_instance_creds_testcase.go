@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"path"
 	"strings"
 
@@ -22,12 +23,23 @@ type CfCredhubSSITestCase struct {
 
 func NewCfCredhubSSITestCase() *CfCredhubSSITestCase {
 	id := RandomStringNumber()
+
+  credhubAppPath, appPathPresent := os.LookupEnv("CREDHUB_APP_PATH") 
+
+  if no(appPathPresent) {
+    credhubAppPath = path.Join(CurrentTestDir(), "/../fixtures/credhub-test-app")
+  }
+
 	return &CfCredhubSSITestCase{
 		uniqueTestID:       id,
 		name:               "cf-credhub",
 		appName:            "app" + id,
-		testAppFixturePath: path.Join(CurrentTestDir(), "/../fixtures/credhub-test-app"),
+		testAppFixturePath: credhubAppPath,
 	}
+}
+
+func no(b bool) bool {
+  return ! b
 }
 
 var listResponse struct {
