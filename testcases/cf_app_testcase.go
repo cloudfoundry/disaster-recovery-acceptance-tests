@@ -59,7 +59,7 @@ func (tc *CfAppTestCase) BeforeBackup(config Config) {
 }
 
 func (tc *CfAppTestCase) AfterBackup(config Config) {
-	RunCommandSuccessfully("cf delete -f" + tc.deletedAppName)
+	RunCommandSuccessfully("cf delete -f " + tc.deletedAppName)
 	RunCommandSuccessfully("cf start " + tc.stoppedAppName)
 	RunCommandSuccessfully("cf stop " + tc.runningAppName)
 }
