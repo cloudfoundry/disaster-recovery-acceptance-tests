@@ -24,6 +24,9 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 	BeforeEach(func() {
 		SetDefaultEventuallyTimeout(config.Timeout)
 
+		fmt.Println("\nCF CLI version:")
+		RunCommandSuccessfully("cf", "version")
+
 		fmt.Println("\nRunning test cases:")
 		for _, testCase := range testCases {
 			fmt.Println(testCase.Name())
