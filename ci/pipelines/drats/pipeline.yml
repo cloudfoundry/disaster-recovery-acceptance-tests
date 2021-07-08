@@ -47,7 +47,7 @@ resources:
   source:
     repository: cloudfoundry-incubator/disaster-recovery-acceptance-tests
     access_token: ((github.access_token))
-    disable_forks: true
+    disable_forks: false
 
 - name: cf-deployment-env
   icon: pool
