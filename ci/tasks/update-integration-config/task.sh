@@ -40,7 +40,6 @@ smb_broker_password=$(get_password_from_credhub smb-broker-password || echo "")
 smb_broker_url="http://smbbroker.${SYSTEM_DOMAIN}"
 credhub_client_name="${CREDHUB_CLIENT}"
 credhub_client_secret="${CREDHUB_SECRET}"
-selective_backup=true
 
 configs=( cf_deployment_name
         cf_api_url
@@ -65,8 +64,7 @@ configs=( cf_deployment_name
         smb_broker_password
         smb_broker_url
         credhub_client_name
-        credhub_client_secret
-        selective_backup )
+        credhub_client_secret )
 
 integration_config="$(cat "integration-configs/${INTEGRATION_CONFIG_FILE_PATH}")"
 
