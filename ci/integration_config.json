@@ -32,5 +32,6 @@
   "include_cf-routing": true,
   "include_app-uptime": true,
   "include_cf-nfsbroker": false,
-  "include_cf-smbbroker": false
+  "include_cf-smbbroker": false,
+  "selective_backup": true
 }
