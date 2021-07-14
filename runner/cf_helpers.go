@@ -20,9 +20,11 @@ import (
 
 var clientWithInsecureTransport *http.Client
 
+const CF_CLI = "cf6"
+
 func getClientWithInsecureTransport() *http.Client {
 	if clientWithInsecureTransport == nil {
-		clientWithInsecureTransport = &http.Client {
+		clientWithInsecureTransport = &http.Client{
 			Transport: &http.Transport{
 				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 			},
@@ -33,7 +35,7 @@ func getClientWithInsecureTransport() *http.Client {
 }
 
 func GetAppURL(appName string) string {
-	appStats := string(RunCommandAndRetry("cf app "+appName, 5).Out.Contents())
+	appStats := string(RunCommandAndRetry(CF_CLI+" app "+appName, 5).Out.Contents())
 	var appURL string
 	for _, line := range strings.Split(appStats, "\n") {
 		if strings.HasPrefix(line, "routes:") {
@@ -47,7 +49,7 @@ func GetAppURL(appName string) string {
 }
 
 func GetRequestedState(appName string) string {
-	appStats := string(RunCommandAndRetry("cf app "+appName, 5).Out.Contents())
+	appStats := string(RunCommandAndRetry(CF_CLI+" app "+appName, 5).Out.Contents())
 	var appRequestedState string
 	for _, line := range strings.Split(appStats, "\n") {
 		if strings.HasPrefix(line, "requested state:") {

@@ -118,12 +118,12 @@ func (tc *CfRouterGroupTestCase) Cleanup(config Config) {
 }
 
 func loginAndGetToken(config Config) string {
-	RunCommandSuccessfully("cf login --skip-ssl-validation -a", config.CloudFoundryConfig.APIURL, "-u", config.CloudFoundryConfig.AdminUsername, "-p", config.CloudFoundryConfig.AdminPassword)
+	RunCommandSuccessfully(CF_CLI+" login --skip-ssl-validation -a", config.CloudFoundryConfig.APIURL, "-u", config.CloudFoundryConfig.AdminUsername, "-p", config.CloudFoundryConfig.AdminPassword)
 	return refreshToken()
 }
 
 func refreshToken() string {
-	token := string(RunCommandSuccessfullySilently("cf oauth-token").Out.Contents()[:])
+	token := string(RunCommandSuccessfullySilently(CF_CLI + " oauth-token").Out.Contents()[:])
 	token = strings.Split(token, " ")[1]
 	token = strings.Trim(token, "\r\n\t ")
 	return token

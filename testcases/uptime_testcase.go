@@ -35,13 +35,13 @@ func (tc *AppUptimeTestCase) CheckDeployment(config Config) {
 }
 
 func (tc *AppUptimeTestCase) BeforeBackup(config Config) {
-	RunCommandSuccessfully("cf api --skip-ssl-validation", config.CloudFoundryConfig.APIURL)
-	RunCommandSuccessfully("cf auth", config.CloudFoundryConfig.AdminUsername, config.CloudFoundryConfig.AdminPassword)
-	RunCommandSuccessfully("cf create-org acceptance-test-org-" + tc.uniqueTestID)
-	RunCommandSuccessfully("cf create-space acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
-	RunCommandSuccessfully("cf target -o acceptance-test-org-" + tc.uniqueTestID + " -s acceptance-test-space-" + tc.uniqueTestID)
+	RunCommandSuccessfully(CF_CLI+" api --skip-ssl-validation", config.CloudFoundryConfig.APIURL)
+	RunCommandSuccessfully(CF_CLI+" auth", config.CloudFoundryConfig.AdminUsername, config.CloudFoundryConfig.AdminPassword)
+	RunCommandSuccessfully(CF_CLI + " create-org acceptance-test-org-" + tc.uniqueTestID)
+	RunCommandSuccessfully(CF_CLI + " create-space acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
+	RunCommandSuccessfully(CF_CLI + " target -o acceptance-test-org-" + tc.uniqueTestID + " -s acceptance-test-space-" + tc.uniqueTestID)
 	var testAppFixturePath = path.Join(CurrentTestDir(), "/../fixtures/test_app/")
-	RunCommandSuccessfully("cf push test_app_" + tc.uniqueTestID + " -p " + testAppFixturePath)
+	RunCommandSuccessfully(CF_CLI + " push test_app_" + tc.uniqueTestID + " -p " + testAppFixturePath)
 
 	By("checking the app stays up")
 	appURL := GetAppURL("test_app_" + tc.uniqueTestID)
@@ -67,7 +67,7 @@ func (tc *AppUptimeTestCase) AfterRestore(config Config) {
 
 func (tc *AppUptimeTestCase) Cleanup(config Config) {
 	By("cleaning up orgs, spaces and apps")
-	RunCommandSuccessfully("cf delete-org -f acceptance-test-org-" + tc.uniqueTestID)
+	RunCommandSuccessfully(CF_CLI + " delete-org -f acceptance-test-org-" + tc.uniqueTestID)
 }
 
 func checkAPIGoesDown(apiURL string) (chan<- bool, <-chan bool) {

@@ -20,8 +20,8 @@ func NewCfUaaTestCase() *CfUaaTestCase {
 }
 
 func login(config Config, username, password string) {
-	RunCommandSuccessfully("cf api --skip-ssl-validation", config.CloudFoundryConfig.APIURL)
-	RunCommandSuccessfully("cf auth", username, password)
+	RunCommandSuccessfully(CF_CLI+" api --skip-ssl-validation", config.CloudFoundryConfig.APIURL)
+	RunCommandSuccessfully(CF_CLI+" auth", username, password)
 }
 
 func (tc *CfUaaTestCase) Name() string {
@@ -34,20 +34,20 @@ func (tc *CfUaaTestCase) CheckDeployment(config Config) {
 func (tc *CfUaaTestCase) BeforeBackup(config Config) {
 	By("we create a user and can login")
 	login(config, config.CloudFoundryConfig.AdminUsername, config.CloudFoundryConfig.AdminPassword)
-	RunCommandSuccessfully("cf create-user ", tc.testUser, tc.testPassword)
+	RunCommandSuccessfully(CF_CLI+" create-user ", tc.testUser, tc.testPassword)
 	login(config, tc.testUser, tc.testPassword)
-	RunCommandSuccessfully("cf logout")
+	RunCommandSuccessfully(CF_CLI + " logout")
 }
 
 func (tc *CfUaaTestCase) AfterBackup(config Config) {
 	By("we delete the user and verify")
 	login(config, config.CloudFoundryConfig.AdminUsername, config.CloudFoundryConfig.AdminPassword)
-	RunCommandSuccessfully("cf delete-user ", tc.testUser, "-f")
-	RunCommandSuccessfully("cf logout")
-	RunCommandSuccessfully("cf api --skip-ssl-validation", config.CloudFoundryConfig.APIURL)
+	RunCommandSuccessfully(CF_CLI+" delete-user ", tc.testUser, "-f")
+	RunCommandSuccessfully(CF_CLI + " logout")
+	RunCommandSuccessfully(CF_CLI+" api --skip-ssl-validation", config.CloudFoundryConfig.APIURL)
 
 	By("user has been deleted. authentication should fail")
-	result := RunCommand("cf auth", tc.testUser, tc.testPassword)
+	result := RunCommand(CF_CLI+" auth", tc.testUser, tc.testPassword)
 	Expect(result.ExitCode()).To(Equal(1))
 }
 
@@ -61,5 +61,5 @@ func (tc *CfUaaTestCase) AfterRestore(config Config) {
 func (tc *CfUaaTestCase) Cleanup(config Config) {
 	By("We delete the user")
 	login(config, config.CloudFoundryConfig.AdminUsername, config.CloudFoundryConfig.AdminPassword)
-	RunCommandSuccessfully("cf delete-user ", tc.testUser, "-f")
+	RunCommandSuccessfully(CF_CLI+" delete-user ", tc.testUser, "-f")
 }

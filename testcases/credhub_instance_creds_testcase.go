@@ -24,11 +24,11 @@ type CfCredhubSSITestCase struct {
 func NewCfCredhubSSITestCase() *CfCredhubSSITestCase {
 	id := RandomStringNumber()
 
-  credhubAppPath, appPathPresent := os.LookupEnv("CREDHUB_APP_PATH") 
+	credhubAppPath, appPathPresent := os.LookupEnv("CREDHUB_APP_PATH")
 
-  if no(appPathPresent) {
-    credhubAppPath = path.Join(CurrentTestDir(), "/../fixtures/credhub-test-app")
-  }
+	if no(appPathPresent) {
+		credhubAppPath = path.Join(CurrentTestDir(), "/../fixtures/credhub-test-app")
+	}
 
 	return &CfCredhubSSITestCase{
 		uniqueTestID:       id,
@@ -39,7 +39,7 @@ func NewCfCredhubSSITestCase() *CfCredhubSSITestCase {
 }
 
 func no(b bool) bool {
-  return ! b
+	return !b
 }
 
 var listResponse struct {
@@ -56,16 +56,16 @@ func (tc *CfCredhubSSITestCase) CheckDeployment(config Config) {
 }
 
 func (tc *CfCredhubSSITestCase) BeforeBackup(config Config) {
-	RunCommandSuccessfully("cf api --skip-ssl-validation", config.CloudFoundryConfig.APIURL)
-	RunCommandSuccessfully("cf auth", config.CloudFoundryConfig.AdminUsername, config.CloudFoundryConfig.AdminPassword)
-	RunCommandSuccessfully("cf create-org acceptance-test-org-" + tc.uniqueTestID)
-	RunCommandSuccessfully("cf create-space acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
-	RunCommandSuccessfully("cf target -s acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
+	RunCommandSuccessfully(CF_CLI+" api --skip-ssl-validation", config.CloudFoundryConfig.APIURL)
+	RunCommandSuccessfully(CF_CLI+" auth", config.CloudFoundryConfig.AdminUsername, config.CloudFoundryConfig.AdminPassword)
+	RunCommandSuccessfully(CF_CLI + " create-org acceptance-test-org-" + tc.uniqueTestID)
+	RunCommandSuccessfully(CF_CLI + " create-space acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
+	RunCommandSuccessfully(CF_CLI + " target -s acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
 
-	RunCommandSuccessfully("cf push " + "--no-start " + tc.appName + " -p " + tc.testAppFixturePath + " -b go_buildpack" + " -f " + tc.testAppFixturePath + "/manifest.yml")
-	RunCommandSuccessfully("cf set-env " + tc.appName + " CREDHUB_CLIENT " + config.CloudFoundryConfig.CredHubClient + " > /dev/null")
-	RunCommandSuccessfully("cf set-env " + tc.appName + " CREDHUB_SECRET " + config.CloudFoundryConfig.CredHubSecret + " > /dev/null")
-	RunCommandSuccessfully("cf start " + tc.appName)
+	RunCommandSuccessfully(CF_CLI + " push " + "--no-start " + tc.appName + " -p " + tc.testAppFixturePath + " -b go_buildpack" + " -f " + tc.testAppFixturePath + "/manifest.yml")
+	RunCommandSuccessfully(CF_CLI + " set-env " + tc.appName + " CREDHUB_CLIENT " + config.CloudFoundryConfig.CredHubClient + " > /dev/null")
+	RunCommandSuccessfully(CF_CLI + " set-env " + tc.appName + " CREDHUB_SECRET " + config.CloudFoundryConfig.CredHubSecret + " > /dev/null")
+	RunCommandSuccessfully(CF_CLI + " start " + tc.appName)
 
 	tc.appURL = GetAppURL(tc.appName)
 
@@ -100,10 +100,10 @@ func (tc *CfCredhubSSITestCase) AfterBackup(config Config) {
 }
 
 func (tc *CfCredhubSSITestCase) EnsureAfterSelectiveRestore(config Config) {
-	RunCommandSuccessfully("cf push " + "--no-start " + tc.appName + " -p " + tc.testAppFixturePath + " -b go_buildpack" + " -f " + tc.testAppFixturePath + "/manifest.yml")
-	RunCommandSuccessfully("cf set-env " + tc.appName + " CREDHUB_CLIENT " + config.CloudFoundryConfig.CredHubClient + " > /dev/null")
-	RunCommandSuccessfully("cf set-env " + tc.appName + " CREDHUB_SECRET " + config.CloudFoundryConfig.CredHubSecret + " > /dev/null")
-	RunCommandSuccessfully("cf start " + tc.appName)
+	RunCommandSuccessfully(CF_CLI + " push " + "--no-start " + tc.appName + " -p " + tc.testAppFixturePath + " -b go_buildpack" + " -f " + tc.testAppFixturePath + "/manifest.yml")
+	RunCommandSuccessfully(CF_CLI + " set-env " + tc.appName + " CREDHUB_CLIENT " + config.CloudFoundryConfig.CredHubClient + " > /dev/null")
+	RunCommandSuccessfully(CF_CLI + " set-env " + tc.appName + " CREDHUB_SECRET " + config.CloudFoundryConfig.CredHubSecret + " > /dev/null")
+	RunCommandSuccessfully(CF_CLI + " start " + tc.appName)
 }
 
 func (tc *CfCredhubSSITestCase) AfterRestore(config Config) {
@@ -119,5 +119,5 @@ func (tc *CfCredhubSSITestCase) Cleanup(config Config) {
 	defer appResponse.Body.Close()
 
 	Expect(appResponse.StatusCode).To(Equal(http.StatusOK))
-	RunCommandSuccessfully("cf delete-org -f acceptance-test-org-" + tc.uniqueTestID)
+	RunCommandSuccessfully(CF_CLI + " delete-org -f acceptance-test-org-" + tc.uniqueTestID)
 }

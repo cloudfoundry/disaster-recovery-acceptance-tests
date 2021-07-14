@@ -36,28 +36,28 @@ func (tc *CfNetworkingTestCase) CheckDeployment(config Config) {
 
 func (tc *CfNetworkingTestCase) BeforeBackup(config Config) {
 	By("creating new orgs and spaces")
-	RunCommandSuccessfully("cf api --skip-ssl-validation", config.CloudFoundryConfig.APIURL)
-	RunCommandSuccessfully("cf auth", config.CloudFoundryConfig.AdminUsername, config.CloudFoundryConfig.AdminPassword)
-	RunCommandSuccessfully("cf create-org acceptance-test-org-" + tc.uniqueTestID)
-	RunCommandSuccessfully("cf create-space acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
-	RunCommandSuccessfully("cf target -s acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
-	RunCommandSuccessfully("cf push " + tc.testAppName + " -p " + tc.testAppFixturePath)
-	RunCommandSuccessfully(fmt.Sprintf("cf add-network-policy %s --destination-app %s --port 8080 --protocol tcp", tc.testAppName, tc.testAppName))
+	RunCommandSuccessfully(CF_CLI+" api --skip-ssl-validation", config.CloudFoundryConfig.APIURL)
+	RunCommandSuccessfully(CF_CLI+" auth", config.CloudFoundryConfig.AdminUsername, config.CloudFoundryConfig.AdminPassword)
+	RunCommandSuccessfully(CF_CLI + " create-org acceptance-test-org-" + tc.uniqueTestID)
+	RunCommandSuccessfully(CF_CLI + " create-space acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
+	RunCommandSuccessfully(CF_CLI + " target -s acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
+	RunCommandSuccessfully(CF_CLI + " push " + tc.testAppName + " -p " + tc.testAppFixturePath)
+	RunCommandSuccessfully(fmt.Sprintf(CF_CLI+" add-network-policy %s --destination-app %s --port 8080 --protocol tcp", tc.testAppName, tc.testAppName))
 }
 
 func (tc *CfNetworkingTestCase) AfterBackup(config Config) {
 	testAppName := fmt.Sprintf("test_app_%s", tc.uniqueTestID)
-	RunCommandSuccessfully(fmt.Sprintf("cf remove-network-policy %s --destination-app %s --port 8080 --protocol tcp", testAppName, testAppName))
+	RunCommandSuccessfully(fmt.Sprintf(CF_CLI+" remove-network-policy %s --destination-app %s --port 8080 --protocol tcp", testAppName, testAppName))
 }
 
 func (tc *CfNetworkingTestCase) EnsureAfterSelectiveRestore(config Config) {
 	By("repushing apps if restoring from a selective restore")
-	RunCommandSuccessfully("cf push " + tc.testAppName + " -p " + tc.testAppFixturePath)
+	RunCommandSuccessfully(CF_CLI + " push " + tc.testAppName + " -p " + tc.testAppFixturePath)
 }
 
 func (tc *CfNetworkingTestCase) AfterRestore(config Config) {
 	By("finding credentials for the deployment to restore")
-	session := RunCommand(fmt.Sprintf("cf network-policies"))
+	session := RunCommand(fmt.Sprintf(CF_CLI + " network-policies"))
 	testAppName := fmt.Sprintf("test_app_%s", tc.uniqueTestID)
 	Eventually(session.Out).Should(gbytes.Say(fmt.Sprintf(`%s.*%s.*tcp.*8080`, testAppName, testAppName)))
 }
@@ -68,5 +68,5 @@ func (tc *CfNetworkingTestCase) Cleanup(config Config) {
 
 func (tc *CfNetworkingTestCase) deletePushedApps(config Config) {
 	By("cleaning up orgs and spaces")
-	RunCommandSuccessfully("cf delete-org -f acceptance-test-org-" + tc.uniqueTestID)
+	RunCommandSuccessfully(CF_CLI + " delete-org -f acceptance-test-org-" + tc.uniqueTestID)
 }
