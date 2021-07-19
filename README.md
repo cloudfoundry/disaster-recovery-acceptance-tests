@@ -1,7 +1,16 @@
-# disaster-recovery-acceptance-tests (DRATs)
+# disaster-recovery-acceptance-tests (DRATs): cf6-compatible branch
 
 Tests if Cloud Foundry (CF) can be backed up and restored. The tests will back up from and restore to `CF_DEPLOYMENT_NAME`.
 Specifically, DRATs adds state to a Cloud Foundry deployment by testing backup and restore during a CF operation such as pushing an app. DRATs backs up the deployment, restores from the backup, and asserts that the state is present after restore.
+
+## cf6-compatible branch
+This branch of DRATS uses the V6 version of the CF CLI. It is
+therefore compatible with older CF deployments which cannot talk to
+the V7 version of the CF CLI. The `main` branch of DRATS at the time
+of writing uses the V7 version of the CF CLI.
+
+This branch can be deleted or deprecated when all stakeholders have
+moved to CF versions that support the V7 version of the CLI
 
 
 ## Prerequisites
