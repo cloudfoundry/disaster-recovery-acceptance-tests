@@ -6,10 +6,10 @@ import (
 	"strings"
 	"time"
 
-	routing_api "code.cloudfoundry.org/routing-api"
+	routing_api "github.com/cloudfoundry/routing-api"
 
-	"code.cloudfoundry.org/routing-api/models"
 	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/runner"
+	"github.com/cloudfoundry/routing-api/models"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

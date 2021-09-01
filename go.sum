@@ -6,6 +6,8 @@ code.cloudfoundry.org/trace-logger v0.0.0-20170119230301-107ef08a939d h1:1I5BueV
 code.cloudfoundry.org/trace-logger v0.0.0-20170119230301-107ef08a939d/go.mod h1:KAH6N5nwHViCZsOgmApk6nj8TDuqRGb9R06Hk461Uwc=
 github.com/bmizerany/pat v0.0.0-20170815010413-6226ea591a40 h1:y4B3+GPxKlrigF1ha5FFErxK+sr6sWxQovRMzwMhejo=
 github.com/bmizerany/pat v0.0.0-20170815010413-6226ea591a40/go.mod h1:8rLXio+WjiTceGBHIoTvn60HIbs7Hm7bcHjyrSqYB9c=
+github.com/cloudfoundry/routing-api v0.0.0-20210519201915-b3b118a368e6 h1:wmfPyoQY2lO1gkzBzxJ/eWXMpWPt3RxNSUiHePTHphA=
+github.com/cloudfoundry/routing-api v0.0.0-20210519201915-b3b118a368e6/go.mod h1:VmhUAxFnbO/X9m/TG6cnDgn2sVrQo5zxNbelWhqChXo=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
