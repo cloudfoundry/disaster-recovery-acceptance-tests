@@ -26,7 +26,7 @@ export BOSH_CERT_PATH="$PWD/bosh.cert"
 
 pushd bbr-binary-release
   tar xvf ./*.tar
-  export BBR_BUILD_PATH="$PWD/releases/bbr"
+  export BBR_BUILD_PATH="$PWD/bbr"
 popd
 
 pushd src/github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests
