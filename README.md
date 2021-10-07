@@ -44,7 +44,7 @@ Test cases should be used for checking that CF components' data has been backed 
 
 **Backup and restore of apps is covered by the existing CAPI test case.** No new test cases are needed for this – unless you're writing CAPI backup and restore scripts, app backup and restore can be assumed to work.
 
-To add extra test cases, create a new TestCase that follows the [TestCase interface](runner/testcase.go).
+To add extra test cases, create a new TestCase that follows the [TestCase interface](https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/blob/master/runner/testcase.go).
 
 The methods that need to be implemented are:
 * `CheckDeployment(common.Config)` runs first to ensure that the test case could possibly succeed in the deployment DRATs is running against. E.g. An errand-based test case could never succeed in a deployment where the errand has never been run.
@@ -61,11 +61,11 @@ The methods that need to be implemented are:
 ## Running DRATs in your CI
 
 We provide tasks to run DRATs with your CI:
-* A [`drats` task](ci/tasks/drats) that reads in environment variables
-* A [`drats-with-integration-config` task](ci/tasks/drats-with-integration-config) that read from an integration config.
+* A [`drats` task](https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/tree/master/ci/drats) that reads in environment variables
+* A [`drats-with-integration-config` task](https://github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/tree/master/ci/drats-with-integration-config) that read from an integration config.
 
 Both DRATs tasks establish an SSH tunnel using [`sshuttle`](http://sshuttle.readthedocs.io) so that they can run from outside the network. Note the tasks will need to be run from a privileged container.
-You can also find [our pipeline definition here](ci/pipelines/drats/pipeline.yml)
+You can also find [our pipeline definition here](https://github.com/cloudfoundry-incubator/backup-and-restore-ci/blob/master/pipelines/drats/pipeline.yml)
 
 ## Debugging your DRATs run
 
