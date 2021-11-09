@@ -97,24 +97,6 @@ jobs:
       params:
         action: claim
     - get: cryogenics-concourse-tasks
-  - task: find-pr-story
-    attempts: 5
-    file: cryogenics-concourse-tasks/tracker-automation/find-pr-story/task.yml
-    input_mapping:
-      pr: disaster-recovery-acceptance-tests
-    params:
-      TRACKER_API_TOKEN: ((tracker.api_token))
-      TRACKER_PROJECT_ID: ((tracker.project_id))
-      GIT_REPOSITORY: cloudfoundry-incubator/disaster-recovery-acceptance-tests
-  - task: start-story
-    attempts: 5
-    file: cryogenics-concourse-tasks/tracker-automation/start-story/task.yml
-    input_mapping:
-      pr: disaster-recovery-acceptance-tests
-    params:
-      TRACKER_API_TOKEN: ((tracker.api_token))
-      TRACKER_PROJECT_ID: ((tracker.project_id))
-      ESTIMATE: 1
 
 - name: deploy-backup-restore-components
   plan:
@@ -249,26 +231,3 @@ jobs:
     params:
       action: unclaim
       env_file: cf-deployment-env/metadata
-
-- name: update-tracker
-  plan:
-  - get: every-day
-    trigger: true
-    passed: [run-drats-tests]
-  - get: disaster-recovery-acceptance-tests
-    trigger: true
-    passed: [run-drats-tests]
-    version: every
-  - get: cryogenics-concourse-tasks
-  - task: deliver-stories
-    file: cryogenics-concourse-tasks/tracker-automation/deliver-stories/task.yml
-    params:
-      TRACKER_API_TOKEN: ((tracker.api_token))
-      TRACKER_PROJECT_ID: ((tracker.project_id))
-      GIT_REPOSITORY: cloudfoundry-incubator/disaster-recovery-acceptance-tests
-  - task: accept-stories
-    file: cryogenics-concourse-tasks/tracker-automation/accept-stories/task.yml
-    params:
-      TRACKER_API_TOKEN: ((tracker.api_token))
-      TRACKER_PROJECT_ID: ((tracker.project_id))
-      GIT_REPOSITORY: cloudfoundry-incubator/disaster-recovery-acceptance-tests
