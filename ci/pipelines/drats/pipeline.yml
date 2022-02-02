@@ -57,14 +57,6 @@ resources:
     hostname: environments.toolsmiths.cf-app.com
     pool_name: cf-deployment
 
-- name: every-day
-  type: time
-  source:
-    start: 8:00 AM
-    stop: 9:00 AM
-    days: [Monday, Tuesday, Wednesday, Thursday, Friday]
-    location: Europe/London
-
 - name: cryogenics-concourse-tasks
   type: git
   source:
@@ -78,8 +70,6 @@ jobs:
     - get: disaster-recovery-acceptance-tests
       trigger: true
       version: every
-    - get: every-day
-      trigger: true
     - set_pipeline: drats
       file: disaster-recovery-acceptance-tests/ci/pipelines/drats/pipeline.yml
 
@@ -90,31 +80,10 @@ jobs:
       passed: [set-pipeline]
       trigger: true
       version: every
-    - get: every-day
-      trigger: true
-      passed: [set-pipeline]
     - put: cf-deployment-env
       params:
         action: claim
     - get: cryogenics-concourse-tasks
-  - task: find-pr-story
-    attempts: 5
-    file: cryogenics-concourse-tasks/tracker-automation/find-pr-story/task.yml
-    input_mapping:
-      pr: disaster-recovery-acceptance-tests
-    params:
-      TRACKER_API_TOKEN: ((tracker.api_token))
-      TRACKER_PROJECT_ID: ((tracker.project_id))
-      GIT_REPOSITORY: cloudfoundry-incubator/disaster-recovery-acceptance-tests
-  - task: start-story
-    attempts: 5
-    file: cryogenics-concourse-tasks/tracker-automation/start-story/task.yml
-    input_mapping:
-      pr: disaster-recovery-acceptance-tests
-    params:
-      TRACKER_API_TOKEN: ((tracker.api_token))
-      TRACKER_PROJECT_ID: ((tracker.project_id))
-      ESTIMATE: 1
 
 - name: deploy-backup-restore-components
   plan:
@@ -123,9 +92,6 @@ jobs:
       version: every
       passed: [claim-cf-deployment]
       trigger: true
-    - get: every-day
-      trigger: true
-      passed: [claim-cf-deployment]
     - get: cf-deployment-env
       passed: [claim-cf-deployment]
       trigger: true
@@ -168,9 +134,6 @@ jobs:
 - name: run-drats-tests
   plan:
   - in_parallel:
-    - get: every-day
-      trigger: true
-      passed: [deploy-backup-restore-components]
     - get: cf-deployment
       passed: [deploy-backup-restore-components]
     - get: disaster-recovery-acceptance-tests
@@ -249,26 +212,3 @@ jobs:
     params:
       action: unclaim
       env_file: cf-deployment-env/metadata
-
-- name: update-tracker
-  plan:
-  - get: every-day
-    trigger: true
-    passed: [run-drats-tests]
-  - get: disaster-recovery-acceptance-tests
-    trigger: true
-    passed: [run-drats-tests]
-    version: every
-  - get: cryogenics-concourse-tasks
-  - task: deliver-stories
-    file: cryogenics-concourse-tasks/tracker-automation/deliver-stories/task.yml
-    params:
-      TRACKER_API_TOKEN: ((tracker.api_token))
-      TRACKER_PROJECT_ID: ((tracker.project_id))
-      GIT_REPOSITORY: cloudfoundry-incubator/disaster-recovery-acceptance-tests
-  - task: accept-stories
-    file: cryogenics-concourse-tasks/tracker-automation/accept-stories/task.yml
-    params:
-      TRACKER_API_TOKEN: ((tracker.api_token))
-      TRACKER_PROJECT_ID: ((tracker.project_id))
-      GIT_REPOSITORY: cloudfoundry-incubator/disaster-recovery-acceptance-tests
