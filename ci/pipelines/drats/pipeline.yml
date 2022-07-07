@@ -1,9 +1,4 @@
 ---
-vault_creds: &vault_creds
-  url: ((vault/server.url))
-  role_id: ((vault/resource_credentials.role_id))
-  secret_id: ((vault/resource_credentials.secret_id))
-
 resource_types:
 - name: pull-request
   type: docker-image
