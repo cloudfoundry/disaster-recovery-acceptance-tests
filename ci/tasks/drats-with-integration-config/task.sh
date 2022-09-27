@@ -22,15 +22,6 @@ ssh-add ssh.pem
 export BOSH_ALL_PROXY="ssh+socks5://${BOSH_GW_USER}@${BOSH_GW_HOST}:22?private-key=$(pwd)/ssh.pem"
 echo "Configured BOSH_ALL_PROXY to $BOSH_ALL_PROXY"
 
-#sshuttle -r "${BOSH_GW_USER}@${BOSH_GW_HOST}" "${SSH_DESTINATION_CIDR}" --daemon -e 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o ServerAliveInterval=600' --no-latency-control
-
-#sleep 5
-
-#if ! stat sshuttle.pid > /dev/null 2>&1; then
-#  echo "Failed to start sshuttle daemon"
-#  exit 1
-#fi
-
 pushd bbr-binary-release
   tar xvf ./*.tar
   export BBR_BUILD_PATH="$PWD/releases/bbr"
