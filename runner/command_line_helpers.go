@@ -21,6 +21,21 @@ func RunCommandSuccessfully(cmd string, args ...string) *gexec.Session {
 	return session
 }
 
+func RunCommandSuccessfullyWithRetries(cmd string, args ...string) *gexec.Session {
+	var session *gexec.Session
+	for i := 0; i < 5; i++ {
+		session = runCommandWithStream("", GinkgoWriter, GinkgoWriter, cmd, args...)
+		if session.ExitCode() == 0 {
+			Expect(session).To(gexec.Exit(0))
+			return session
+		}
+		time.Sleep(10 * time.Second)
+	}
+
+	Expect(session).To(gexec.Exit(0))
+	return session
+}
+
 func RunCommandSuccessfullySilently(cmd string, args ...string) *gexec.Session {
 	session := runCommandWithStream("", bytes.NewBufferString(""), GinkgoWriter, cmd, args...)
 	Expect(session).To(gexec.Exit(0))

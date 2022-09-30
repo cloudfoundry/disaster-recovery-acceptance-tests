@@ -24,11 +24,11 @@ type CfCredhubSSITestCase struct {
 func NewCfCredhubSSITestCase() *CfCredhubSSITestCase {
 	id := RandomStringNumber()
 
-  credhubAppPath, appPathPresent := os.LookupEnv("CREDHUB_APP_PATH") 
+	credhubAppPath, appPathPresent := os.LookupEnv("CREDHUB_APP_PATH")
 
-  if no(appPathPresent) {
-    credhubAppPath = path.Join(CurrentTestDir(), "/../fixtures/credhub-test-app")
-  }
+	if no(appPathPresent) {
+		credhubAppPath = path.Join(CurrentTestDir(), "/../fixtures/credhub-test-app")
+	}
 
 	return &CfCredhubSSITestCase{
 		uniqueTestID:       id,
@@ -65,7 +65,8 @@ func (tc *CfCredhubSSITestCase) BeforeBackup(config Config) {
 	RunCommandSuccessfully("cf push " + "--no-start " + tc.appName + " -p " + tc.testAppFixturePath + " -b go_buildpack" + " -f " + tc.testAppFixturePath + "/manifest.yml")
 	RunCommandSuccessfully("cf set-env " + tc.appName + " CREDHUB_CLIENT " + config.CloudFoundryConfig.CredHubClient + " > /dev/null")
 	RunCommandSuccessfully("cf set-env " + tc.appName + " CREDHUB_SECRET " + config.CloudFoundryConfig.CredHubSecret + " > /dev/null")
-	RunCommandSuccessfully("cf start " + tc.appName)
+	fmt.Printf("trying to run cf start with retries\n")
+	RunCommandSuccessfullyWithRetries("cf start " + tc.appName)
 
 	tc.appURL = GetAppURL(tc.appName)
 
