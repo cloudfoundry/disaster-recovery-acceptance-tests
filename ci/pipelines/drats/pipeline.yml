@@ -45,6 +45,7 @@ resources:
     disable_forks: false
     base_branch: main
     watch_checks_interval: "30"
+    autosync_pr: true
 
 - name: cf-deployment-env
   icon: pool
