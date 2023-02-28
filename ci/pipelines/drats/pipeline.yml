@@ -3,7 +3,7 @@ resource_types:
 - name: pull-request
   type: docker-image
   source:
-    repository: teliaoss/github-pr-resource
+    repository: cryogenics/pr-queue-resource
 
 - name: vault
   type: docker-image
@@ -40,9 +40,11 @@ resources:
 - name: disaster-recovery-acceptance-tests
   type: pull-request
   source:
-    repository: cloudfoundry-incubator/disaster-recovery-acceptance-tests
+    repository: cloudfoundry/disaster-recovery-acceptance-tests
     access_token: ((github.access_token))
     disable_forks: false
+    base_branch: main
+    watch_checks_interval: "30"
 
 - name: cf-deployment-env
   icon: pool
@@ -60,19 +62,10 @@ resources:
     branch: main
 
 jobs:
-- name: set-pipeline
-  plan:
-    - get: disaster-recovery-acceptance-tests
-      trigger: true
-      version: every
-    - set_pipeline: drats
-      file: disaster-recovery-acceptance-tests/ci/pipelines/drats/pipeline.yml
-
 - name: claim-cf-deployment
   plan:
   - in_parallel:
     - get: disaster-recovery-acceptance-tests
-      passed: [set-pipeline]
       trigger: true
       version: every
     - put: cf-deployment-env
@@ -192,17 +185,10 @@ jobs:
           path: disaster-recovery-acceptance-tests
           status: success
           context: drats
-      - load_var: pr-url
-        file: disaster-recovery-acceptance-tests/.git/resource/url
-      - task: merge-pr
-        file: cryogenics-concourse-tasks/github-automation/merge-pr/task.yml
-        input_mapping:
-          source-repo: disaster-recovery-acceptance-tests
+      - put: disaster-recovery-acceptance-tests
         params:
-          DELETE: TRUE
-          AUTHOR: dependabot
-          GH_TOKEN: ((github.access_token))
-          PR_REF: ((.:pr-url))
+          path: disaster-recovery-acceptance-tests
+          merge: true
   - put: cf-deployment-env
     params:
       action: unclaim
