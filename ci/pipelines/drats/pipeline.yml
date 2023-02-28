@@ -42,7 +42,7 @@ resources:
   source:
     repository: cloudfoundry/disaster-recovery-acceptance-tests
     access_token: ((github.access_token))
-    disable_forks: false
+    disable_forks: true
     base_branch: main
     watch_checks_interval: "30"
     autosync_pr: true
