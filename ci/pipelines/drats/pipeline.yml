@@ -105,7 +105,7 @@ jobs:
         operations/enable-nfs-volume-service.yml
         operations/experimental/disable-interpolate-service-bindings.yml
         operations/experimental/enable-traffic-to-internal-networks.yml
-        operations/experimental/enable-smb-volume-service.yml
+        operations/enable-smb-volume-service.yml
         operations/backup-and-restore/skip-backup-restore-droplets-and-packages.yml
   - task: bosh-run-errand-nfsbrokerpush
     file: cf-deployment-concourse-tasks/run-errand/task.yml
