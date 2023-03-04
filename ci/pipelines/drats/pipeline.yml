@@ -3,7 +3,7 @@ resource_types:
 - name: pull-request
   type: docker-image
   source:
-    repository: teliaoss/github-pr-resource
+    repository: cryogenics/pr-queue-resource
 
 - name: vault
   type: docker-image
@@ -22,7 +22,6 @@ resources:
   source:
     branch: main
     uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
-    tag_filter: v12.*
 
 - name: cf-deployment
   type: git
@@ -40,9 +39,12 @@ resources:
 - name: disaster-recovery-acceptance-tests
   type: pull-request
   source:
-    repository: cloudfoundry-incubator/disaster-recovery-acceptance-tests
+    repository: cloudfoundry/disaster-recovery-acceptance-tests
     access_token: ((github.access_token))
-    disable_forks: false
+    disable_forks: true
+    base_branch: main
+    watch_checks_interval: "30"
+    autosync_pr: true
 
 - name: cf-deployment-env
   icon: pool
@@ -60,19 +62,10 @@ resources:
     branch: main
 
 jobs:
-- name: set-pipeline
-  plan:
-    - get: disaster-recovery-acceptance-tests
-      trigger: true
-      version: every
-    - set_pipeline: drats
-      file: disaster-recovery-acceptance-tests/ci/pipelines/drats/pipeline.yml
-
 - name: claim-cf-deployment
   plan:
   - in_parallel:
     - get: disaster-recovery-acceptance-tests
-      passed: [set-pipeline]
       trigger: true
       version: every
     - put: cf-deployment-env
@@ -111,7 +104,7 @@ jobs:
         operations/enable-nfs-volume-service.yml
         operations/experimental/disable-interpolate-service-bindings.yml
         operations/experimental/enable-traffic-to-internal-networks.yml
-        operations/experimental/enable-smb-volume-service.yml
+        operations/enable-smb-volume-service.yml
         operations/backup-and-restore/skip-backup-restore-droplets-and-packages.yml
   - task: bosh-run-errand-nfsbrokerpush
     file: cf-deployment-concourse-tasks/run-errand/task.yml
@@ -192,17 +185,10 @@ jobs:
           path: disaster-recovery-acceptance-tests
           status: success
           context: drats
-      - load_var: pr-url
-        file: disaster-recovery-acceptance-tests/.git/resource/url
-      - task: merge-pr
-        file: cryogenics-concourse-tasks/github-automation/merge-pr/task.yml
-        input_mapping:
-          source-repo: disaster-recovery-acceptance-tests
+      - put: disaster-recovery-acceptance-tests
         params:
-          DELETE: TRUE
-          AUTHOR: dependabot
-          GH_TOKEN: ((github.access_token))
-          PR_REF: ((.:pr-url))
+          path: disaster-recovery-acceptance-tests
+          merge: true
   - put: cf-deployment-env
     params:
       action: unclaim
