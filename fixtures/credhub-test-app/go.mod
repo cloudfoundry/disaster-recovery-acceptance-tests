@@ -11,7 +11,7 @@ require (
 	github.com/onsi/ginkgo v1.16.2 // indirect
 	github.com/onsi/gomega v1.12.0 // indirect
 	golang.org/x/crypto v0.1.0 // indirect
-	golang.org/x/net v0.1.0 // indirect
-	golang.org/x/sys v0.1.0 // indirect
+	golang.org/x/net v0.7.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
