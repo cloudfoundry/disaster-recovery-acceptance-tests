@@ -3,7 +3,7 @@ image_resource:
   type: registry-image
   source:
     repository: cryogenics/essentials-cf6
-    tag: 0.1.16
+    tag: 0.1.18
 inputs:
   - name: disaster-recovery-acceptance-tests
   - name: integration-configs
