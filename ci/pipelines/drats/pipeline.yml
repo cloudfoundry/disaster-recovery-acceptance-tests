@@ -9,6 +9,7 @@ groups:
     - claim-cf-deployment
     - deploy-backup-restore-components
     - run-drats-tests
+    - unclaim-cf-deployment-env
 
 resource_types:
 - name: pull-request
@@ -222,6 +223,13 @@ jobs:
         params:
           path: pr
           merge: true
+
+- name: unclaim-cf-deployment-env
+  plan:
+  - get: cf-deployment-env
+    trigger: true
+    passed:
+    - run-drats-tests
   - put: cf-deployment-env
     params:
       action: unclaim
