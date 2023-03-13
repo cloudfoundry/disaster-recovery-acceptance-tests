@@ -13,7 +13,5 @@ export GOPATH=$PWD
 export PATH=$PATH:$GOPATH/bin
 
 pushd src/github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests
-    go get github.com/onsi/ginkgo/ginkgo
-    go mod tidy
     ginkgo -v -r --trace --skipPackage acceptance
 popd
