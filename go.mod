@@ -5,7 +5,7 @@ go 1.19
 require (
 	code.cloudfoundry.org/routing-api v0.0.0-20200423182059-8cf9b4589b27
 	github.com/onsi/ginkgo v1.16.5
-	github.com/onsi/gomega v1.27.2
+	github.com/onsi/gomega v1.27.3
 )
 
 require (
