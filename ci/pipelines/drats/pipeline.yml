@@ -1,4 +1,6 @@
 ---
+number_of_retries: &number_of_retries 2
+
 groups:
 - name: bump
   jobs:
@@ -137,12 +139,14 @@ jobs:
         operations/enable-smb-volume-service.yml
         operations/backup-and-restore/skip-backup-restore-droplets-and-packages.yml
   - task: bosh-run-errand-nfsbrokerpush
+    attempts: *number_of_retries
     file: cf-deployment-concourse-tasks/run-errand/task.yml
     input_mapping:
       toolsmiths-env: cf-deployment-env
     params:
       ERRAND_NAME: nfsbrokerpush
   - task: bosh-run-errand-smbbrokerpush
+    attempts: *number_of_retries
     file: cf-deployment-concourse-tasks/run-errand/task.yml
     input_mapping:
       toolsmiths-env: cf-deployment-env
@@ -198,6 +202,7 @@ jobs:
       BOSH_CLIENT: ((.:pooled-env.bosh.bosh_client))
       BOSH_CLIENT_SECRET: ((.:pooled-env.bosh.bosh_client_secret))
   - task: acceptance-tests
+    attempts: *number_of_retries
     file: pr/ci/tasks/drats-with-integration-config/task.yml
     privileged: true
     input_mapping:
