@@ -1,7 +1,7 @@
 package testcases
 
 import (
-	"github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/runner"
+	"github.com/cloudfoundry/disaster-recovery-acceptance-tests/runner"
 )
 
 func OpenSourceTestCases() []runner.TestCase {

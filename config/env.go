@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/runner"
+	"github.com/cloudfoundry/disaster-recovery-acceptance-tests/runner"
 )
 
 func FromEnv() (runner.Config, runner.TestCaseFilter) {
