@@ -13,16 +13,3 @@ updates:
     directory: "/fixtures/credhub-test-app"
     schedule:
       interval: "daily"
-
-  # Run dependabot also for cf6-compatible branch
-  - package-ecosystem: "gomod"
-    directory: "/"
-    schedule:
-      interval: "daily"
-    target-branch: "cf6-compatible"
-  - package-ecosystem: "gomod"
-    directory: "/fixtures/credhub-test-app"
-    schedule:
-      interval: "daily"
-    target-branch: "cf6-compatible"
-
