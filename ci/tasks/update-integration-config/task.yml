@@ -1,19 +1,15 @@
----
 platform: linux
-
 image_resource:
-  type: docker-image
+  type: registry-image
   source:
-    repository: relintdockerhubpushbot/cf-deployment-concourse-tasks
-
+    repository: cryogenics/essentials
+    tag: 0.1.18
 inputs:
-- name: disaster-recovery-acceptance-tests
-- name: integration-configs
-- name: cf-deployment-env
-
+  - name: disaster-recovery-acceptance-tests
+  - name: integration-configs
+  - name: cf-deployment-env
 outputs:
-- name: updated-integration-configs
-
+  - name: updated-integration-configs
 params:
   CF_DEPLOYMENT_NAME: cf
   INTEGRATION_CONFIG_FILE_PATH: ci/integration_config.json
@@ -29,6 +25,5 @@ params:
   BOSH_ALL_PROXY:
   BOSH_CLIENT:
   BOSH_CLIENT_SECRET:
-
 run:
   path: disaster-recovery-acceptance-tests/ci/tasks/update-integration-config/task.sh

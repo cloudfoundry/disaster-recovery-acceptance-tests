@@ -1,9 +1,23 @@
 ---
+number_of_retries: &number_of_retries 2
+
+groups:
+- name: bump
+  jobs:
+    - bump-ci-tasks
+
+- name: test
+  jobs:
+    - claim-cf-deployment
+    - deploy-backup-restore-components
+    - run-drats-tests
+    - unclaim-cf-deployment-env
+
 resource_types:
 - name: pull-request
   type: docker-image
   source:
-    repository: teliaoss/github-pr-resource
+    repository: cryogenics/pr-queue-resource
 
 - name: vault
   type: docker-image
@@ -22,7 +36,6 @@ resources:
   source:
     branch: main
     uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
-    tag_filter: v12.*
 
 - name: cf-deployment
   type: git
@@ -37,12 +50,28 @@ resources:
     repository: bosh-backup-and-restore
     access_token: ((github.access_token))
 
-- name: disaster-recovery-acceptance-tests
+- name: pr
   type: pull-request
   source:
-    repository: cloudfoundry-incubator/disaster-recovery-acceptance-tests
+    repository: cloudfoundry/disaster-recovery-acceptance-tests
     access_token: ((github.access_token))
-    disable_forks: false
+    disable_forks: true
+    base_branch: main
+    watch_checks_interval: "30"
+    autosync_pr: true
+
+- name: disaster-recovery-acceptance-tests
+  type: git
+  source:
+    uri: git@github.com:cloudfoundry/disaster-recovery-acceptance-tests.git
+    branch: main
+    private_key: ((github.ssh_key))
+
+- name: disaster-recovery-acceptance-tests-bump-ci-tasks
+  type: git
+  source:
+    uri: git@github.com:cloudfoundry/disaster-recovery-acceptance-tests.git
+    private_key: ((github.ssh_key))
 
 - name: cf-deployment-env
   icon: pool
@@ -59,20 +88,16 @@ resources:
     private_key: ((github.ssh_key))
     branch: main
 
-jobs:
-- name: set-pipeline
-  plan:
-    - get: disaster-recovery-acceptance-tests
-      trigger: true
-      version: every
-    - set_pipeline: drats
-      file: disaster-recovery-acceptance-tests/ci/pipelines/drats/pipeline.yml
+- name: cryogenics-essentials
+  type: registry-image
+  source:
+    repository: cryogenics/essentials
 
+jobs:
 - name: claim-cf-deployment
   plan:
   - in_parallel:
-    - get: disaster-recovery-acceptance-tests
-      passed: [set-pipeline]
+    - get: pr
       trigger: true
       version: every
     - put: cf-deployment-env
@@ -83,7 +108,7 @@ jobs:
 - name: deploy-backup-restore-components
   plan:
   - in_parallel:
-    - get: disaster-recovery-acceptance-tests
+    - get: pr
       version: every
       passed: [claim-cf-deployment]
       trigger: true
@@ -93,9 +118,9 @@ jobs:
       version: every
     - get: cf-deployment
     - get: cf-deployment-concourse-tasks
-  - put: disaster-recovery-acceptance-tests
+  - put: pr
     params:
-      path: disaster-recovery-acceptance-tests
+      path: pr
       status: pending
       context: drats
   - task: deploy-backup-restore-components
@@ -111,15 +136,17 @@ jobs:
         operations/enable-nfs-volume-service.yml
         operations/experimental/disable-interpolate-service-bindings.yml
         operations/experimental/enable-traffic-to-internal-networks.yml
-        operations/experimental/enable-smb-volume-service.yml
+        operations/enable-smb-volume-service.yml
         operations/backup-and-restore/skip-backup-restore-droplets-and-packages.yml
   - task: bosh-run-errand-nfsbrokerpush
+    attempts: *number_of_retries
     file: cf-deployment-concourse-tasks/run-errand/task.yml
     input_mapping:
       toolsmiths-env: cf-deployment-env
     params:
       ERRAND_NAME: nfsbrokerpush
   - task: bosh-run-errand-smbbrokerpush
+    attempts: *number_of_retries
     file: cf-deployment-concourse-tasks/run-errand/task.yml
     input_mapping:
       toolsmiths-env: cf-deployment-env
@@ -131,7 +158,7 @@ jobs:
   - in_parallel:
     - get: cf-deployment
       passed: [deploy-backup-restore-components]
-    - get: disaster-recovery-acceptance-tests
+    - get: pr
       trigger: true
       passed: [deploy-backup-restore-components]
       version: every
@@ -145,19 +172,22 @@ jobs:
     file: cf-deployment-env/metadata
     format: json
   - task: unit-tests
-    file: disaster-recovery-acceptance-tests/ci/tasks/unit-tests/task.yml
+    file: pr/ci/tasks/unit-tests/task.yml
+    input_mapping:
+      disaster-recovery-acceptance-tests: pr
     params:
       GITHUB_SSH_KEY: ((github.ssh_key))
     on_failure:
-      put: disaster-recovery-acceptance-tests
+      put: pr
       params:
-        path: disaster-recovery-acceptance-tests
+        path: pr
         status: failure
         context: drats
   - task: update-integration-config
-    file: disaster-recovery-acceptance-tests/ci/tasks/update-integration-config/task.yml
+    file: pr/ci/tasks/update-integration-config/task.yml
     input_mapping:
-      integration-configs: disaster-recovery-acceptance-tests
+      integration-configs: pr
+      disaster-recovery-acceptance-tests: pr
     params:
       SYSTEM_DOMAIN: ((.:pooled-env.name)).cf-app.com
       JUMPBOX_PRIVATE_KEY: ((.:pooled-env.bosh.jumpbox_private_key))
@@ -172,38 +202,82 @@ jobs:
       BOSH_CLIENT: ((.:pooled-env.bosh.bosh_client))
       BOSH_CLIENT_SECRET: ((.:pooled-env.bosh.bosh_client_secret))
   - task: acceptance-tests
-    file: disaster-recovery-acceptance-tests/ci/tasks/drats-with-integration-config/task.yml
+    attempts: *number_of_retries
+    file: pr/ci/tasks/drats-with-integration-config/task.yml
     privileged: true
     input_mapping:
+      disaster-recovery-acceptance-tests: pr
       drats-integration-config: updated-integration-configs
     params:
       CONFIG_FILE_PATH: ci/integration_config.json
       CF_DIAL_TIMEOUT: 300
     on_failure:
-      put: disaster-recovery-acceptance-tests
+      put: pr
       params:
-        path: disaster-recovery-acceptance-tests
+        path: pr
         status: failure
         context: drats
     on_success:
       do:
-      - put: disaster-recovery-acceptance-tests
+      - put: pr
         params:
-          path: disaster-recovery-acceptance-tests
+          path: pr
           status: success
           context: drats
-      - load_var: pr-url
-        file: disaster-recovery-acceptance-tests/.git/resource/url
-      - task: merge-pr
-        file: cryogenics-concourse-tasks/github-automation/merge-pr/task.yml
-        input_mapping:
-          source-repo: disaster-recovery-acceptance-tests
+      - put: pr
         params:
-          DELETE: TRUE
-          AUTHOR: dependabot
-          GH_TOKEN: ((github.access_token))
-          PR_REF: ((.:pr-url))
+          path: pr
+          merge: true
+
+- name: unclaim-cf-deployment-env
+  plan:
+  - get: cf-deployment-env
+    trigger: true
+    passed:
+    - run-drats-tests
   - put: cf-deployment-env
     params:
       action: unclaim
       env_file: cf-deployment-env/metadata
+
+- name: bump-ci-tasks
+  plan:
+    - in_parallel:
+      - get: cryogenics-essentials
+        trigger: true
+      - get: cryogenics-concourse-tasks
+      - get: disaster-recovery-acceptance-tests
+    - in_parallel:
+      - load_var: cryogenics-essentials-version
+        file: cryogenics-essentials/tag
+      - task: bump-tasks
+        file: cryogenics-concourse-tasks/deps-automation/bump-concourse-tasks/task.yml
+        input_mapping:
+          repo: disaster-recovery-acceptance-tests
+          image: cryogenics-essentials
+        output_mapping:
+          repo: disaster-recovery-acceptance-tests
+    - put: disaster-recovery-acceptance-tests-bump-ci-tasks
+      params:
+        repository: disaster-recovery-acceptance-tests
+        branch: &bump-ci-task-branch bump-cryogenics-essentials-to-v((.:cryogenics-essentials-version))
+        force: true
+    - task: create-pull-request
+      file: cryogenics-concourse-tasks/github-automation/create-pr/task.yml
+      params:
+        BASE: main
+        BRANCH: *bump-ci-task-branch
+        LABELS: dependencies
+        TITLE: Bump cryogenics/essentials to v((.:cryogenics-essentials-version))
+        MESSAGE: |
+          This is an automatically generated Pull Request from the Cryogenics CI Bot.
+
+          I have detected a new version of [cryogenics/essentials](https://hub.docker.com/r/cryogenics/essentials/tags) and automatically bumped
+          this package to benefit from the latest changes.
+
+          If this does not look right, please reach out to the [#mapbu-cryogenics](https://vmware.slack.com/archives/C01DXEYRKRU) team.
+      input_mapping:
+        source-repo: disaster-recovery-acceptance-tests-bump-ci-tasks
+
+
+
