@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"path"
 
-	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/runner"
+	. "github.com/cloudfoundry/disaster-recovery-acceptance-tests/runner"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gbytes"

@@ -9,7 +9,7 @@ import (
 	"path"
 	"strings"
 
-	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/runner"
+	. "github.com/cloudfoundry/disaster-recovery-acceptance-tests/runner"
 	. "github.com/onsi/gomega"
 )
 

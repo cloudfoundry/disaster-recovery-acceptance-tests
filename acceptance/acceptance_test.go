@@ -3,9 +3,9 @@ package acceptance
 import (
 	"os"
 
-	"github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/config"
-	"github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/runner"
-	"github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/testcases"
+	"github.com/cloudfoundry/disaster-recovery-acceptance-tests/config"
+	"github.com/cloudfoundry/disaster-recovery-acceptance-tests/runner"
+	"github.com/cloudfoundry/disaster-recovery-acceptance-tests/testcases"
 	. "github.com/onsi/ginkgo"
 )
 

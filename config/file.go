@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"time"
 
-	"github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/runner"
+	"github.com/cloudfoundry/disaster-recovery-acceptance-tests/runner"
 )
 
 const defaultTimeout = 15 * time.Minute

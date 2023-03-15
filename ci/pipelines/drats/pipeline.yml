@@ -46,7 +46,7 @@ resources:
 - name: bbr-binary-release
   type: github-release
   source:
-    owner: cloudfoundry-incubator
+    owner: cloudfoundry
     repository: bosh-backup-and-restore
     access_token: ((github.access_token))
 
