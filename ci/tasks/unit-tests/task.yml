@@ -1,18 +1,13 @@
----
 platform: linux
-
 image_resource:
   type: registry-image
   source:
     repository: cryogenics/essentials
-    tag: 0.1.18
-
+    tag: 0.1.19
 inputs:
-- name: disaster-recovery-acceptance-tests
-  path: src/github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests
-
+  - name: disaster-recovery-acceptance-tests
+    path: src/github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests
 run:
   path: src/github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/ci/tasks/unit-tests/task.sh
-
 params:
   GITHUB_SSH_KEY:
