@@ -9,10 +9,10 @@ image_resource:
 
 inputs:
 - name: disaster-recovery-acceptance-tests
-  path: src/github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests
+  path: src/github.com/cloudfoundry/disaster-recovery-acceptance-tests
 
 run:
-  path: src/github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/ci/tasks/unit-tests/task.sh
+  path: src/github.com/cloudfoundry/disaster-recovery-acceptance-tests/ci/tasks/unit-tests/task.sh
 
 params:
   GITHUB_SSH_KEY:

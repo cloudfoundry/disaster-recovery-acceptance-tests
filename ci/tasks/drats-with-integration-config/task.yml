@@ -9,7 +9,7 @@ image_resource:
 
 inputs:
 - name: disaster-recovery-acceptance-tests
-  path: src/github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests
+  path: src/github.com/cloudfoundry/disaster-recovery-acceptance-tests
 - name: bbr-binary-release
 - name: drats-integration-config
 
@@ -18,4 +18,4 @@ params:
   CF_DIAL_TIMEOUT:
 
 run:
-  path: src/github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/ci/tasks/drats-with-integration-config/task.sh
+  path: src/github.com/cloudfoundry/disaster-recovery-acceptance-tests/ci/tasks/drats-with-integration-config/task.sh

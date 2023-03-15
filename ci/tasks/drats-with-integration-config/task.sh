@@ -27,6 +27,6 @@ pushd bbr-binary-release
   export BBR_BUILD_PATH="$PWD/releases/bbr"
 popd
 
-pushd src/github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests
+pushd src/github.com/cloudfoundry/disaster-recovery-acceptance-tests
   scripts/_run_acceptance_tests.sh
 popd

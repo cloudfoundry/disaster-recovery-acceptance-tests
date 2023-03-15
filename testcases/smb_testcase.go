@@ -2,7 +2,7 @@ package testcases
 
 import (
 	"fmt"
-	. "github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/runner"
+	. "github.com/cloudfoundry/disaster-recovery-acceptance-tests/runner"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

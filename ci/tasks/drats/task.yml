@@ -9,7 +9,7 @@ image_resource:
 
 inputs:
 - name: disaster-recovery-acceptance-tests
-  path: src/github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests
+  path: src/github.com/cloudfoundry/disaster-recovery-acceptance-tests
 - name: bbr-binary-release
 
 params:
@@ -43,4 +43,4 @@ params:
   CF_CREDHUB_SECRET:
 
 run:
-  path: src/github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests/ci/tasks/drats/task.sh
+  path: src/github.com/cloudfoundry/disaster-recovery-acceptance-tests/ci/tasks/drats/task.sh

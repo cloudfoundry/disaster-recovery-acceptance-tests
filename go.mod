@@ -1,4 +1,4 @@
-module github.com/cloudfoundry-incubator/disaster-recovery-acceptance-tests
+module github.com/cloudfoundry/disaster-recovery-acceptance-tests
 
 go 1.19
 
