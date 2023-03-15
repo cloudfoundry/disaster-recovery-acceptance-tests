@@ -1,3 +1,5 @@
+# This branch has been deprecated. Please consider switching back to [main](https://github.com/cloudfoundry/disaster-recovery-acceptance-tests/tree/main).
+
 # disaster-recovery-acceptance-tests (DRATs): cf6-compatible branch
 
 Tests if Cloud Foundry (CF) can be backed up and restored. The tests will back up from and restore to `CF_DEPLOYMENT_NAME`.
