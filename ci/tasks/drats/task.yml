@@ -1,17 +1,13 @@
----
 platform: linux
-
 image_resource:
   type: registry-image
   source:
     repository: cryogenics/essentials
-    tag: 0.1.18
-
+    tag: 0.1.19
 inputs:
 - name: disaster-recovery-acceptance-tests
   path: src/github.com/cloudfoundry/disaster-recovery-acceptance-tests
 - name: bbr-binary-release
-
 params:
   CF_DEPLOYMENT_NAME:
   CF_ADMIN_USERNAME:
@@ -41,6 +37,5 @@ params:
   DELETE_AND_REDEPLOY_CF: false
   CF_CREDHUB_CLIENT:
   CF_CREDHUB_SECRET:
-
 run:
   path: src/github.com/cloudfoundry/disaster-recovery-acceptance-tests/ci/tasks/drats/task.sh
