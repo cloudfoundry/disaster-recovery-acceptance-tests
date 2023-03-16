@@ -42,12 +42,12 @@ func (tc *CfNetworkingTestCase) BeforeBackup(config Config) {
 	RunCommandSuccessfully("cf create-space acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf target -s acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf push " + tc.testAppName + " -p " + tc.testAppFixturePath)
-	RunCommandSuccessfully(fmt.Sprintf("cf add-network-policy %s --destination-app %s --port 8080 --protocol tcp", tc.testAppName, tc.testAppName))
+	RunCommandSuccessfully(fmt.Sprintf("cf add-network-policy %s %s --port 8080 --protocol tcp", tc.testAppName, tc.testAppName))
 }
 
 func (tc *CfNetworkingTestCase) AfterBackup(config Config) {
 	testAppName := fmt.Sprintf("test_app_%s", tc.uniqueTestID)
-	RunCommandSuccessfully(fmt.Sprintf("cf remove-network-policy %s --destination-app %s --port 8080 --protocol tcp", testAppName, testAppName))
+	RunCommandSuccessfully(fmt.Sprintf("cf remove-network-policy %s %s --port 8080 --protocol tcp", testAppName, testAppName))
 }
 
 func (tc *CfNetworkingTestCase) EnsureAfterSelectiveRestore(config Config) {
