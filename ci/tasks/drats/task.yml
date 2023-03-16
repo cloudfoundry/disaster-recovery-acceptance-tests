@@ -3,11 +3,11 @@ image_resource:
   type: registry-image
   source:
     repository: cryogenics/essentials
-    tag: 0.1.19
+    tag: 0.1.20
 inputs:
-- name: disaster-recovery-acceptance-tests
-  path: src/github.com/cloudfoundry/disaster-recovery-acceptance-tests
-- name: bbr-binary-release
+  - name: disaster-recovery-acceptance-tests
+    path: src/github.com/cloudfoundry/disaster-recovery-acceptance-tests
+  - name: bbr-binary-release
 params:
   CF_DEPLOYMENT_NAME:
   CF_ADMIN_USERNAME:
