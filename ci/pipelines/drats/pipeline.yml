@@ -1,4 +1,9 @@
 ---
+#!  WARNING: this pipeline is automatically set and manual changes will go away.
+#!
+#!  To setetetpipeline manually run:
+#!    fly set-pipeline -p drats -c pipeline.yml
+
 number_of_retries: &number_of_retries 2
 
 groups:
