@@ -173,6 +173,8 @@ jobs:
       version: every
     - get: bbr-binary-release
     - get: cryogenics-concourse-tasks
+      passed:
+        - claim-cf-deployment
   - load_var: pooled-env
     file: cf-deployment-env/metadata
     format: json
