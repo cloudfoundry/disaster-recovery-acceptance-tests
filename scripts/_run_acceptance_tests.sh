@@ -27,6 +27,4 @@ export DELETE_AND_REDEPLOY_CF
 export CF_CREDHUB_CLIENT
 export CF_CREDHUB_SECRET
 
-go get github.com/onsi/ginkgo/ginkgo
-go mod tidy
-ginkgo -v --trace acceptance
+go run github.com/onsi/ginkgo/v2/ginkgo -v --trace acceptance
