@@ -6,7 +6,6 @@ Specifically, DRATs adds state to a Cloud Foundry deployment by testing backup a
 
 ## Prerequisites
 1. [Install `go`](https://golang.org/)
-1. [Install `ginkgo`](https://github.com/onsi/ginkgo)
 
 ## Running DRATs with Environment Variables
 

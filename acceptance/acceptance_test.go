@@ -6,7 +6,7 @@ import (
 	"github.com/cloudfoundry/disaster-recovery-acceptance-tests/config"
 	"github.com/cloudfoundry/disaster-recovery-acceptance-tests/runner"
 	"github.com/cloudfoundry/disaster-recovery-acceptance-tests/testcases"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 )
 
 var _ = Describe("backing up Cloud Foundry", func() {
