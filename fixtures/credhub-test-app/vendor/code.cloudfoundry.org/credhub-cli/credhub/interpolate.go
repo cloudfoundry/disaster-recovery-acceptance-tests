@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-//InterpolateString translates credhub refs in a VCAP_SERVICES object into actual credentials
+// InterpolateString translates credhub refs in a VCAP_SERVICES object into actual credentials
 func (ch *CredHub) InterpolateString(vcapServicesBody string) (string, error) {
 	if !strings.Contains(vcapServicesBody, `"credhub-ref"`) {
 		return vcapServicesBody, nil
