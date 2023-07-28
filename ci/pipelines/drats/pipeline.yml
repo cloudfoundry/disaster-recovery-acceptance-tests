@@ -7,16 +7,15 @@
 number_of_retries: &number_of_retries 2
 
 groups:
-- name: bump
-  jobs:
-    - bump-ci-tasks
-
 - name: test
   jobs:
     - claim-cf-deployment
     - deploy-backup-restore-components
     - run-drats-tests
     - unclaim-cf-deployment-env
+- name: bump
+  jobs:
+    - bump-ci-tasks
 
 resource_types:
 - name: pull-request
