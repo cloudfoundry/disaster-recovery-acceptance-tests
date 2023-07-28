@@ -11,7 +11,7 @@ In order to run DRATs using an integration config file, you can use [`scripts/ru
 1. Run the tests
    ```bash
    $> go mod tidy
-   $> ginkgo -v --trace acceptance
+   $> go run github.com/onsi/ginkgo/v2/ginkgo -v --trace acceptance
    ```
 
 ### Locally

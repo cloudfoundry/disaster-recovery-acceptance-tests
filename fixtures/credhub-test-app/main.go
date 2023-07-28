@@ -5,10 +5,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
+
 	"code.cloudfoundry.org/credhub-cli/credhub"
 	"code.cloudfoundry.org/credhub-cli/credhub/auth"
 	"code.cloudfoundry.org/credhub-cli/credhub/credentials/generate"
-	"strings"
 )
 
 const credhubBaseURL = "https://credhub.service.cf.internal:8844"
@@ -33,7 +34,7 @@ type Server struct {
 
 func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 	s.counter++
-	password, err := s.client.GeneratePassword(fmt.Sprintf("/%s/%d",credentialName,s.counter),generate.Password{},credhub.Overwrite)
+	password, err := s.client.GeneratePassword(fmt.Sprintf("/%s/%d", credentialName, s.counter), generate.Password{}, credhub.Overwrite)
 	if ok := handleBadResponses(w, err); !ok {
 		return
 	}
@@ -42,7 +43,7 @@ func (s *Server) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) List(w http.ResponseWriter, r *http.Request) {
-	results, err := s.client.FindByPartialName("/"+credentialName)
+	results, err := s.client.FindByPartialName("/" + credentialName)
 	if ok := handleBadResponses(w, err); !ok {
 		return
 	}
@@ -53,17 +54,16 @@ func (s *Server) List(w http.ResponseWriter, r *http.Request) {
 
 	var response []string
 	for _, cred := range results.Credentials {
-		response = append(response, "{\"name\": \"" + cred.Name+ "\"}")
+		response = append(response, "{\"name\": \""+cred.Name+"\"}")
 	}
 
 	respString := strings.Join(response, ",")
-
 
 	fmt.Fprintf(w, "{ \"credentials\": ["+string(respString)+"]}")
 }
 
 func (s *Server) Clean(w http.ResponseWriter, r *http.Request) {
-	results, err := s.client.FindByPartialName("/"+credentialName)
+	results, err := s.client.FindByPartialName("/" + credentialName)
 
 	if ok := handleBadResponses(w, err); !ok {
 		return
@@ -83,7 +83,6 @@ func (s *Server) Clean(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 }
-
 
 func handleBadResponses(w http.ResponseWriter, err error) bool {
 	if err != nil {

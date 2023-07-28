@@ -24,11 +24,11 @@ type CfCredhubSSITestCase struct {
 func NewCfCredhubSSITestCase() *CfCredhubSSITestCase {
 	id := RandomStringNumber()
 
-  credhubAppPath, appPathPresent := os.LookupEnv("CREDHUB_APP_PATH") 
+	credhubAppPath, appPathPresent := os.LookupEnv("CREDHUB_APP_PATH")
 
-  if no(appPathPresent) {
-    credhubAppPath = path.Join(CurrentTestDir(), "/../fixtures/credhub-test-app")
-  }
+	if no(appPathPresent) {
+		credhubAppPath = path.Join(CurrentTestDir(), "/../fixtures/credhub-test-app")
+	}
 
 	return &CfCredhubSSITestCase{
 		uniqueTestID:       id,
@@ -39,7 +39,7 @@ func NewCfCredhubSSITestCase() *CfCredhubSSITestCase {
 }
 
 func no(b bool) bool {
-  return ! b
+	return !b
 }
 
 var listResponse struct {

@@ -11,7 +11,7 @@ import (
 	"code.cloudfoundry.org/routing-api/models"
 	. "github.com/cloudfoundry/disaster-recovery-acceptance-tests/runner"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
