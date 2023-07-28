@@ -3,7 +3,7 @@ package testcases
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"path"
@@ -72,14 +72,14 @@ func (tc *CfCredhubSSITestCase) BeforeBackup(config Config) {
 	appCreateResponse := Get(tc.appURL + "/create")
 	defer appCreateResponse.Body.Close()
 
-	body, _ := ioutil.ReadAll(appCreateResponse.Body)
+	body, _ := io.ReadAll(appCreateResponse.Body)
 	fmt.Println(string(body))
 	Expect(appCreateResponse.StatusCode).To(Equal(http.StatusCreated))
 
 	appListResponse := Get(tc.appURL + "/list")
 	defer appListResponse.Body.Close()
 
-	response, err := ioutil.ReadAll(appListResponse.Body)
+	response, err := io.ReadAll(appListResponse.Body)
 	Expect(err).NotTo(HaveOccurred())
 
 	Expect(json.NewDecoder(strings.NewReader(string(response))).Decode(&listResponse)).To(Succeed())
