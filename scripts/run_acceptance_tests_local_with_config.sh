@@ -32,8 +32,6 @@ trap 'cleanup' EXIT
 export BBR_BUILD_PATH=$(which bbr)
 
 echo "Running DRATs..."
-go get github.com/onsi/ginkgo/ginkgo
-go mod tidy
-ginkgo -v --trace acceptance
+go run github.com/onsi/ginkgo/v2/ginkgo -v --trace acceptance
 
 echo "Successfully ran DRATs!"

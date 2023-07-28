@@ -6,10 +6,9 @@ import (
 
 	"os"
 
-	"io/ioutil"
 	"path"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"
 )
@@ -43,16 +42,14 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 		testContext, err = NewTestContext(uniqueTestID, config.BoshConfig)
 		Expect(err).NotTo(HaveOccurred())
 
-		cfHomeTmpDir, err = ioutil.TempDir("", "drats-cf-home")
-		Expect(err).NotTo(HaveOccurred())
-
+		cfHomeTmpDir = GinkgoT().TempDir()
 		for _, testCase := range testCases {
 			err := os.Mkdir(cfHomeDir(cfHomeTmpDir, testCase), 0700)
 			Expect(err).NotTo(HaveOccurred())
 		}
 	})
 
-	It("backups and restores a cf", func() {
+	It("backs up and restores a CF", func() {
 		By("populating state in environment to be backed up")
 		for _, testCase := range testCases {
 			os.Setenv("CF_HOME", cfHomeDir(cfHomeTmpDir, testCase))
@@ -94,7 +91,7 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 				"-d", config.CloudFoundryConfig.Name,
 				"manifest",
 			)
-			file, err := ioutil.TempFile("", "cf")
+			file, err := os.CreateTemp("", "cf")
 			Expect(err).NotTo(HaveOccurred())
 			_, err = file.Write(manifestSession.Out.Contents())
 			Expect(err).NotTo(HaveOccurred())
@@ -211,14 +208,6 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 			})
 		}(testCase)
 	}
-
-	AfterEach(func() {
-		By("removing individual test-case cf-home directory")
-		for _, testCase := range testCases {
-			removeHomeDirErr := os.RemoveAll(cfHomeDir(cfHomeTmpDir, testCase))
-			Expect(removeHomeDirErr).ToNot(HaveOccurred())
-		}
-	})
 
 	AfterEach(func() {
 		By("cleaning up the test context")

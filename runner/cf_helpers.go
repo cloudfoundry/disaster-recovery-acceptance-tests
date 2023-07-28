@@ -14,7 +14,7 @@ import (
 
 	"io"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
@@ -22,7 +22,7 @@ var clientWithInsecureTransport *http.Client
 
 func getClientWithInsecureTransport() *http.Client {
 	if clientWithInsecureTransport == nil {
-		clientWithInsecureTransport = &http.Client {
+		clientWithInsecureTransport = &http.Client{
 			Transport: &http.Transport{
 				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 			},
