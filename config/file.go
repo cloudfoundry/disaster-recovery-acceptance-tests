@@ -3,7 +3,7 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"time"
 
 	"github.com/cloudfoundry/disaster-recovery-acceptance-tests/runner"
@@ -12,7 +12,7 @@ import (
 const defaultTimeout = 15 * time.Minute
 
 func FromFile(path string) (runner.Config, runner.TestCaseFilter) {
-	configFromFile, err := ioutil.ReadFile(path)
+	configFromFile, err := os.ReadFile(path)
 	if err != nil {
 		panic(fmt.Sprint(fmt.Sprintf("Could not load config from file: %s\n", path)))
 	}

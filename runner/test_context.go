@@ -1,7 +1,7 @@
 package runner
 
 import (
-	"io/ioutil"
+	"os"
 
 	. "github.com/onsi/ginkgo/v2"
 )
@@ -37,12 +37,12 @@ func (testContext *TestContext) Cleanup() {
 }
 
 func writeBoshCaCertToFile(tmpDir, boshCaCert string) (string, error) {
-	dir, err := ioutil.TempDir(tmpDir, "drats")
+	dir, err := os.MkdirTemp(tmpDir, "drats")
 	if err != nil {
 		return "", err
 	}
 
-	boshCaCertFile, err := ioutil.TempFile(dir, "boshca")
+	boshCaCertFile, err := os.CreateTemp(dir, "boshca")
 	if err != nil {
 		return "", err
 	}
