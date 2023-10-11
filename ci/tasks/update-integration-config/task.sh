@@ -10,7 +10,7 @@ get_password_from_credhub() {
 
 setup_env_vars() {
   eval "$(bbl print-env --metadata-file cf-deployment-env/metadata)"
-  export SYSTEM_DOMAIN="$(cat cf-deployment-env/name).cf-app.com"
+  export SYSTEM_DOMAIN="$(cat cf-deployment-env/metadata | jq -r '.name').cf-app.com"
   export JUMPBOX_ADDRESS=$(echo $BOSH_ALL_PROXY | cut -d"@" -f2 | cut -d":" -f1)
 }
 
