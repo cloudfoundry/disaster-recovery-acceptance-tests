@@ -111,9 +111,13 @@ jobs:
       trigger: true
       version: every
     - put: cf-deployment-env
+      imeout: 6h
       attempts: *number_of_claim_env_retries
       params:
-        action: claim
+        action: create
+        duration: 24h
+        resource: cf-deployment-env
+        timeout: 6h
     - get: cryogenics-concourse-tasks
 
 - name: deploy-backup-restore-components
