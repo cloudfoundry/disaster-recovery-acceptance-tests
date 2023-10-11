@@ -111,7 +111,7 @@ jobs:
       trigger: true
       version: every
     - put: cf-deployment-env
-      imeout: 6h
+      timeout: 6h
       attempts: *number_of_claim_env_retries
       params:
         action: create
