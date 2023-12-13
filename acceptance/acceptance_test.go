@@ -19,5 +19,6 @@ var _ = Describe("backing up Cloud Foundry", func() {
 		conf, filter = config.FromEnv()
 	}
 
+  config.Timeout = "60m"
 	runner.RunDisasterRecoveryAcceptanceTests(conf, filter.Filter(testcases.OpenSourceTestCases()))
 })
