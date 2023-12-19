@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"os"
+	"time"
 
 	"github.com/cloudfoundry/disaster-recovery-acceptance-tests/config"
 	"github.com/cloudfoundry/disaster-recovery-acceptance-tests/runner"
@@ -19,5 +20,6 @@ var _ = Describe("backing up Cloud Foundry", func() {
 		conf, filter = config.FromEnv()
 	}
 
+	conf.Timeout = time.Duration(60 * float64(time.Minute))
 	runner.RunDisasterRecoveryAcceptanceTests(conf, filter.Filter(testcases.OpenSourceTestCases()))
 })
