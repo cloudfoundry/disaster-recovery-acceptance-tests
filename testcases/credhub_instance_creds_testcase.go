@@ -11,6 +11,7 @@ import (
 
 	. "github.com/cloudfoundry/disaster-recovery-acceptance-tests/runner"
 	. "github.com/onsi/gomega"
+	"golang.org/x/mod/modfile"
 )
 
 type CfCredhubSSITestCase struct {
@@ -99,8 +100,20 @@ func (tc *CfCredhubSSITestCase) AfterBackup(config Config) {
 	Expect(listResponse.Credentials).To(HaveLen(2))
 }
 
+func (tc *CfCredhubSSITestCase) GetGoVersionFromGoModFile() string {
+	var file_bytes []byte
+	f, err := modfile.Parse(fmt.Sprintf("%sgo.mod", tc.testAppFixturePath), file_bytes, nil)
+	if err != nil {
+		panic(err)
+	}
+	return f.Go.Version
+
+}
 func (tc *CfCredhubSSITestCase) EnsureAfterSelectiveRestore(config Config) {
+	goVersion := fmt.Sprintf("go%s", tc.GetGoVersionFromGoModFile())
+
 	RunCommandSuccessfully("cf push " + "--no-start " + tc.appName + " -p " + tc.testAppFixturePath + " -b go_buildpack" + " -f " + tc.testAppFixturePath + "/manifest.yml")
+	RunCommandSuccessfully("cf set-env " + tc.appName + " GOVERSION " + goVersion + " > /dev/null")
 	RunCommandSuccessfully("cf set-env " + tc.appName + " CREDHUB_CLIENT " + config.CloudFoundryConfig.CredHubClient + " > /dev/null")
 	RunCommandSuccessfully("cf set-env " + tc.appName + " CREDHUB_SECRET " + config.CloudFoundryConfig.CredHubSecret + " > /dev/null")
 	RunCommandSuccessfully("cf start " + tc.appName)
