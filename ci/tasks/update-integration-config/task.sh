@@ -8,9 +8,14 @@ get_password_from_credhub() {
   credhub find -j -n "${variable_name}" | jq -r .credentials[].name | xargs credhub get -j -n | jq -r .value
 }
 
+get_system_domain() {
+  jq -r '.cf.api_url | capture("^api\\.(?<system_domain>.*)$") | .system_domain' \
+    cf-deployment-env/metadata
+}
+
 setup_env_vars() {
   eval "$(bbl print-env --metadata-file cf-deployment-env/metadata)"
-  export SYSTEM_DOMAIN="$(cat cf-deployment-env/metadata | jq -r '.name').cf-app.com"
+  export SYSTEM_DOMAIN="$(get_system_domain)"
   export JUMPBOX_ADDRESS=$(echo $BOSH_ALL_PROXY | cut -d"@" -f2 | cut -d":" -f1)
 }
 
