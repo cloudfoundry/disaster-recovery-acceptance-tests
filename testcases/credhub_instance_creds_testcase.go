@@ -104,11 +104,10 @@ func (tc *CfCredhubSSITestCase) AfterBackup(config Config) {
 }
 
 func (tc *CfCredhubSSITestCase) GetGoVersionFromGoModFile() string {
-	var file_bytes []byte
-	f, err := modfile.Parse(fmt.Sprintf("%sgo.mod", tc.testAppFixturePath), file_bytes, nil)
-	if err != nil {
-		panic(err)
-	}
+	file_bytes, err := os.ReadFile(fmt.Sprintf("%s/go.mod", tc.testAppFixturePath))
+	Expect(err).NotTo(HaveOccurred())
+	f, err := modfile.Parse(fmt.Sprintf("%s/go.mod", tc.testAppFixturePath), file_bytes, nil)
+	Expect(err).NotTo(HaveOccurred())
 	return f.Go.Version
 
 }
