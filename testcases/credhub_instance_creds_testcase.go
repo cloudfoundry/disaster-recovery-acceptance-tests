@@ -63,7 +63,10 @@ func (tc *CfCredhubSSITestCase) BeforeBackup(config Config) {
 	RunCommandSuccessfully("cf create-space acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf target -s acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
 
+	goVersion := fmt.Sprintf("go%s", tc.GetGoVersionFromGoModFile())
+
 	RunCommandSuccessfully("cf push " + "--no-start " + tc.appName + " -p " + tc.testAppFixturePath + " -b go_buildpack" + " -f " + tc.testAppFixturePath + "/manifest.yml")
+	RunCommandSuccessfully("cf set-env " + tc.appName + " GOVERSION " + goVersion + " > /dev/null")
 	RunCommandSuccessfully("cf set-env " + tc.appName + " CREDHUB_CLIENT " + config.CloudFoundryConfig.CredHubClient + " > /dev/null")
 	RunCommandSuccessfully("cf set-env " + tc.appName + " CREDHUB_SECRET " + config.CloudFoundryConfig.CredHubSecret + " > /dev/null")
 	RunCommandSuccessfully("cf start " + tc.appName)
