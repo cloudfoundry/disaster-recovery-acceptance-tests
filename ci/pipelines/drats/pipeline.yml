@@ -297,19 +297,20 @@ jobs:
           path: pr
           status: success
           context: drats
-      - put: git-drats-version
-        params:
-          bump: minor
-      - put: git-drats-write
-        params:
-          repository: pr
-          tag: git-drats-version/version
-          only_tag: true
-          tag_prefix: v
       - put: pr
         params:
           path: pr
           merge: true
+      - put: git-drats-version
+        params:
+          bump: minor
+      - get: git-drats
+      - put: git-drats-write
+        params:
+          repository: git-drats
+          tag: git-drats-version/version
+          only_tag: true
+          tag_prefix: v
 
 - name: release-cf-deployment-env
   plan:
