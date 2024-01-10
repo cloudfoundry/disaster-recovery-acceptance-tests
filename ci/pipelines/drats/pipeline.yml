@@ -113,6 +113,15 @@ resources:
     uri: git@github.com:cloudfoundry/disaster-recovery-acceptance-tests.git
     private_key: *github_ssh_key
 
+- name: git-drats-version
+  type: semver
+  source:
+    uri: git@github.com:cloudfoundry/disaster-recovery-acceptance-tests.git
+    private_key: *github_ssh_key
+    driver: git
+    branch: version
+    file: version
+
 - name: run-once-a-day
   type: time
   icon: timer-outline
@@ -288,6 +297,15 @@ jobs:
           path: pr
           status: success
           context: drats
+      - put: git-drats-version
+        params:
+          bump: minor
+      - put: git-drats-write
+        params:
+          repository: pr
+          tag: git-drats-version/version
+          only_tag: true
+          tag_prefix: v
       - put: pr
         params:
           path: pr
