@@ -301,16 +301,20 @@ jobs:
         params:
           path: pr
           merge: true
-      - put: git-drats-version
+      - get: git-drats-version
         params:
-          bump: minor
-      - get: git-drats
+          bump: patch
       - put: git-drats-write
         params:
-          repository: git-drats
+          repository: pr
           tag: git-drats-version/version
           only_tag: true
           tag_prefix: v
+          branch: main
+        ensure:
+          put: git-drats-version
+          params:
+            file: git-drats-version/version
 
 - name: release-cf-deployment-env
   plan:
