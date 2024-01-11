@@ -297,20 +297,16 @@ jobs:
           path: pr
           status: success
           context: drats
-      - put: pr
-        params:
-          path: pr
-          merge: true
       - get: git-drats-version
         params:
           bump: patch
-      - put: git-drats-write
+      - put: git-drats #this is intentionally not putting on git-drats-write because this wants to write to main and the generated version is expected.
         params:
           repository: pr
           tag: git-drats-version/version
-          only_tag: true
           tag_prefix: v
           branch: main
+          merge: true
         ensure:
           put: git-drats-version
           params:
