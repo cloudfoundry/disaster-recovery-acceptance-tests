@@ -214,6 +214,7 @@ jobs:
         operations/enable-smb-volume-service.yml
         operations/backup-and-restore/skip-backup-restore-droplets-and-packages.yml
   - task: bosh-run-errand-nfsbrokerpush
+    image: cf-deployment-concourse-tasks-image
     attempts: *number_of_retries
     file: cf-deployment-concourse-tasks/run-errand/task.yml
     input_mapping:
@@ -221,6 +222,7 @@ jobs:
     params:
       ERRAND_NAME: nfsbrokerpush
   - task: bosh-run-errand-smbbrokerpush
+    image: cf-deployment-concourse-tasks-image
     attempts: *number_of_retries
     file: cf-deployment-concourse-tasks/run-errand/task.yml
     input_mapping:
