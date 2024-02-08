@@ -118,6 +118,9 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/disaster-recovery-acceptance-tests.git
     private_key: *github_ssh_key
+    commit_filter:
+      exclude:
+      - ;resource comment; This resource is used exclusively for pushing new changes
 
 - name: git-drats-version
   type: semver
