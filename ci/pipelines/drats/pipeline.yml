@@ -337,6 +337,7 @@ jobs:
       resource: cf-deployment-env
 
 - name: bump-go-module
+  serial: true
   plan:
   - in_parallel:
     - get: source-repo
