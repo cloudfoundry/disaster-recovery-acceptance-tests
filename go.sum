@@ -1,7 +1,7 @@
 code.cloudfoundry.org/cfhttp/v2 v2.0.0 h1:4+mLfyzm84gUpJnCT68BLPUypGgvUsYq29QKaSotTz4=
 code.cloudfoundry.org/cfhttp/v2 v2.0.0/go.mod h1:Fwt0o/haXfwgOHMom4AM96pXCVw9EAiIcSsPb8hWK9s=
-code.cloudfoundry.org/routing-api v0.0.0-20240304204111-816d1f560a86 h1:CoBMKZj5oF7zWZgUlf+dflOjTx2zRYYvmsmc65Q/ASQ=
-code.cloudfoundry.org/routing-api v0.0.0-20240304204111-816d1f560a86/go.mod h1:zvOkz/tZMCCr9jvq4xeFf8kzTnRjLrJQZn6jMtShfCA=
+code.cloudfoundry.org/routing-api v0.0.0-20240308221647-8d0a58ac5a62 h1:LFJqLxVDyjgYMW9tCcgFMJmAKeItSFqZjZYoFlq6p20=
+code.cloudfoundry.org/routing-api v0.0.0-20240308221647-8d0a58ac5a62/go.mod h1:zvOkz/tZMCCr9jvq4xeFf8kzTnRjLrJQZn6jMtShfCA=
 github.com/bmizerany/pat v0.0.0-20210406213842-e4b6760bdd6f h1:gOO/tNZMjjvTKZWpY7YnXC72ULNLErRtp94LountVE8=
 github.com/bmizerany/pat v0.0.0-20210406213842-e4b6760bdd6f/go.mod h1:8rLXio+WjiTceGBHIoTvn60HIbs7Hm7bcHjyrSqYB9c=
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
