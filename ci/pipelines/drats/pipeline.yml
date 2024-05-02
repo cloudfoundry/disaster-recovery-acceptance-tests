@@ -360,6 +360,6 @@ jobs:
               I have detected a new version of a go module and automatically bumped
               it to benefit from the latest changes.
 
-              If this does not look right, please reach out to the [#mapbu-cryogenics](https://vmware.slack.com/archives/C01DXEYRKRU) team.
+              If this does not look right, please reach out to the mapbu-cryogenics team.
           input_mapping:
             source-repo: git-drats-write
