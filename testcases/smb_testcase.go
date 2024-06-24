@@ -48,7 +48,7 @@ func (tc *SMBTestCase) BeforeBackup(config Config) {
 	RunCommandSuccessfully("cf create-space " + spaceName + " -o " + orgName)
 	RunCommandSuccessfully("cf target -o " + orgName + " -s " + spaceName)
 	RunCommandSuccessfully("cf enable-feature-flag diego_docker")
-	RunCommandSuccessfully("cf push dratsApp --docker-image docker/httpd --no-start --random-route")
+	RunCommandSuccessfully("cf push dratsApp --docker-image httpd --no-start --random-route")
 
 	if config.CloudFoundryConfig.SMBCreateServiceBroker {
 		RunCommandSuccessfully("cf create-service-broker " + "smbbroker-drats-" + tc.uniqueTestID + " " +
@@ -68,7 +68,7 @@ func (tc *SMBTestCase) AfterBackup(config Config) {
 }
 func (tc *SMBTestCase) EnsureAfterSelectiveRestore(config Config) {
 	By("repushing apps if restoring from a selective restore")
-	RunCommandSuccessfully("cf push dratsApp --docker-image docker/httpd --no-start --random-route")
+	RunCommandSuccessfully("cf push dratsApp --docker-image httpd --no-start --random-route")
 }
 
 func (tc *SMBTestCase) AfterRestore(config Config) {

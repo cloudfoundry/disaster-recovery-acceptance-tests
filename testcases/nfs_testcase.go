@@ -48,7 +48,7 @@ func (tc *NFSTestCase) BeforeBackup(config Config) {
 	RunCommandSuccessfully("cf create-space " + spaceName + " -o " + orgName)
 	RunCommandSuccessfully("cf target -o " + orgName + " -s " + spaceName)
 	RunCommandSuccessfully("cf enable-feature-flag diego_docker")
-	RunCommandSuccessfully("cf push dratsApp --docker-image docker/httpd --no-start --random-route")
+	RunCommandSuccessfully("cf push dratsApp --docker-image httpd --no-start --random-route")
 
 	if config.CloudFoundryConfig.NFSCreateServiceBroker {
 		RunCommandSuccessfully("cf create-service-broker nfsbroker-drats-" + tc.uniqueTestID + " " +
@@ -69,7 +69,7 @@ func (tc *NFSTestCase) AfterBackup(config Config) {
 
 func (tc *NFSTestCase) EnsureAfterSelectiveRestore(config Config) {
 	By("repushing apps if restoring from a selective restore")
-	RunCommandSuccessfully("cf push dratsApp --docker-image docker/httpd --no-start --random-route")
+	RunCommandSuccessfully("cf push dratsApp --docker-image httpd --no-start --random-route")
 }
 
 func (tc *NFSTestCase) AfterRestore(config Config) {
