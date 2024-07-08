@@ -44,7 +44,9 @@ resource_types:
 - name: pull-request
   type: docker-image
   source:
-    repository: harbor-repo.vmware.com/dockerhub-proxy-cache/cryogenics/pr-queue-resource
+    repository: cryogenics/pr-queue-resource
+    username: ((docker.username))
+    password: ((docker.password))
 
 - name: shepherd
   source:
