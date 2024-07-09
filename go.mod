@@ -3,7 +3,7 @@ module github.com/cloudfoundry/disaster-recovery-acceptance-tests
 go 1.19
 
 require (
-	code.cloudfoundry.org/routing-api v0.0.0-20240517181550-f97bdd7c2328
+	code.cloudfoundry.org/routing-api v0.0.0-20240708200609-e941235af478
 	github.com/onsi/ginkgo/v2 v2.19.0
 	github.com/onsi/gomega v1.33.1
 	golang.org/x/mod v0.18.0
