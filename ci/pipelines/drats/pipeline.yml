@@ -44,7 +44,9 @@ resource_types:
 - name: pull-request
   type: docker-image
   source:
-    repository: harbor-repo.vmware.com/dockerhub-proxy-cache/cryogenics/pr-queue-resource
+    repository: cryogenics/pr-queue-resource
+    username: ((docker.username))
+    password: ((docker.password))
 
 - name: shepherd
   source:
@@ -139,7 +141,9 @@ resources:
 - name: image-cryogenics-essentials
   type: registry-image
   source:
-    repository: harbor-repo.vmware.com/dockerhub-proxy-cache/cryogenics/essentials
+    repository: cryogenics/essentials
+    username: ((docker.username))
+    password: ((docker.password))
 
 jobs:
 - name: claim-cf-deployment
@@ -344,6 +348,7 @@ jobs:
           image: image-cryogenics-essentials
           params:
             BASE: main
+            GH_TOKEN: *github_token
             BRANCH: *go-module-branch
             LABELS: dependencies
             TITLE: Bump go module ((.:go-module-update-branch))
