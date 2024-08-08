@@ -1,8 +1,6 @@
 module github.com/cloudfoundry/disaster-recovery-acceptance-tests/fixtures/credhub-test-app
 
-go 1.21
-
-toolchain go1.21.5
+go 1.22.6
 
 require code.cloudfoundry.org/credhub-cli v0.0.0-20231211140702-4cb99a786107
 
