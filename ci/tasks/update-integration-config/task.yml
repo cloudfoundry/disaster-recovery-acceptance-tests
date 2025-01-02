@@ -1,28 +1,24 @@
 platform: linux
+
 image_resource:
   type: registry-image
   source:
-    repository: cryogenics/essentials
+    repository: cloudfoundry/cf-deployment-concourse-tasks
+    tag: latest
+
 inputs:
-  - name: disaster-recovery-acceptance-tests
-  - name: integration-configs
-  - name: cf-deployment-env
+- name: bbl-state
+- name: disaster-recovery-acceptance-tests
+- name: integration-configs
+
 outputs:
-  - name: updated-integration-configs
+- name: updated-integration-configs
+
 params:
+  BBL_STATE_DIR: bbl-state
   CF_DEPLOYMENT_NAME: cf
   INTEGRATION_CONFIG_FILE_PATH: ci/integration_config.json
   SYSTEM_DOMAIN:
-  JUMPBOX_PRIVATE_KEY:
-  CREDHUB_CLIENT:
-  CREDHUB_SECRET:
-  CREDHUB_CA_CERT:
-  CREDHUB_SERVER:
-  CREDHUB_PROXY:
-  BOSH_ENVIRONMENT:
-  BOSH_CA_CERT:
-  BOSH_ALL_PROXY:
-  BOSH_CLIENT:
-  BOSH_CLIENT_SECRET:
+
 run:
   path: disaster-recovery-acceptance-tests/ci/tasks/update-integration-config/task.sh

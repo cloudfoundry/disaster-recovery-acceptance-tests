@@ -1,0 +1,310 @@
+---
+resources:
+- name: disaster-recovery-acceptance-tests-main
+  type: git
+  icon: github
+  source:
+    uri: git@github.com:cloudfoundry/disaster-recovery-acceptance-tests.git
+    branch: main
+    private_key: ((ard_wg_gitbot_ssh_key.private_key))
+
+- name: disaster-recovery-acceptance-tests-trigger
+  type: git
+  icon: github
+  source:
+    uri: git@github.com:cloudfoundry/disaster-recovery-acceptance-tests.git
+    branch: main
+    private_key: ((ard_wg_gitbot_ssh_key.private_key))
+    ignore_paths:
+    - ci/**
+    - .github/**
+
+- name: drats-version
+  type: semver
+  source:
+    driver: git
+    uri: git@github.com:cloudfoundry/cf-relint-ci-semver.git
+    branch: main
+    file: drats-version
+    private_key: ((ard_wg_gitbot_ssh_key.private_key))
+
+- name: bbr-binary-release
+  type: github-release
+  source:
+    user: cloudfoundry
+    repository: bosh-backup-and-restore
+    access_token: ((ard_wg_gitbot_token))
+
+- name: cf-deployment-main
+  type: git
+  icon: github
+  source:
+    uri: git@github.com:cloudfoundry/cf-deployment.git
+    private_key: ((ard_wg_gitbot_ssh_key.private_key))
+
+- name: env-pool
+  type: pool
+  icon: pool
+  source:
+    uri: git@github.com:cloudfoundry/relint-ci-pools
+    branch: main
+    pool: cats
+    private_key: ((ard_wg_gitbot_ssh_key.private_key))
+
+- name: relint-envs
+  type: git
+  icon: github
+  source:
+    branch: main
+    uri: git@github.com:cloudfoundry/relint-envs.git
+    private_key: ((ard_wg_gitbot_ssh_key.private_key))
+
+- name: cf-deployment-concourse-tasks
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
+
+- name: runtime-ci
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/cloudfoundry/runtime-ci.git
+
+jobs:
+- name: acquire-pool-env
+  serial: true
+  public: true
+  plan:
+  - in_parallel:
+    - get: disaster-recovery-acceptance-tests-main
+    - get: disaster-recovery-acceptance-tests-trigger
+      trigger: true
+
+  - put: env-pool
+    params:
+      claim: cats
+
+- name: release-pool-manual
+  public: true
+  plan:
+  - get: env-pool
+  ensure:
+    try:
+      put: env-pool
+      params:
+        release: env-pool
+
+- name: deploy-cf
+  serial: true
+  public: true
+  plan:
+  - in_parallel:
+    - get: env-pool
+      passed:
+      - acquire-pool-env
+      trigger: true
+    - get: disaster-recovery-acceptance-tests-main
+      passed:
+      - acquire-pool-env
+    - get: runtime-ci
+    - get: cf-deployment-concourse-tasks
+    - get: cf-deployment-main
+    - get: relint-envs
+
+  - task: guarantee-no-existing-cf-deployment
+    file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
+    input_mapping:
+      bbl-state: relint-envs
+    params:
+      BBL_STATE_DIR: environments/test/cats/bbl-state
+      IGNORE_ERRORS: true
+
+  - task: bosh-deploy-cf
+    file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
+    input_mapping:
+      bbl-state: relint-envs
+      cf-deployment: cf-deployment-main
+      ops-files: cf-deployment-main
+      vars-files: relint-envs
+    params:
+      BBL_STATE_DIR: environments/test/cats/bbl-state
+      SYSTEM_DOMAIN: cf.cats.env.wg-ard.ci.cloudfoundry.org
+      OPS_FILES: |
+        operations/backup-and-restore/enable-backup-restore.yml
+        operations/backup-and-restore/skip-backup-restore-droplets-and-packages.yml
+        operations/enable-nfs-volume-service.yml
+        operations/enable-smb-volume-service.yml
+        operations/experimental/disable-interpolate-service-bindings.yml
+        operations/experimental/enable-traffic-to-internal-networks.yml
+        operations/scale-to-one-az.yml
+        operations/use-compiled-releases.yml
+
+- name: run-errands
+  serial: true
+  public: true
+  plan:
+  - in_parallel:
+    - get: env-pool
+      passed:
+      - deploy-cf
+      trigger: true
+    - get: disaster-recovery-acceptance-tests-main
+      passed:
+      - deploy-cf
+    - get: relint-envs
+      passed:
+      - deploy-cf
+    - get: cf-deployment-concourse-tasks
+
+  - task: bosh-run-errand-nfsbrokerpush
+    file: cf-deployment-concourse-tasks/run-errand/task.yml
+    input_mapping:
+      bbl-state: relint-envs
+    params:
+      BBL_STATE_DIR: environments/test/cats/bbl-state
+      ERRAND_NAME: nfsbrokerpush
+
+  - task: bosh-run-errand-smbbrokerpush
+    file: cf-deployment-concourse-tasks/run-errand/task.yml
+    input_mapping:
+      bbl-state: relint-envs
+    params:
+      BBL_STATE_DIR: environments/test/cats/bbl-state
+      ERRAND_NAME: smbbrokerpush
+
+- name: run-drats
+  serial: true
+  public: true
+  plan:
+  - in_parallel:
+    - get: env-pool
+      passed:
+      - run-errands
+      trigger: true
+    - get: disaster-recovery-acceptance-tests-main
+      passed:
+      - run-errands
+    - get: relint-envs
+      passed:
+      - run-errands
+    - get: bbr-binary-release
+
+  - task: update-integration-config
+    file: disaster-recovery-acceptance-tests-main/ci/tasks/update-integration-config/task.yml
+    input_mapping:
+      bbl-state: relint-envs
+      disaster-recovery-acceptance-tests: disaster-recovery-acceptance-tests-main
+      integration-configs: disaster-recovery-acceptance-tests-main
+    params:
+      BBL_STATE_DIR: environments/test/cats/bbl-state
+      SYSTEM_DOMAIN: cf.cats.env.wg-ard.ci.cloudfoundry.org
+
+  - task: acceptance-tests
+    file: disaster-recovery-acceptance-tests-main/ci/tasks/drats-with-integration-config/task.yml
+    privileged: true
+    attempts: 2
+    input_mapping:
+      disaster-recovery-acceptance-tests: disaster-recovery-acceptance-tests-main
+      drats-integration-config: updated-integration-configs
+    params:
+      CONFIG_FILE_PATH: ci/integration_config.json
+      CF_DIAL_TIMEOUT: 300
+
+- name: delete-cf
+  serial: true
+  public: true
+  plan:
+  - timeout: 4h
+    do:
+    - in_parallel:
+      - get: env-pool
+        trigger: true
+        passed:
+        - run-drats
+      - get: relint-envs
+        passed:
+        - run-drats
+      - get: cf-deployment-concourse-tasks
+
+  - task: delete-deployment-cf
+    file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
+    input_mapping:
+      bbl-state: relint-envs
+    params:
+      BBL_STATE_DIR: environments/test/cats/bbl-state
+      IGNORE_ERRORS: true
+
+  - task: run-bosh-cleanup
+    file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
+    input_mapping:
+      bbl-state: relint-envs
+    params:
+      BBL_STATE_DIR: environments/test/cats/bbl-state
+
+  - put: env-pool
+    params:
+      release: env-pool
+
+- name: ship-it-patch
+  public: true
+  plan:
+  - in_parallel:
+    - get: drats-version
+      params:
+        bump: patch
+    - get: disaster-recovery-acceptance-tests-main
+      passed:
+      - run-drats
+
+  - put: disaster-recovery-acceptance-tests-main
+    params:
+      repository: disaster-recovery-acceptance-tests-main
+      tag: drats-version/version
+      tag_prefix: v
+
+  - put: drats-version
+    params:
+      bump: patch
+
+- name: ship-it-minor
+  public: true
+  plan:
+  - in_parallel:
+    - get: drats-version
+      params:
+        bump: minor
+    - get: disaster-recovery-acceptance-tests-main
+      passed:
+      - run-drats
+
+  - put: disaster-recovery-acceptance-tests-main
+    params:
+      repository: disaster-recovery-acceptance-tests-main
+      tag: drats-version/version
+      tag_prefix: v
+
+  - put: drats-version
+    params:
+      bump: minor
+
+- name: ship-it-major
+  public: true
+  plan:
+  - in_parallel:
+    - get: drats-version
+      params:
+        bump: major
+    - get: disaster-recovery-acceptance-tests-main
+      passed:
+      - run-drats
+
+  - put: disaster-recovery-acceptance-tests-main
+    params:
+      repository: disaster-recovery-acceptance-tests-main
+      tag: drats-version/version
+      tag_prefix: v
+
+  - put: drats-version
+    params:
+      bump: major

@@ -2,6 +2,7 @@ package testcases
 
 import (
 	. "github.com/cloudfoundry/disaster-recovery-acceptance-tests/runner"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -32,7 +33,7 @@ func (tc *CfUaaTestCase) CheckDeployment(config Config) {
 }
 
 func (tc *CfUaaTestCase) BeforeBackup(config Config) {
-	By("we create a user and can login")
+	By("creating a test user and logging in")
 	login(config, config.CloudFoundryConfig.AdminUsername, config.CloudFoundryConfig.AdminPassword)
 	RunCommandSuccessfully("cf create-user ", tc.testUser, tc.testPassword)
 	login(config, tc.testUser, tc.testPassword)
@@ -40,13 +41,13 @@ func (tc *CfUaaTestCase) BeforeBackup(config Config) {
 }
 
 func (tc *CfUaaTestCase) AfterBackup(config Config) {
-	By("we delete the user and verify")
+	By("deleting the test user")
 	login(config, config.CloudFoundryConfig.AdminUsername, config.CloudFoundryConfig.AdminPassword)
 	RunCommandSuccessfully("cf delete-user ", tc.testUser, "-f")
 	RunCommandSuccessfully("cf logout")
 	RunCommandSuccessfully("cf api --skip-ssl-validation", config.CloudFoundryConfig.APIURL)
 
-	By("user has been deleted. authentication should fail")
+	By("verifying that the test user cannot authenticate")
 	result := RunCommand("cf auth", tc.testUser, tc.testPassword)
 	Expect(result.ExitCode()).To(Equal(1))
 }
@@ -54,12 +55,12 @@ func (tc *CfUaaTestCase) AfterBackup(config Config) {
 func (tc *CfUaaTestCase) EnsureAfterSelectiveRestore(config Config) {}
 
 func (tc *CfUaaTestCase) AfterRestore(config Config) {
-	By("we can login again")
+	By("verifying that the test user can login again")
 	login(config, tc.testUser, tc.testPassword)
 }
 
 func (tc *CfUaaTestCase) Cleanup(config Config) {
-	By("We delete the user")
+	By("deleting the test user")
 	login(config, config.CloudFoundryConfig.AdminUsername, config.CloudFoundryConfig.AdminPassword)
 	RunCommandSuccessfully("cf delete-user ", tc.testUser, "-f")
 }

@@ -6,11 +6,10 @@ import (
 	"strings"
 	"time"
 
-	routing_api "code.cloudfoundry.org/routing-api"
-
-	"code.cloudfoundry.org/routing-api/models"
 	. "github.com/cloudfoundry/disaster-recovery-acceptance-tests/runner"
 
+	routing_api "code.cloudfoundry.org/routing-api"
+	"code.cloudfoundry.org/routing-api/models"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -54,9 +53,10 @@ func (tc *CfRouterGroupTestCase) CheckDeployment(config Config) {
 // It also spawns a goroutine to check that reads are always available during
 // the backup.
 func (tc *CfRouterGroupTestCase) BeforeBackup(config Config) {
-	By("Getting CF OAuth Token")
+	By("getting a CF OAuth Token")
 	token := loginAndGetToken(config)
-	By("Creating a pre-backup router group backup")
+
+	By("creating a pre-backup router group backup")
 	var err error
 	time.Sleep(15 * time.Second)
 	tc.routingAPIClient = routing_api.NewClient(config.CloudFoundryConfig.APIURL, true)
@@ -74,10 +74,10 @@ func (tc *CfRouterGroupTestCase) BeforeBackup(config Config) {
 // It also spawns a goroutine to check that reads are not available during
 // the restore operation after AfterBackup is called.
 func (tc *CfRouterGroupTestCase) AfterBackup(config Config) {
-	By("Getting CF OAuth Token")
+	By("getting a CF OAuth Token")
 	token := refreshToken()
 
-	By("Adding an entry in the router group table")
+	By("adding an entry in the router group table")
 	tc.routingAPIClient.SetToken(token)
 	routerGroupEntry := models.RouterGroup{
 		Guid:            "RandomTestGUID" + "_" + RandomStringNumber(),
@@ -102,10 +102,10 @@ func (tc *CfRouterGroupTestCase) EnsureAfterSelectiveRestore(config Config) {}
 // It verifies that the goroutine spawned in AfterBackup verified that reads
 // were not always available during the restore.
 func (tc *CfRouterGroupTestCase) AfterRestore(config Config) {
-	By("Getting CF OAuth Token")
+	By("getting a CF OAuth Token")
 	token := refreshToken()
 
-	By("Taking a snapshot of restored table and comparing it with the pre-backup table")
+	By("taking a snapshot of restored table and comparing it with the pre-backup table")
 	time.Sleep(15 * time.Second)
 	routerGroupsPostRestore, err := tc.readRouterGroups(token)
 	Expect(err).NotTo(HaveOccurred())
@@ -114,6 +114,7 @@ func (tc *CfRouterGroupTestCase) AfterRestore(config Config) {
 
 // Cleanup is called at the end to remove the test artifacts left behind.
 func (tc *CfRouterGroupTestCase) Cleanup(config Config) {
+	By("deleting the test router groups")
 	cleanupRouterGroups()
 }
 

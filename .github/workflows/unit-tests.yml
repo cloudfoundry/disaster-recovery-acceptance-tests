@@ -1,0 +1,25 @@
+name: Unit Tests
+
+on:
+  push:
+    branches:
+    - "main"
+  pull_request:
+    branches:
+    - "main"
+
+jobs:
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout DRATs Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Golang
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: "go.mod"
+
+    - name: Run Tests
+      run: go run github.com/onsi/ginkgo/v2/ginkgo -r --randomize-all --randomize-suites --fail-on-pending --keep-going --race --trace runner

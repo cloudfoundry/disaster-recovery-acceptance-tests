@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	. "github.com/cloudfoundry/disaster-recovery-acceptance-tests/runner"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -24,7 +25,7 @@ func (tc *SMBTestCase) Name() string {
 }
 
 func (tc *SMBTestCase) CheckDeployment(config Config) {
-	By("checking if the SMB service is registered")
+	By("verifying that the SMB service is registered")
 	RunCommandAndRetry("cf api --skip-ssl-validation", 3, config.CloudFoundryConfig.APIURL)
 	RunCommandAndRetry("cf auth", 3, config.CloudFoundryConfig.AdminUsername, config.CloudFoundryConfig.AdminPassword)
 	RunCommandSuccessfullyWithFailureMessage(
@@ -38,19 +39,21 @@ func (tc *SMBTestCase) BeforeBackup(config Config) {
 	Expect(config.CloudFoundryConfig.SMBServiceName).NotTo(BeEmpty(), "required config SMB service name not set")
 	Expect(config.CloudFoundryConfig.SMBPlanName).NotTo(BeEmpty(), "required config SMB plan name not set")
 
-	By("creating an SMB service broker and service instance")
+	By("creating a test org and space")
 	RunCommandSuccessfully("cf api --skip-ssl-validation", config.CloudFoundryConfig.APIURL)
-	RunCommandSuccessfully("cf login --skip-ssl-validation -a", config.CloudFoundryConfig.APIURL,
-		"-u", config.CloudFoundryConfig.AdminUsername, "-p", config.CloudFoundryConfig.AdminPassword)
+	RunCommandSuccessfully("cf auth", config.CloudFoundryConfig.AdminUsername, config.CloudFoundryConfig.AdminPassword)
 	orgName := "acceptance-test-org-" + tc.uniqueTestID
 	spaceName := "acceptance-test-space-" + tc.uniqueTestID
 	RunCommandSuccessfully("cf create-org " + orgName)
 	RunCommandSuccessfully("cf create-space " + spaceName + " -o " + orgName)
 	RunCommandSuccessfully("cf target -o " + orgName + " -s " + spaceName)
+
+	By("setting up a test app")
 	RunCommandSuccessfully("cf enable-feature-flag diego_docker")
 	RunCommandSuccessfully("cf push dratsApp --docker-image httpd --no-start --random-route")
 
 	if config.CloudFoundryConfig.SMBCreateServiceBroker {
+		By("creating an SMB service broker and service instance")
 		RunCommandSuccessfully("cf create-service-broker " + "smbbroker-drats-" + tc.uniqueTestID + " " +
 			config.CloudFoundryConfig.SMBBrokerUser + " " + config.CloudFoundryConfig.SMBBrokerPassword + " " +
 			config.CloudFoundryConfig.SMBBrokerURL)
@@ -63,24 +66,26 @@ func (tc *SMBTestCase) BeforeBackup(config Config) {
 }
 
 func (tc *SMBTestCase) AfterBackup(config Config) {
-	By("deleting the SMB service instance after backup")
+	By("deleting the SMB service instance")
 	RunCommandSuccessfully("cf delete-service " + tc.instanceName + " -f")
 }
+
 func (tc *SMBTestCase) EnsureAfterSelectiveRestore(config Config) {
 	By("repushing apps if restoring from a selective restore")
 	RunCommandSuccessfully("cf push dratsApp --docker-image httpd --no-start --random-route")
 }
 
 func (tc *SMBTestCase) AfterRestore(config Config) {
-	By("re-binding the SMB service instance after restore")
+	By("re-binding the SMB service instance")
 	RunCommandSuccessfully("cf bind-service dratsApp " + tc.instanceName + ` -c '{"username":"someuser","password":"somepass"}'`)
 }
 
 func (tc *SMBTestCase) Cleanup(config Config) {
-	By("smb cleanup")
+	By("deleting the test org")
 	RunCommandSuccessfully("cf delete-org -f acceptance-test-org-" + tc.uniqueTestID)
 
 	if config.CloudFoundryConfig.SMBCreateServiceBroker {
+		By("deleting the SMB service broker")
 		RunCommandSuccessfully("cf delete-service-broker -f " + "smbbroker-drats-" + tc.uniqueTestID)
 	}
 }

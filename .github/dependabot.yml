@@ -4,12 +4,11 @@
 # https://help.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
 
 version: 2
+
 updates:
-  - package-ecosystem: "gomod"
-    directory: "/"
-    schedule:
-      interval: "daily"
-  - package-ecosystem: "gomod"
-    directory: "/fixtures/credhub-test-app"
-    schedule:
-      interval: "daily"
+- package-ecosystem: "gomod"
+  schedule:
+    interval: "weekly"
+  directories:
+  - "/"
+  - "/fixtures/credhub-test-app"

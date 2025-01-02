@@ -5,6 +5,7 @@ import (
 	"time"
 
 	. "github.com/cloudfoundry/disaster-recovery-acceptance-tests/runner"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -41,12 +42,14 @@ func (tc *CfAppTestCase) CheckDeployment(config Config) {
 }
 
 func (tc *CfAppTestCase) BeforeBackup(config Config) {
-	By("creating new orgs and spaces")
+	By("creating a test org and space")
 	RunCommandSuccessfully("cf api --skip-ssl-validation", config.CloudFoundryConfig.APIURL)
 	RunCommandSuccessfully("cf auth", config.CloudFoundryConfig.AdminUsername, config.CloudFoundryConfig.AdminPassword)
 	RunCommandSuccessfully("cf create-org acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf create-space acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf target -s acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
+
+	By("setting up some test apps")
 	RunCommandSuccessfully("cf push " + tc.deletedAppName + " -p " + tc.testAppFixturePath)
 	RunCommandSuccessfully("cf push " + tc.stoppedAppName + " -p " + tc.testAppFixturePath)
 	RunCommandSuccessfully("cf push " + tc.runningAppName + " -p " + tc.testAppFixturePath)
@@ -59,13 +62,14 @@ func (tc *CfAppTestCase) BeforeBackup(config Config) {
 }
 
 func (tc *CfAppTestCase) AfterBackup(config Config) {
+	By("changing the state of the test apps")
 	RunCommandSuccessfully("cf delete -f " + tc.deletedAppName)
 	RunCommandSuccessfully("cf start " + tc.stoppedAppName)
 	RunCommandSuccessfully("cf stop " + tc.runningAppName)
 }
 
 func (tc *CfAppTestCase) EnsureAfterSelectiveRestore(config Config) {
-	By("repushing apps if restoring from a selective restore")
+	By("repushing the deleted app if restoring from a selective restore")
 	RunCommandSuccessfully("cf target -s acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf push " + tc.deletedAppName + " -p " + tc.testAppFixturePath)
 
@@ -79,10 +83,9 @@ func (tc *CfAppTestCase) AfterRestore(config Config) {
 	RunCommandSuccessfully("cf org acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf target -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf space acceptance-test-space-" + tc.uniqueTestID)
-
-	By("verifying apps are back")
 	RunCommandSuccessfully("cf target -s acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
 
+	By("verifying that all apps are back")
 	deletedAppUrl := GetAppURL(tc.deletedAppName)
 	Eventually(StatusCode("https://"+deletedAppUrl), 5*time.Minute, 5*time.Second).Should(Equal(200))
 	Expect(string(RunCommandSuccessfully("cf env " + tc.deletedAppName).Out.Contents())).To(MatchRegexp("winnebago" + tc.uniqueTestID))
@@ -105,6 +108,6 @@ func (tc *CfAppTestCase) Cleanup(config Config) {
 }
 
 func (tc *CfAppTestCase) deletePushedApps(config Config) {
-	By("cleaning up orgs and spaces")
+	By("deleting the test org")
 	RunCommandSuccessfully("cf delete-org -f acceptance-test-org-" + tc.uniqueTestID)
 }
