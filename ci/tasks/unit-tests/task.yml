@@ -2,7 +2,7 @@ platform: linux
 image_resource:
   type: registry-image
   source:
-    repository: cryogenics/essentials
+    repository: cloudfoundry/cf-deployment-concourse-tasks
 inputs:
   - name: disaster-recovery-acceptance-tests
     path: src/github.com/cloudfoundry/disaster-recovery-acceptance-tests

@@ -1,6 +1,8 @@
 module github.com/cloudfoundry/disaster-recovery-acceptance-tests
 
-go 1.22.9
+go 1.23
+
+toolchain go1.23.0
 
 require (
 	code.cloudfoundry.org/routing-api v0.0.0-20241104170925-6857e3fbd830

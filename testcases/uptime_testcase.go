@@ -8,6 +8,7 @@ import (
 	"time"
 
 	. "github.com/cloudfoundry/disaster-recovery-acceptance-tests/runner"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -35,11 +36,14 @@ func (tc *AppUptimeTestCase) CheckDeployment(config Config) {
 }
 
 func (tc *AppUptimeTestCase) BeforeBackup(config Config) {
+	By("creating a test org and space")
 	RunCommandSuccessfully("cf api --skip-ssl-validation", config.CloudFoundryConfig.APIURL)
 	RunCommandSuccessfully("cf auth", config.CloudFoundryConfig.AdminUsername, config.CloudFoundryConfig.AdminPassword)
 	RunCommandSuccessfully("cf create-org acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf create-space acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
 	RunCommandSuccessfully("cf target -o acceptance-test-org-" + tc.uniqueTestID + " -s acceptance-test-space-" + tc.uniqueTestID)
+
+	By("setting up a test app")
 	var testAppFixturePath = path.Join(CurrentTestDir(), "/../fixtures/test_app/")
 	RunCommandSuccessfully("cf push test_app_" + tc.uniqueTestID + " -p " + testAppFixturePath)
 
@@ -66,7 +70,7 @@ func (tc *AppUptimeTestCase) AfterRestore(config Config) {
 }
 
 func (tc *AppUptimeTestCase) Cleanup(config Config) {
-	By("cleaning up orgs, spaces and apps")
+	By("deleting the test org")
 	RunCommandSuccessfully("cf delete-org -f acceptance-test-org-" + tc.uniqueTestID)
 }
 
