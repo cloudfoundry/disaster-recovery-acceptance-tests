@@ -17,6 +17,7 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 	var uniqueTestID string
 	var testContext *TestContext
 	var backupRunning, restoreRunning bool
+	var bbrSession *gexec.Session
 	var cfHomeTmpDir string
 	var err error
 
@@ -37,6 +38,8 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 		}
 
 		backupRunning = false
+		restoreRunning = false
+		bbrSession = nil
 
 		uniqueTestID = RandomStringNumber()
 		testContext, err = NewTestContext(uniqueTestID, config.BoshConfig)
@@ -59,7 +62,7 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 
 		backupRunning = true
 		By("backing up " + config.CloudFoundryConfig.Name)
-		RunCommandSuccessfullyWithFailureMessage(
+		bbrSession = RunCommandSuccessfullyWithFailureMessage(
 			"bbr deployment backup",
 			fmt.Sprintf(
 				"cd %s && %s deployment --target %s --ca-cert %s --username %s --password %s --deployment %s backup",
@@ -117,7 +120,7 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 
 		restoreRunning = true
 		By("restoring to " + config.CloudFoundryConfig.Name)
-		RunCommandSuccessfullyWithFailureMessage(
+		bbrSession = RunCommandSuccessfullyWithFailureMessage(
 			"bbr deployment restore",
 			fmt.Sprintf(
 				"cd %s && %s deployment --target %s --ca-cert %s --username %s --password %s "+
@@ -154,7 +157,12 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 
 	AfterEach(func() {
 		if backupRunning {
-			By("running bbr backup-cleanup")
+			By("canceling the bbr deployment backup command")
+			bbrSession.Interrupt().Wait(1 * time.Second)
+			bbrSession.Terminate().Wait(1 * time.Second)
+			bbrSession.Kill().Wait(1 * time.Second)
+
+			By("running bbr deployment backup-cleanup")
 			backupCleanupSession := RunCommandWithFailureMessage(
 				"bbr deployment backup-cleanup",
 				fmt.Sprintf(
@@ -173,7 +181,12 @@ func RunDisasterRecoveryAcceptanceTests(config Config, testCases []TestCase) {
 
 	AfterEach(func() {
 		if restoreRunning {
-			By("running bbr restore-cleanup")
+			By("canceling the bbr deployment restore command")
+			bbrSession.Interrupt().Wait(1 * time.Second)
+			bbrSession.Terminate().Wait(1 * time.Second)
+			bbrSession.Kill().Wait(1 * time.Second)
+
+			By("running bbr deployment restore-cleanup")
 			restoreCleanupSession := RunCommandWithFailureMessage(
 				"bbr deployment restore-cleanup",
 				fmt.Sprintf(
