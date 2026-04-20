@@ -13,7 +13,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"golang.org/x/mod/modfile"
 )
 
 type CfCredhubSSITestCase struct {
@@ -67,10 +66,8 @@ func (tc *CfCredhubSSITestCase) BeforeBackup(config Config) {
 	RunCommandSuccessfully("cf target -s acceptance-test-space-" + tc.uniqueTestID + " -o acceptance-test-org-" + tc.uniqueTestID)
 
 	By("setting up a test app")
-	goVersion := fmt.Sprintf("go%s", tc.GetGoVersionFromGoModFile())
 
 	RunCommandSuccessfully("cf push " + "--no-start " + tc.appName + " -p " + tc.testAppFixturePath + " -b go_buildpack" + " -f " + tc.testAppFixturePath + "/manifest.yml")
-	RunCommandSuccessfully("cf set-env " + tc.appName + " GOVERSION " + goVersion + " > /dev/null")
 	RunCommandSuccessfully("cf set-env " + tc.appName + " CREDHUB_CLIENT " + config.CloudFoundryConfig.CredHubClient + " > /dev/null")
 	RunCommandSuccessfully("cf set-env " + tc.appName + " CREDHUB_SECRET " + config.CloudFoundryConfig.CredHubSecret + " > /dev/null")
 	RunCommandSuccessfully("cf start " + tc.appName)
@@ -109,20 +106,10 @@ func (tc *CfCredhubSSITestCase) AfterBackup(config Config) {
 	Expect(listResponse.Credentials).To(HaveLen(2))
 }
 
-func (tc *CfCredhubSSITestCase) GetGoVersionFromGoModFile() string {
-	file_bytes, err := os.ReadFile(fmt.Sprintf("%s/go.mod", tc.testAppFixturePath))
-	Expect(err).NotTo(HaveOccurred())
-	f, err := modfile.Parse(fmt.Sprintf("%s/go.mod", tc.testAppFixturePath), file_bytes, nil)
-	Expect(err).NotTo(HaveOccurred())
-	return f.Go.Version
-
-}
 func (tc *CfCredhubSSITestCase) EnsureAfterSelectiveRestore(config Config) {
 	By("repushing the test app")
-	goVersion := fmt.Sprintf("go%s", tc.GetGoVersionFromGoModFile())
 
 	RunCommandSuccessfully("cf push " + "--no-start " + tc.appName + " -p " + tc.testAppFixturePath + " -b go_buildpack" + " -f " + tc.testAppFixturePath + "/manifest.yml")
-	RunCommandSuccessfully("cf set-env " + tc.appName + " GOVERSION " + goVersion + " > /dev/null")
 	RunCommandSuccessfully("cf set-env " + tc.appName + " CREDHUB_CLIENT " + config.CloudFoundryConfig.CredHubClient + " > /dev/null")
 	RunCommandSuccessfully("cf set-env " + tc.appName + " CREDHUB_SECRET " + config.CloudFoundryConfig.CredHubSecret + " > /dev/null")
 	RunCommandSuccessfully("cf start " + tc.appName)
