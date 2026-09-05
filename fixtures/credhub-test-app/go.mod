@@ -1,6 +1,6 @@
 module github.com/cloudfoundry/disaster-recovery-acceptance-tests/fixtures/credhub-test-app
 
-go 1.25
+go 1.25.0
 
 toolchain go1.25.9
 
@@ -10,7 +10,7 @@ require (
 	github.com/cloudfoundry/go-socks5 v0.0.0-20250423223041-4ad5fea42851 // indirect
 	github.com/cloudfoundry/socks5-proxy v0.2.157 // indirect
 	github.com/hashicorp/go-version v1.7.0 // indirect
-	golang.org/x/crypto v0.45.0 // indirect
-	golang.org/x/net v0.47.0 // indirect
-	golang.org/x/sys v0.38.0 // indirect
+	golang.org/x/crypto v0.52.0 // indirect
+	golang.org/x/net v0.54.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
 )
