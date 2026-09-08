@@ -2,8 +2,6 @@ module github.com/cloudfoundry/disaster-recovery-acceptance-tests/fixtures/credh
 
 go 1.26.8
 
-toolchain go1.26.8
-
 require code.cloudfoundry.org/credhub-cli v0.0.0-20251020132013-870a4dda3a37
 
 require (
