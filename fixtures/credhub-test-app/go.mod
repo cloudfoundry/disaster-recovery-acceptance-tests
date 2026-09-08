@@ -11,6 +11,6 @@ require (
 	github.com/cloudfoundry/socks5-proxy v0.2.157 // indirect
 	github.com/hashicorp/go-version v1.7.0 // indirect
 	golang.org/x/crypto v0.52.0 // indirect
-	golang.org/x/net v0.54.0 // indirect
+	golang.org/x/net v0.55.0 // indirect
 	golang.org/x/sys v0.45.0 // indirect
 )
